@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
+using System.IO;
 
 namespace XoSoWeb
 {
@@ -44,7 +45,12 @@ namespace XoSoWeb
                 .UseSerilog() // 👉 Thêm dòng này để dùng Serilog
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    var webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    if (!Directory.Exists(webRoot))
+                        Directory.CreateDirectory(webRoot); 
+                    webBuilder
+                    .UseWebRoot("wwwroot")
+                    .UseStartup<Startup>();
                 });
     }
 }

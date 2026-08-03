@@ -69,12 +69,10 @@ namespace XoSoWeb
             services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
             services.AddTransient<AdoXoSoDB>();
             services.AddSingleton<RedisService>();
-            services.AddSingleton<WebSocketManager>();
-            services.AddHostedService<LiveSocketService>();
-            services.AddHostedService<ClientCleanupService>();
-            services.AddHostedService<HeartbeatService>();
-            services.AddLotteryModule();
-            services.AddControllers();
+            
+            services.AddResponseCompression();
+            services.AddControllersWithViews(); // 👈 hỗ trợ cả View + API
+            services.AddHttpClient(); // Add HttpClient factory
 
         }
 
@@ -83,6 +81,8 @@ namespace XoSoWeb
         {
             var telegramConfig = app.ApplicationServices.GetRequiredService<IOptions<TelegramSettings>>();
             Helper.ConfigureTelegram(telegramConfig.Value);
+
+            app.UseStaticFiles();
 
             app.UseHttpsRedirection();
 
@@ -94,57 +94,15 @@ namespace XoSoWeb
 
             app.UseAuthorization();
 
-            app.UseWebSockets(new WebSocketOptions
-            {
-                KeepAliveInterval = TimeSpan.FromSeconds(30)
-            });
+            app.UseResponseCompression();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
-                endpoints.Map("/ws", async context =>
-                {
-                    if (!context.WebSockets.IsWebSocketRequest)
-                    {
-                        context.Response.StatusCode = 400;
-                        return;
-                    }
-                    var socket = await context
-                   .WebSockets
-                   .AcceptWebSocketAsync();
-                    var client = new ClientsInfo
-                    {
-                        Id = Guid.NewGuid(),
-                        Socket = socket,
-                        ConnectedAt = DateTime.Now,
-                        LastSeen = DateTime.Now,
-                        IpAddress = context.Connection .RemoteIpAddress?.ToString(),
-                        SentBytes = 0,
-                        ReceivedBytes = 0
-                    };
-                    var manager = context.RequestServices
-                        .GetRequiredService<WebSocketManager>();
-                    manager.Add(client);
-                    var buffer = new byte[8192];
-                    while (socket.State == System.Net.WebSockets.WebSocketState.Open)
-                    {
-                        var result = await socket.ReceiveAsync(
-                            new ArraySegment<byte>(buffer),
-                            CancellationToken.None);
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-                        if (result.MessageType == WebSocketMessageType.Close)
-                        {
-                            await socket.CloseAsync(
-                                WebSocketCloseStatus.NormalClosure,
-                                "Closed by client",
-                                CancellationToken.None);
-                            break;
-                        }
-                        client.LastSeen = DateTime.UtcNow;
-                        client.ReceivedBytes += result.Count;
-                    }
-                    manager.Remove(client.Id);
-                });
+                endpoints.MapControllers(); // API route
             });
         }
     }
