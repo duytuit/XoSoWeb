@@ -46,6 +46,16 @@ namespace XoSoWeb.Controllers
         {
             return View("Support");
         }
+        [HttpGet("/xo-so-mien-bac")]
+        public IActionResult XoSoMienBac()
+        {
+            return View("XoSoMienBac");
+        }
+         [HttpGet("/vietlott")]
+        public IActionResult Vietlott()
+        {
+            return View("Vietlott");
+        }
         [HttpPost("support")]
         public async Task<IActionResult> Contact([FromBody] ContactSupportRequest request)
         {

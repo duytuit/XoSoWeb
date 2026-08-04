@@ -2,36 +2,167 @@
     Layout = null;
 }
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Xổ Số Việt Nam</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=IBM+Plex+Sans:wght@600&family=Hanken+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+
+    @RenderSection("Styles", required: false)
 </head>
 <body>
-    <div class="container py-5">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-            <a class="navbar-brand" href="/">Vudaco</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Trang chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/privacy">Chính sách bảo mật</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/support">Hỗ trợ</a>
-                    </li>
-                </ul>
+
+    <!-- TopAppBar -->
+    <header class="sticky-top z-3 bg-surface border-bottom border-neutral py-2 w-100">
+        <div class="container-xl d-flex justify-content-between align-items-center h-100">
+            <div class="d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-primary fs-4">confirmation_number</span>
+                <h1 class="h5 mb-0 fw-bold text-primary font-headline-md">Xổ Số Việt Nam</h1>
             </div>
-        </nav>
-        @RenderBody()
+            <nav class="d-none d-md-flex gap-4">
+                <a class="text-primary border-bottom border-2 border-primary fw-bold text-decoration-none py-1" asp-controller="Home" asp-action="Index" href="/">Trang Chủ</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac" href="/xo-so-mien-bac">XS Miền Bắc</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott" href="/vietlott">Vietlott</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" href="#">Trực Tiếp</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" href="#">Thống Kê</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" href="#">Soi Cầu</a>
+            </nav>
+            <button class="btn btn-primary rounded-pill font-label-sm px-4 py-2">
+                Đăng nhập
+            </button>
+        </div>
+    </header>
+
+    <div class="container-xl mt-3">
+        <div class="w-100 bg-surface-container-highest rounded ad-banner" style="height: 96px;">
+            Google AdSense - Top Banner
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <main class="container-xl py-4 d-flex flex-column flex-lg-row gap-4">
+
+        <!-- Sidebar Navigation Drawer (Desktop Only) -->
+        <aside class="d-none d-lg-flex flex-column flex-shrink-0 sticky-top" style="width: 256px; top: 80px; height: max-content;">
+            <div class="bg-surface-container shadow-sm rounded overflow-hidden">
+                <div class="p-3 bg-primary text-white">
+                    <h2 class="font-label-sm text-uppercase opacity-75 mb-0">Khu Vực</h2>
+                </div>
+                <nav class="d-flex flex-column py-2">
+                    <a class="bg-primary-container text-white rounded-pill mx-2 d-flex align-items-center gap-2 px-3 py-2 text-decoration-none mb-1" href="#">
+                        <span class="material-symbols-outlined fs-5">location_on</span>
+                        <span>XS Miền Bắc</span>
+                    </a>
+                    <a class="text-on-surface-variant px-4 py-2 d-flex align-items-center gap-2 text-decoration-none hover-bg-surface" href="#">
+                        <span class="material-symbols-outlined fs-5">location_on</span>
+                        <span>XS Miền Trung</span>
+                    </a>
+                    <a class="text-on-surface-variant px-4 py-2 d-flex align-items-center gap-2 text-decoration-none hover-bg-surface" href="#">
+                        <span class="material-symbols-outlined fs-5">location_on</span>
+                        <span>XS Miền Nam</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Quick Links / Statistics Chips -->
+            <div class="mt-4">
+                <h3 class="h6 text-primary mb-3 px-2">Tiện ích nhanh</h3>
+                <div class="d-flex flex-wrap gap-2 px-2">
+                    <span class="badge bg-surface-blue text-primary border border-neutral rounded-pill py-2 px-3 fw-normal hover-bg-primary" style="cursor:pointer">Lô Gan</span>
+                    <span class="badge bg-surface-blue text-primary border border-neutral rounded-pill py-2 px-3 fw-normal hover-bg-primary" style="cursor:pointer">Lịch quay</span>
+                    <span class="badge bg-surface-blue text-primary border border-neutral rounded-pill py-2 px-3 fw-normal hover-bg-primary" style="cursor:pointer">Sổ mơ</span>
+                    <span class="badge bg-surface-blue text-primary border border-neutral rounded-pill py-2 px-3 fw-normal hover-bg-primary" style="cursor:pointer">Quay thử</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area (render theo từng trang con) -->
+        <section class="flex-grow-1 d-flex flex-column gap-4">
+            @RenderBody()
+        </section>
+
+    </main>
+
+    <!-- Footer Ad -->
+    <div class="container-xl mb-5 mt-2">
+        <div class="w-100 bg-surface-container-highest rounded-4 ad-banner" style="height: 256px;">
+            Google AdSense - Large Rectangular Ad
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-inverse-surface text-secondary-container-opacity border-top border-secondary-container-opacity pt-5 pb-3">
+        <div class="container-xl d-flex flex-column flex-md-row justify-content-between align-items-start gap-4 pb-4 border-bottom border-light border-opacity-10">
+            <div class="mb-4 mb-md-0" style="max-width: 350px;">
+                <h2 class="h5 fw-bold text-white mb-3">Xổ Số Việt Nam</h2>
+                <p class="text-white-50 mb-3 fs-7">Cung cấp kết quả xổ số kiến thiết 3 miền nhanh nhất, chính xác nhất từ các công ty XSKT trên toàn quốc.</p>
+                <div class="d-flex gap-3 text-white-50">
+                    <span class="material-symbols-outlined" style="cursor: pointer;">qr_code_2</span>
+                    <span class="material-symbols-outlined" style="cursor: pointer;">youtube_activity</span>
+                    <span class="material-symbols-outlined" style="cursor: pointer;">share</span>
+                </div>
+            </div>
+            <div class="row w-100" style="max-width: 500px;">
+                <div class="col-6">
+                    <h4 class="font-label-sm text-white text-uppercase mb-3">Thông tin</h4>
+                    <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                        <li><a class="text-white-50 text-decoration-none" href="#">Về chúng tôi</a></li>
+                        <li><a class="text-white-50 text-decoration-none" href="#">Liên hệ</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Support">Hỗ trợ</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Privacy">Điều khoản sử dụng</a></li>
+                    </ul>
+                </div>
+                <div class="col-6">
+                    <h4 class="font-label-sm text-white text-uppercase mb-3">Ứng dụng</h4>
+                    <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                        <li><a class="text-white-50 text-decoration-none" href="#">Android App</a></li>
+                        <li><a class="text-white-50 text-decoration-none" href="#">iOS App</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container-xl pt-3 text-center">
+            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @DateTime.Now.Year Xổ Số Việt Nam - Dữ liệu kết quả chính xác từ các công ty XSKT.</p>
+        </div>
+    </footer>
+
+    <!-- BottomNavBar (Mobile Only) -->
+    <nav class="fixed-bottom w-100 z-3 d-flex justify-content-around align-items-center p-2 d-lg-none bg-surface bottom-nav rounded-top-3">
+        <a class="d-flex flex-column align-items-center text-primary text-decoration-none" asp-controller="Home" asp-action="Index">
+            <span class="material-symbols-outlined mb-1">home</span>
+            <span class="font-label-sm">Trang Chủ</span>
+        </a>
+        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" href="#">
+            <span class="material-symbols-outlined mb-1">live_tv</span>
+            <span class="font-label-sm">Trực Tiếp</span>
+        </a>
+        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" href="#">
+            <span class="material-symbols-outlined mb-1">analytics</span>
+            <span class="font-label-sm">Thống Kê</span>
+        </a>
+        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" href="#">
+            <span class="material-symbols-outlined mb-1">settings</span>
+            <span class="font-label-sm">Cài Đặt</span>
+        </a>
+    </nav>
+
+
+    <!-- jQuery JS -->
+    <script src="~/lib/jquery/jquery-4.0.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Site JS -->
+    <script src="~/js/main.js" asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
