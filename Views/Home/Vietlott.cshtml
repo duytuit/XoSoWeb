@@ -1,235 +1,105 @@
+@model XoSoWeb.Models.VietlottPageViewModel
 @{
-    ViewData["Title"] = "Vietlott Mega 6/45 & Power 6/55";
+    ViewData["Title"] = "Kết Quả Vietlott";
 }
 
-<!-- Hero Banner cho Vietlott -->
-<div class="position-relative overflow-hidden rounded-4 bg-inverse-surface p-4 p-md-5 text-white">
-    <div class="position-relative z-3 d-flex flex-column flex-md-row align-items-center gap-4">
-        <div class="flex-grow-1">
-            <span class="badge bg-secondary px-2 py-1 mb-3 font-label-sm text-uppercase tracking-widest">LIVE NOW</span>
-            <h1 class="fw-bold lh-sm mb-3" style="font-size: 3rem;">Vietlott Jackpot<br /><span class="text-accent">Siêu Khủng</span></h1>
-            <p class="fs-5 opacity-75">Cập nhật kết quả Mega 6/45 và Power 6/55 nhanh nhất, chính xác nhất từ hệ thống Vietlott.</p>
-        </div>
-        <div class="text-center p-4 glass-card rounded-4 border-0 shadow-lg">
-            <p class="text-dark font-label-sm fw-bold text-uppercase mb-2">Tổng giá trị thưởng ước tính</p>
-            <div class="text-secondary fw-bold fs-2">
-                120.000.000.000đ
-            </div>
-        </div>
-    </div>
-    <div class="mt-4 w-100 bg-surface-container-highest rounded-3 ad-banner p-3" style="height: 96px;">
-        Google AdSense - Vietlott Banner
+<div class="d-flex justify-content-between align-items-end mb-3">
+    <div>
+        <h1 class="fs-3 fw-bold text-primary mb-1">Kết quả Vietlott</h1>
+        <p class="text-on-surface-variant mb-0">Mega 6/45, Power 6/55 và các sản phẩm Vietlott từ cơ sở dữ liệu.</p>
     </div>
 </div>
 
-<!-- Bento Grid Results Section -->
-<div class="row g-4">
-    <!-- Mega 6/45 -->
-    <div class="col-12 col-lg-6">
-        <div class="bg-surface-container-lowest rounded-4 border border-neutral shadow-sm overflow-hidden h-100">
-            <div class="p-3 bg-surface-container-low border-bottom border-neutral d-flex justify-content-between align-items-center">
+@if (Model.Results.Count == 0)
+{
+    <div class="alert alert-light border border-neutral">Chưa có kết quả Vietlott trong cơ sở dữ liệu.</div>
+}
+else
+{
+    foreach (var result in Model.Results)
+    {
+        var currentOffset = Model.SelectedGameCode == result.GameCode ? Model.SelectedOffset : 0;
+        var hasPrevious = currentOffset > 0;
+        var hasNext = currentOffset + 1 < result.TotalPeriods;
+        <section id="vietlott-@result.GameCode" class="bg-surface-container-lowest rounded-4 border border-neutral shadow-sm overflow-hidden mb-4">
+            <div class="p-3 bg-surface-container-low border-bottom border-neutral d-flex justify-content-between align-items-center gap-3">
                 <div>
-                    <h2 class="fs-5 text-primary mb-0">Mega 6/45</h2>
-                    <p class="font-label-sm text-on-surface-variant mb-0">Kỳ quay #01123 | 31/07/2024</p>
+                    <h2 class="fs-5 text-primary mb-1">@result.GameCode</h2>
+                    <p class="font-label-sm text-on-surface-variant mb-0">Kỳ quay #@result.DrawNo | @result.DrawDate.ToString("dd/MM/yyyy")</p>
                 </div>
-                <span class="material-symbols-outlined text-secondary">trending_up</span>
-            </div>
-            <div class="p-4 text-center bg-surface-container-lowest">
-                <p class="font-label-sm fw-bold text-on-surface-variant mb-4 text-uppercase">Giá trị Jackpot</p>
-                <div class="text-secondary fw-bold fs-2 mb-4 font-number-display">
-                    27.535.400.000đ
-                </div>
-                <div class="d-flex justify-content-center flex-wrap gap-3">
-                    <div class="lottery-ball vietlott-red-gradient text-white font-number-display border border-4 border-danger border-opacity-25">06</div>
-                    <div class="lottery-ball vietlott-red-gradient text-white font-number-display border border-4 border-danger border-opacity-25">16</div>
-                    <div class="lottery-ball vietlott-red-gradient text-white font-number-display border border-4 border-danger border-opacity-25">24</div>
-                    <div class="lottery-ball vietlott-red-gradient text-white font-number-display border border-4 border-danger border-opacity-25">25</div>
-                    <div class="lottery-ball vietlott-red-gradient text-white font-number-display border border-4 border-danger border-opacity-25">38</div>
-                    <div class="lottery-ball vietlott-red-gradient text-white font-number-display border border-4 border-danger border-opacity-25">43</div>
+                <div class="vietlott-period-controls">
+                    @if (hasPrevious)
+                    {
+                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Vietlott", "Home", new { gameCode = result.GameCode, offset = currentOffset - 1 })#vietlott-@result.GameCode" title="Kỳ trước">&#8592; Kỳ trước</a>
+                    }
+                    @if (hasNext)
+                    {
+                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Vietlott", "Home", new { gameCode = result.GameCode, offset = currentOffset + 1 })#vietlott-@result.GameCode" title="Kỳ sau">Kỳ sau &#8594;</a>
+                    }
                 </div>
             </div>
-            <div class="bg-surface-container-low p-3">
-                <table class="table table-borderless table-sm mb-0 fs-7">
-                    <thead>
-                        <tr class="text-on-surface-variant border-bottom border-neutral">
-                            <th class="pb-2">Giải thưởng</th>
-                            <th class="pb-2 text-center">Số lượng</th>
-                            <th class="pb-2 text-end">Giá trị (VNĐ)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="py-2 fw-bold text-secondary">Jackpot</td>
-                            <td class="py-2 text-center">0</td>
-                            <td class="py-2 text-end">27.535.400.000</td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">Giải nhất</td>
-                            <td class="py-2 text-center">34</td>
-                            <td class="py-2 text-end">10.000.000</td>
-                        </tr>
-                        <tr>
-                            <td class="py-2">Giải nhì</td>
-                            <td class="py-2 text-center">1447</td>
-                            <td class="py-2 text-end">300.000</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Power 6/55 -->
-    <div class="col-12 col-lg-6">
-        <div class="bg-surface-container-lowest rounded-4 border border-neutral shadow-sm overflow-hidden h-100">
-            <div class="p-3 bg-surface-container-low border-bottom border-neutral d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="fs-5 text-primary mb-0">Power 6/55</h2>
-                    <p class="font-label-sm text-on-surface-variant mb-0">Kỳ quay #01079 | 01/08/2024</p>
-                </div>
-                <span class="material-symbols-outlined text-secondary">flash_on</span>
-            </div>
-            <div class="p-4 text-center bg-surface-container-lowest">
-                <div class="row g-3 mb-4">
-                    <div class="col-6">
-                        <div class="p-2 bg-surface-container-low rounded-3">
-                            <p class="font-label-sm text-on-surface-variant text-uppercase mb-1">Jackpot 1</p>
-                            <p class="text-secondary fw-bold mb-0 font-number-display">51.543.425.100đ</p>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-2 bg-surface-container-low rounded-3">
-                            <p class="font-label-sm text-on-surface-variant text-uppercase mb-1">Jackpot 2</p>
-                            <p class="text-secondary fw-bold mb-0 font-number-display">3.934.045.850đ</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-center flex-wrap gap-2 mb-4 align-items-center">
-                    <div class="lottery-ball lottery-ball-sm vietlott-red-gradient text-white font-number-display">11</div>
-                    <div class="lottery-ball lottery-ball-sm vietlott-red-gradient text-white font-number-display">14</div>
-                    <div class="lottery-ball lottery-ball-sm vietlott-red-gradient text-white font-number-display">16</div>
-                    <div class="lottery-ball lottery-ball-sm vietlott-red-gradient text-white font-number-display">44</div>
-                    <div class="lottery-ball lottery-ball-sm vietlott-red-gradient text-white font-number-display">49</div>
-                    <div class="lottery-ball lottery-ball-sm vietlott-red-gradient text-white font-number-display">55</div>
-                    <div class="text-primary fw-bold px-1">|</div>
-                    <div class="lottery-ball lottery-ball-sm bg-accent text-primary font-number-display border border-2 border-primary border-opacity-25">39</div>
-                </div>
-                <button class="btn btn-primary w-100 rounded-pill py-2 d-flex align-items-center justify-content-center gap-2">
-                    Xem chi tiết cơ cấu giải <span class="material-symbols-outlined">chevron_right</span>
-                </button>
-            </div>
-            <div class="bg-surface-container-low p-3 d-flex align-items-center gap-3 border-top border-neutral">
-                <div class="bg-surface-container-lowest p-2 rounded-2 shadow-sm d-flex">
-                    <span class="material-symbols-outlined text-primary">calendar_today</span>
-                </div>
-                <div>
-                    <p class="font-label-sm text-on-surface-variant mb-0">Lịch quay thưởng</p>
-                    <p class="fw-bold text-primary mb-0">Thứ 3 - Thứ 5 - Thứ 7</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Keno & Max 3D -->
-    <div class="col-12">
-        <div class="bg-surface-container-lowest rounded-4 border border-neutral shadow-sm p-4">
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                <h2 class="fs-5 text-primary mb-0">Keno &amp; Max 3D</h2>
-                <div class="d-flex gap-2">
-                    <span class="badge bg-surface-container-low text-on-surface-variant border border-neutral px-3 py-2 rounded-pill font-label-sm">Quay mỗi 10 phút</span>
-                    <span class="badge bg-secondary text-white px-3 py-2 rounded-pill font-label-sm">LIVE</span>
-                </div>
-            </div>
-            <div class="row g-4">
-                <div class="col-12 col-md-6">
-                    <p class="font-label-sm fw-bold text-on-surface-variant text-uppercase mb-3">Kết quả Keno mới nhất</p>
-                    <div class="d-flex flex-wrap gap-2">
-                        @{
-                            var kenoNumbers = new[] { "05", "12", "24", "27", "30", "32", "37", "39", "41", "44", "46", "47", "49", "51", "54", "55", "60", "71", "72", "74" };
-                        }
-                        @foreach (var n in kenoNumbers)
+            <div class="p-4">
+                @if (result.Numbers.Count > 0)
+                {
+                    <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+                        @foreach (var number in result.Numbers)
                         {
-                            <div class="lottery-ball-sm rounded-circle bg-surface-container-low d-flex align-items-center justify-content-center text-primary fw-bold border border-neutral">@n</div>
+                            <span class="lottery-ball lottery-ball-sm vietlott-red-gradient text-white font-number-display">@number</span>
+                        }
+                        @foreach (var number in result.SpecialNumbers)
+                        {
+                            <span class="lottery-ball lottery-ball-sm bg-accent text-primary font-number-display border border-2 border-primary border-opacity-25">@number</span>
                         }
                     </div>
-                </div>
-                <div class="col-12 col-md-6">
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="bg-surface-blue p-3 rounded-3 border border-neutral">
-                                <p class="font-label-sm text-primary text-uppercase mb-2">Thống kê Chẵn/Lẻ</p>
-                                <div class="d-flex justify-content-between align-items-end">
-                                    <span class="fw-bold text-primary fs-4 font-number-display">12</span>
-                                    <span class="font-label-sm text-on-surface-variant mb-1">Chẵn</span>
-                                </div>
-                                <div class="progress mt-2" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="bg-surface-blue p-3 rounded-3 border border-neutral">
-                                <p class="font-label-sm text-primary text-uppercase mb-2">Thống kê Lớn/Nhỏ</p>
-                                <div class="d-flex justify-content-between align-items-end">
-                                    <span class="fw-bold text-primary fs-4 font-number-display">8</span>
-                                    <span class="font-label-sm text-on-surface-variant mb-1">Lớn</span>
-                                </div>
-                                <div class="progress mt-2" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(result.OddEven) || !string.IsNullOrWhiteSpace(result.Size))
+                {
+                    <p class="text-center text-on-surface-variant mb-3">
+                        @if (!string.IsNullOrWhiteSpace(result.OddEven)) { <span>@result.OddEven</span> }
+                        @if (!string.IsNullOrWhiteSpace(result.OddEven) && !string.IsNullOrWhiteSpace(result.Size)) { <span> | </span> }
+                        @if (!string.IsNullOrWhiteSpace(result.Size)) { <span>@result.Size</span> }
+                    </p>
+                }
+                @if (result.Prizes.Count > 0)
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr class="text-on-surface-variant">
+                                    <th>Giải thưởng</th>
+                                    <th>Kết quả</th>
+                                    <th class="text-end">Giá trị</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var prize in result.Prizes)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@prize.PrizeName</td>
+                                        <td>@string.Join(", ", prize.Numbers)</td>
+                                        <td class="text-end">@(prize.Value ?? "-")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                </div>
+                }
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Ad -->
-<div class="w-100 bg-surface-container-highest rounded-4 ad-banner" style="height: 128px;">
-    Google AdSense - Responsive Display Ad
-</div>
-
-<!-- How to Play Section -->
-<div class="bg-surface-container-lowest rounded-4 border border-neutral shadow-sm p-4 p-md-5">
-    <h2 class="fs-4 text-primary mb-4">Hướng dẫn tham gia</h2>
-    <div class="row g-4">
-        <div class="col-12 col-md-4 d-flex gap-3">
-            <div class="flex-shrink-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 48px; height: 48px;">1</div>
-            <div>
-                <p class="fw-bold text-primary mb-1">Chọn số</p>
-                <p class="text-on-surface-variant mb-0">Tự chọn bộ số yêu thích hoặc để máy tính chọn ngẫu nhiên cho bạn.</p>
-            </div>
-        </div>
-        <div class="col-12 col-md-4 d-flex gap-3">
-            <div class="flex-shrink-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 48px; height: 48px;">2</div>
-            <div>
-                <p class="fw-bold text-primary mb-1">Mua vé</p>
-                <p class="text-on-surface-variant mb-0">Mua trực tiếp tại đại lý hoặc qua ứng dụng Vietlott SMS chính thức.</p>
-            </div>
-        </div>
-        <div class="col-12 col-md-4 d-flex gap-3">
-            <div class="flex-shrink-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 48px; height: 48px;">3</div>
-            <div>
-                <p class="fw-bold text-primary mb-1">Nhận thưởng</p>
-                <p class="text-on-surface-variant mb-0">Kết quả được công bố trực tiếp, giải thưởng được trả sau khi có kết quả.</p>
-            </div>
-        </div>
-    </div>
-</div>
+        </section>
+    }
+}
 
 @section Scripts {
     <script>
-        // Micro-interaction cho các quả bóng số Vietlott
-        document.querySelectorAll('.vietlott-red-gradient').forEach(ball => {
-            ball.addEventListener('mouseenter', () => {
-                ball.style.transform = 'scale(1.1)';
-                ball.style.transition = 'transform 0.2s';
-            });
-            ball.addEventListener('mouseleave', () => {
-                ball.style.transform = 'scale(1)';
-            });
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.location.hash) {
+                var target = document.querySelector(window.location.hash);
+                if (target) {
+                    window.setTimeout(function () {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                }
+            }
         });
     </script>
 }

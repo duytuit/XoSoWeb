@@ -27,8 +27,21 @@ body {
     background-color: var(--background);
     color: var(--on-surface);
     font-family: var(--font-body);
-    min-height: max(884px, 100dvh);
-    padding-bottom: 70px; /* For mobile nav */
+    min-height: 100dvh;
+    overflow-x: hidden;
+}
+
+.topbar {
+    transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.topbar.is-hidden {
+    transform: translateY(-100%);
+}
+
+.page-content {
+    min-width: 0;
+}
 }
 
 h1, h2, h3, h4, h5, h6, .font-headline-md, .font-headline-lg, .font-display-lg, .font-number-display {
@@ -90,6 +103,52 @@ h1, h2, h3, h4, h5, h6, .font-headline-md, .font-headline-lg, .font-display-lg, 
     box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
 
+@media (max-width: 991.98px) {
+    body {
+        padding-bottom: 72px;
+    }
+
+    .page-content {
+        padding-top: 1.25rem !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .container-xl {
+        --bs-gutter-x: 1rem;
+    }
+
+    .page-content {
+        gap: 1.25rem !important;
+    }
+
+    .topbar h1 {
+        font-size: 1rem;
+    }
+
+    .topbar .btn {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .page-content .display-4,
+    .page-content h1[style*="font-size"] {
+        font-size: 2rem !important;
+    }
+
+    .ad-banner {
+        min-height: 88px;
+        height: auto !important;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .bottom-nav {
+        padding-bottom: max(0.5rem, env(safe-area-inset-bottom)) !important;
+    }
+
+}
+
 /* Utility overrides for exact spacing/sizing matching */
 .fs-7 { font-size: 0.875rem; }
 .tracking-widest { letter-spacing: 0.1em; }
@@ -127,4 +186,918 @@ h1, h2, h3, h4, h5, h6, .font-headline-md, .font-headline-lg, .font-display-lg, 
     width: 2.5rem;
     height: 2.5rem;
     font-size: 1rem;
+}
+
+/* Home results layout */
+.results-home-intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-neutral);
+}
+
+.results-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--secondary);
+    font: 600 .75rem var(--font-label);
+    letter-spacing: .06em;
+    white-space: nowrap;
+}
+
+.results-status .red-dot-anim {
+    width: .5rem;
+    height: .5rem;
+    border-radius: 50%;
+    background: var(--secondary);
+}
+
+.detail-directory-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.detail-directory-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: .85rem;
+    min-height: 6rem;
+    padding: 1rem;
+    color: var(--on-surface);
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--border-neutral);
+    border-left: 4px solid var(--bs-primary);
+    border-radius: .35rem;
+    box-shadow: 0 2px 8px rgba(21, 29, 34, .06);
+    text-decoration: none;
+}
+
+.detail-directory-card:hover {
+    color: var(--on-surface);
+    border-left-color: var(--secondary);
+    transform: translateY(-2px);
+}
+
+.detail-directory-card-vietlott {
+    border-left-color: var(--secondary);
+}
+
+.detail-directory-code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    color: white;
+    background: var(--bs-primary);
+    border-radius: 50%;
+    font: 700 .75rem var(--font-label);
+}
+
+.detail-directory-card-vietlott .detail-directory-code {
+    background: var(--secondary);
+}
+
+.detail-directory-card strong,
+.detail-directory-card small {
+    display: block;
+}
+
+.detail-directory-card strong {
+    color: var(--bs-primary);
+    font-size: 1rem;
+}
+
+.detail-directory-card small {
+    margin-top: .25rem;
+    color: var(--on-surface-variant);
+    font-size: .78rem;
+}
+
+.detail-directory-arrow {
+    color: var(--secondary);
+    font-size: 1.4rem;
+}
+
+.home-region-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.home-summary-section {
+    overflow: hidden;
+    min-width: 0;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--border-neutral);
+    border-radius: .35rem;
+    box-shadow: 0 2px 8px rgba(21, 29, 34, .06);
+}
+
+.home-summary-meta {
+    padding: .65rem .85rem;
+    color: var(--on-surface-variant);
+    border-bottom: 1px solid var(--border-neutral);
+    font-size: .78rem;
+}
+
+.home-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.home-summary-table th,
+.home-summary-table td {
+    padding: .45rem .5rem;
+    border-bottom: 1px solid var(--border-neutral);
+}
+
+.home-summary-table th {
+    width: 25%;
+    color: var(--on-surface-variant);
+    border-right: 1px solid var(--border-neutral);
+    font: 600 .7rem var(--font-label);
+    text-align: center;
+}
+
+.home-summary-table td {
+    color: var(--on-surface);
+    font: 700 .9rem var(--font-headline);
+    text-align: center;
+}
+
+.home-summary-table .special-row td {
+    color: var(--secondary);
+    font-size: 1.2rem;
+}
+
+.home-province-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .5rem;
+    padding: .85rem;
+}
+
+.home-province-summary {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: .2rem .75rem;
+    padding: .65rem;
+    background: var(--surface-container-low);
+    border: 1px solid var(--border-neutral);
+    border-radius: .25rem;
+}
+
+.home-province-summary strong {
+    color: var(--bs-primary);
+    font-size: .82rem;
+}
+
+.home-province-summary small {
+    color: var(--on-surface-variant);
+    font-size: .7rem;
+}
+
+.home-province-summary b {
+    grid-column: 1 / -1;
+    color: var(--secondary);
+    font: 700 1.1rem var(--font-headline);
+    text-align: center;
+}
+
+.home-vietlott-summary {
+    margin-top: 1rem;
+}
+
+.home-vietlott-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    padding: .85rem;
+}
+
+.home-vietlott-item {
+    padding: .75rem;
+    background: var(--surface-container-low);
+    border: 1px solid var(--border-neutral);
+    border-radius: .25rem;
+}
+
+.home-vietlott-item div {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-bottom: .6rem;
+}
+
+.home-vietlott-item strong {
+    color: var(--bs-primary);
+    font-size: .82rem;
+}
+
+.home-vietlott-item small {
+    color: var(--on-surface-variant);
+    font-size: .68rem;
+}
+
+.home-vietlott-item > span {
+    display: block;
+    color: var(--secondary);
+    font: 700 .95rem var(--font-headline);
+    text-align: center;
+}
+
+.home-vietlott-item > b {
+    display: block;
+    margin-top: .25rem;
+    color: var(--bs-primary);
+    font-size: .8rem;
+    text-align: center;
+}
+
+.results-quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .85rem 0 0;
+}
+
+.results-quick-links a {
+    padding: .45rem .75rem;
+    color: var(--bs-primary);
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--border-neutral);
+    border-radius: .25rem;
+    font: 600 .8rem var(--font-label);
+    text-decoration: none;
+}
+
+.results-quick-links a:hover,
+.results-more:hover {
+    color: var(--secondary) !important;
+}
+
+.results-section {
+    margin-top: 1.25rem;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--border-neutral);
+    border-radius: .5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(21, 29, 34, .05);
+}
+
+.results-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: .9rem 1rem;
+    background: var(--surface-container-low);
+    border-bottom: 1px solid var(--border-neutral);
+}
+
+.results-section-header h2,
+.results-section-header p,
+.regional-result-heading h3,
+.regional-result-heading span,
+.vietlott-game-heading h3,
+.vietlott-game-heading span,
+.keno-result-card h3,
+.keno-result-card p {
+    margin: 0;
+}
+
+.results-section-header h2 {
+    font-size: 1.1rem;
+}
+
+.results-section-header h2 a {
+    color: var(--bs-primary);
+    text-decoration: none;
+}
+
+.results-section-header p,
+.regional-result-heading span,
+.vietlott-game-heading span,
+.keno-result-card p {
+    margin-top: .25rem;
+    color: var(--on-surface-variant);
+    font-size: .78rem;
+}
+
+.results-more {
+    color: var(--bs-primary);
+    font: 600 .78rem var(--font-label);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.regional-result + .regional-result {
+    border-top: 8px solid var(--surface);
+}
+
+.regional-result-heading,
+.vietlott-game-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: .75rem 1rem;
+}
+
+.regional-result-heading h3,
+.vietlott-game-heading h3,
+.keno-result-card h3 {
+    color: var(--bs-primary);
+    font-size: .95rem;
+}
+
+.province-code,
+.game-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: .25rem .5rem;
+    color: var(--bs-primary);
+    background: var(--surface-blue);
+    border-radius: .25rem;
+    font: 700 .72rem var(--font-label);
+}
+
+.lottery-table-wrap {
+    overflow-x: auto;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.results-table tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.results-table th,
+.results-table td {
+    padding: .7rem .75rem;
+    border-top: 1px solid var(--border-neutral);
+}
+
+.results-table th {
+    width: 22%;
+    color: var(--on-surface-variant);
+    border-right: 1px solid var(--border-neutral);
+    font: 600 .78rem var(--font-label);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.results-table td {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .7rem 1.3rem;
+    color: var(--on-surface);
+    font: 700 1.05rem var(--font-headline);
+    text-align: center;
+}
+
+.results-table .special-row {
+    background: rgba(255, 236, 160, .35);
+}
+
+.results-table .special-row td {
+    color: var(--secondary);
+    font-size: 1.45rem;
+}
+
+.results-empty {
+    padding: 1.25rem;
+    color: var(--on-surface-variant);
+}
+
+.home-mb-old-layout {
+    background: var(--surface-container-lowest);
+}
+
+.home-mb-old-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--border-neutral);
+}
+
+.home-mb-old-heading h3,
+.home-mb-old-heading span {
+    margin: 0;
+}
+
+.home-mb-old-heading h3 {
+    color: var(--bs-primary);
+    font-size: 1rem;
+}
+
+.home-mb-old-heading span {
+    color: var(--on-surface-variant);
+    font-size: .78rem;
+}
+
+.home-mb-old-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.home-mb-old-table th,
+.home-mb-old-table td {
+    padding: .65rem .75rem;
+    border-top: 1px solid var(--border-neutral);
+}
+
+.home-mb-old-table th {
+    width: 24%;
+    color: var(--on-surface-variant);
+    border-right: 1px solid var(--border-neutral);
+    font: 600 .78rem var(--font-label);
+    text-align: center;
+}
+
+.home-mb-old-table td {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .6rem 1.25rem;
+    color: var(--on-surface);
+    font: 700 1.1rem var(--font-headline);
+    text-align: center;
+}
+
+.home-mb-old-table tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.home-mb-old-table .special-row {
+    background: rgba(255, 236, 160, .35);
+}
+
+.home-mb-old-table .special-row th,
+.home-mb-old-table .special-row td {
+    color: var(--secondary);
+}
+
+.home-mb-old-table .special-row td {
+    font-size: 1.5rem;
+}
+
+.loto-statistics {
+    padding: .75rem 1rem 1rem;
+    background: var(--surface-container-low);
+    border-top: 1px solid var(--border-neutral);
+}
+
+.loto-statistics-links {
+    display: flex;
+    gap: .4rem;
+    align-items: center;
+    margin-bottom: .6rem;
+    font-size: .78rem;
+}
+
+.loto-statistics-links a {
+    color: var(--bs-primary);
+    text-decoration: none;
+}
+
+.loto-statistics-links a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+.loto-statistics-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    background: var(--surface-container-lowest);
+    font-size: .85rem;
+}
+
+.loto-statistics-table th,
+.loto-statistics-table td {
+    padding: .38rem .45rem;
+    border: 1px solid var(--border-neutral);
+}
+
+.loto-statistics-table thead th {
+    color: var(--on-surface);
+    background: #eaf4fb;
+    font-weight: 500;
+    text-align: center;
+}
+
+.loto-statistics-table tbody tr:nth-child(even) {
+    background: #f1f8fd;
+}
+
+.loto-statistics-table tbody th {
+    width: 10%;
+    color: var(--secondary);
+    font-weight: 500;
+    text-align: center;
+}
+
+.loto-statistics-table tbody td {
+    width: 40%;
+    color: var(--on-surface);
+    font-weight: 700;
+    text-align: left;
+}
+
+.vietlott-results-section {
+    background: var(--surface-container);
+}
+
+.vietlott-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.vietlott-game-card,
+.keno-result-card {
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--border-neutral);
+    border-radius: .35rem;
+    overflow: hidden;
+}
+
+.vietlott-balls,
+.keno-balls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .5rem;
+    padding: 1rem;
+}
+
+.vietlott-balls span,
+.keno-balls span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.55rem;
+    height: 2.55rem;
+    color: white;
+    background: var(--secondary);
+    border-radius: 50%;
+    font: 700 .9rem var(--font-headline);
+}
+
+.vietlott-balls .special-ball {
+    color: var(--bs-primary);
+    background: var(--accent-gold);
+}
+
+.vietlott-prizes {
+    padding: .75rem 1rem;
+    background: var(--surface-container-low);
+    border-top: 1px solid var(--border-neutral);
+}
+
+.vietlott-prizes div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .35rem 0;
+    color: var(--on-surface-variant);
+    font-size: .8rem;
+}
+
+.vietlott-prizes strong {
+    color: var(--secondary);
+}
+
+.vietlott-period-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .35rem;
+}
+
+.vietlott-period-controls .btn {
+    padding: .2rem .45rem;
+    font-size: .7rem;
+    white-space: nowrap;
+}
+
+.keno-result-card {
+    margin: 0 1rem 1rem;
+}
+
+.keno-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem 1.25rem;
+    padding: 0 1rem 1rem;
+    color: var(--on-surface-variant);
+    font-size: .8rem;
+}
+
+.regional-page-title {
+    padding-bottom: .75rem;
+}
+
+.regional-page-title h2 {
+    margin: 0;
+    color: var(--bs-primary);
+    font-size: 1.45rem;
+}
+
+.regional-page-title p {
+    margin: .25rem 0 0;
+    color: var(--on-surface-variant);
+    font-size: .85rem;
+}
+
+.results-breadcrumb {
+    margin-bottom: .35rem;
+    color: var(--on-surface-variant);
+    font-size: .72rem;
+}
+
+.results-breadcrumb span {
+    padding: 0 .35rem;
+}
+
+.weekday-filter {
+    display: flex;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-neutral);
+    border-radius: .2rem;
+    background: var(--surface-container-lowest);
+    box-shadow: 0 2px 8px rgba(21, 29, 34, .06);
+}
+
+.weekday-filter a {
+    flex: 1 0 auto;
+    padding: .45rem .75rem;
+    color: var(--bs-primary);
+    border-right: 1px solid var(--border-neutral);
+    font: 600 .75rem var(--font-label);
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.weekday-filter a:last-child {
+    border-right: 0;
+}
+
+.weekday-filter a:hover,
+.weekday-filter a.active {
+    color: white;
+    background: var(--secondary);
+}
+
+.mb-region-old-layout + .mb-region-old-layout {
+    margin-top: 1rem;
+}
+
+.region-detail-section,
+.regional-loto-section {
+    overflow: hidden;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--border-neutral);
+    border-radius: .35rem;
+    box-shadow: 0 2px 8px rgba(21, 29, 34, .06);
+}
+
+.regional-loto-section {
+    margin-top: .85rem;
+    padding: .75rem;
+}
+
+.region-detail-header {
+    padding: .7rem 1rem .6rem;
+    color: var(--bs-primary);
+    background: var(--accent-gold);
+    text-align: center;
+}
+
+.region-detail-header h1 {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 1.1rem;
+}
+
+.mb-region-header {
+    background: #ffe99a;
+}
+
+.mb-region-header h1 {
+    color: var(--on-surface);
+}
+
+.mb-prize-codes {
+    display: grid;
+    grid-template-columns: 9% repeat(6, 1fr);
+    align-items: center;
+    border-bottom: 1px solid var(--border-neutral);
+    background: var(--surface-container-lowest);
+}
+
+.mb-prize-codes span {
+    padding: .35rem .15rem;
+    color: var(--secondary);
+    border-right: 1px solid var(--border-neutral);
+    font: 700 .78rem var(--font-headline);
+    text-align: center;
+}
+
+.mb-prize-codes span:first-child {
+    color: transparent;
+}
+
+.mb-results-table tbody td {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    column-gap: .4rem;
+    font-size: 1.1rem;
+}
+
+.mb-results-table tbody td span {
+    display: block;
+    min-height: 1.35rem;
+}
+
+.mb-results-table tbody td.number-count-1 { grid-template-columns: 1fr; }
+.mb-results-table tbody td.number-count-2 { grid-template-columns: repeat(2, 1fr); }
+.mb-results-table tbody td.number-count-3 { grid-template-columns: repeat(3, 1fr); }
+.mb-results-table tbody td.number-count-4 { grid-template-columns: repeat(4, 1fr); }
+.mb-results-table tbody td.number-count-5,
+.mb-results-table tbody td.number-count-6 { grid-template-columns: repeat(3, 1fr); }
+
+.mb-results-table {
+    min-width: 0;
+}
+
+.mb-results-table .prize-label {
+    width: 10%;
+}
+
+.mb-results-table .special-row td {
+    font-size: 1.5rem;
+}
+
+.region-detail-links,
+.regional-loto-links {
+    display: flex;
+    justify-content: center;
+    gap: .4rem;
+    margin-top: .25rem;
+    font-size: .72rem;
+}
+
+.region-detail-links a,
+.regional-loto-links a {
+    color: var(--bs-primary);
+}
+
+.regional-results-table,
+.regional-loto-table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.regional-results-table th,
+.regional-results-table td,
+.regional-loto-table th,
+.regional-loto-table td {
+    border: 1px solid var(--border-neutral);
+}
+
+.regional-results-table thead th,
+.regional-loto-table thead th {
+    padding: .35rem .25rem;
+    color: var(--bs-primary);
+    background: #eaf4fb;
+    font-size: .72rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.regional-results-table .prize-label,
+.regional-loto-table th:first-child {
+    width: 9%;
+}
+
+.regional-results-table tbody th {
+    padding: .35rem .2rem;
+    color: var(--on-surface);
+    background: #f1f8fd;
+    font-size: .72rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.regional-results-table tbody td {
+    padding: .35rem .25rem;
+    color: var(--on-surface);
+    font: 700 1rem var(--font-headline);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.regional-results-table tbody td span {
+    display: block;
+    min-height: 1.35rem;
+}
+
+.regional-results-table tbody tr:nth-child(even),
+.regional-loto-table tbody tr:nth-child(even) {
+    background: #f1f8fd;
+}
+
+.regional-results-table .special-row th,
+.regional-results-table .special-row td {
+    color: var(--secondary);
+    font-weight: 700;
+}
+
+.regional-results-table .special-row td {
+    font-size: 1.1rem;
+}
+
+.regional-loto-links {
+    justify-content: flex-start;
+    margin: 0 0 .5rem;
+}
+
+.regional-loto-table thead th {
+    color: var(--on-surface);
+}
+
+.regional-loto-table tbody th {
+    color: var(--secondary);
+    background: #f1f8fd;
+    font-weight: 500;
+    text-align: center;
+}
+
+.regional-loto-table tbody td {
+    padding: .34rem .4rem;
+    color: var(--on-surface);
+    font: 700 .78rem var(--font-headline);
+}
+
+@media (max-width: 767.98px) {
+    .home-region-summary-grid,
+    .home-vietlott-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-directory-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .results-home-intro,
+    .results-section-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .results-status {
+        align-self: flex-start;
+    }
+
+    .results-table th {
+        width: 28%;
+    }
+
+    .results-table td {
+        gap: .45rem .8rem;
+        font-size: .95rem;
+    }
+
+    .vietlott-grid {
+        grid-template-columns: 1fr;
+    }
 }

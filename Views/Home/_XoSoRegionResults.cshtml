@@ -1,0 +1,184 @@
+@model XoSoWeb.Models.XoSoRegionViewModel
+@using System.Linq
+
+<div class="regional-page-title">
+    <div>
+        <div class="results-breadcrumb">Trang chủ <span>/</span> Xổ số @Model.RegionName</div>
+        @if (Model.Region != "MB")
+        {
+            <h2>Kết quả Xổ số @Model.RegionName</h2>
+            <p>Dữ liệu kết quả mới nhất trong cơ sở dữ liệu.</p>
+        }
+    </div>
+</div>
+
+<nav class="weekday-filter" aria-label="Lọc kết quả theo thứ">
+    <a class="@(Model.SelectedDay == null ? "active" : "")" asp-route-day="">@Model.RegionName</a>
+    <a class="@(Model.SelectedDay == 1 ? "active" : "")" asp-route-day="1">Thứ 2</a>
+    <a class="@(Model.SelectedDay == 2 ? "active" : "")" asp-route-day="2">Thứ 3</a>
+    <a class="@(Model.SelectedDay == 3 ? "active" : "")" asp-route-day="3">Thứ 4</a>
+    <a class="@(Model.SelectedDay == 4 ? "active" : "")" asp-route-day="4">Thứ 5</a>
+    <a class="@(Model.SelectedDay == 5 ? "active" : "")" asp-route-day="5">Thứ 6</a>
+    <a class="@(Model.SelectedDay == 6 ? "active" : "")" asp-route-day="6">Thứ 7</a>
+    <a class="@(Model.SelectedDay == 7 ? "active" : "")" asp-route-day="7">Chủ Nhật</a>
+</nav>
+
+@if (Model.Results.Count == 0)
+{
+    <div class="results-empty">Không có kết quả @Model.RegionName cho ngày được chọn.</div>
+}
+else if (Model.Region == "MB")
+{
+    var result = Model.Results.First();
+    <section class="region-detail-section mb-region-old-layout">
+        <header class="region-detail-header mb-region-header">
+            <h1>XSMB - Kết quả Xổ số Miền Bắc - SSMB, SXMB hôm nay</h1>
+            <div class="region-detail-links">
+                <a href="#">XSMB</a>
+                <span>/</span>
+                <a href="#">XSMB Chủ Nhật</a>
+                <span>/</span>
+                <a href="#">XSMB @result.DrawDate.ToString("dd/MM/yyyy")</a>
+                <span>(@result.ProvinceName)</span>
+            </div>
+        </header>
+        <div class="mb-prize-codes">
+            <span></span>
+            <span>5GF</span><span>7GF</span><span>8GF</span><span>9GF</span><span>11GF</span><span>14GF</span>
+        </div>
+        <div class="lottery-table-wrap">
+            <table class="regional-results-table mb-results-table">
+                <tbody>
+                    @foreach (var prize in result.Prizes)
+                    {
+                        var isSpecial = prize.PrizeName.Contains("ĐB") || prize.PrizeName.Contains("Đặc biệt");
+                        <tr class="@(isSpecial ? "special-row" : "")">
+                            <th class="prize-label">@prize.PrizeName.Replace("Giải ", "")</th>
+                            <td class="number-count-@prize.Numbers.Count">
+                                @foreach (var number in prize.Numbers)
+                                {
+                                    <span>@number</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <section class="regional-loto-section mb-region-old-loto">
+        <div class="regional-loto-links">
+            <a href="#">Bảng loto @Model.RegionName</a>
+            <span>/</span>
+            <a href="#">Lô @Model.RegionName hôm nay</a>
+        </div>
+        <table class="loto-statistics-table">
+            <thead>
+                <tr><th>Đầu</th><th>Đuôi</th><th>Đầu</th><th>Đuôi</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.LotoStatistics)
+                {
+                    <tr>
+                        <th>@row.Digit</th>
+                        <td>@(string.IsNullOrWhiteSpace(row.HeadNumbers) ? "-" : row.HeadNumbers)</td>
+                        <td>@(string.IsNullOrWhiteSpace(row.TailNumbers) ? "-" : row.TailNumbers)</td>
+                        <th>@row.Digit</th>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+}
+else
+{
+    var results = Model.Results.Take(3).ToList();
+    var prizeNames = results.SelectMany(result => result.Prizes.Select(prize => prize.PrizeName)).Distinct().ToList();
+    var drawDate = results.Min(result => result.DrawDate);
+
+    <section class="region-detail-section">
+        <header class="region-detail-header">
+            <h1>Kết quả Xổ số @Model.RegionName - KQXS @Model.Region</h1>
+            <div class="region-detail-links">
+                <a href="#">XS@Model.Region</a>
+                <span>/</span>
+                <a href="#">XS@Model.Region Chủ nhật</a>
+                <span>/</span>
+                <a href="#">XS@Model.Region @drawDate.ToString("dd/MM/yyyy")</a>
+            </div>
+        </header>
+        <div class="lottery-table-wrap">
+            <table class="regional-results-table">
+                <thead>
+                    <tr>
+                        <th class="prize-label">G</th>
+                        @foreach (var result in results)
+                        {
+                            <th>@result.ProvinceName</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var prizeName in prizeNames)
+                    {
+                        var isSpecial = prizeName.Contains("ĐB") || prizeName.Contains("Đặc biệt");
+                        <tr class="@(isSpecial ? "special-row" : "")">
+                            <th class="prize-label">@prizeName.Replace("Giải ", "")</th>
+                            @foreach (var result in results)
+                            {
+                                var prize = result.Prizes.FirstOrDefault(item => item.PrizeName == prizeName);
+                                <td>
+                                    @if (prize != null)
+                                    {
+                                        foreach (var number in prize.Numbers)
+                                        {
+                                            <span>@number</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="regional-loto-section">
+        <div class="regional-loto-links">
+            <a href="#">Bảng loto @Model.RegionName</a>
+            <span>/</span>
+            <a href="#">Lô XS@Model.Region Chủ nhật</a>
+        </div>
+        <div class="lottery-table-wrap">
+            <table class="regional-loto-table">
+                <thead>
+                    <tr>
+                        <th>Đầu</th>
+                        @foreach (var result in results)
+                        {
+                            <th>@result.ProvinceName</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var digit = 0; digit < 10; digit++)
+                    {
+                        <tr>
+                            <th>@digit</th>
+                            @foreach (var result in results)
+                            {
+                                var row = result.LotoStatistics.FirstOrDefault(item => item.Digit == digit);
+                                <td>@(row == null || string.IsNullOrWhiteSpace(row.HeadNumbers) ? "-" : row.HeadNumbers)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

@@ -7,4 +7,21 @@ document.addEventListener('DOMContentLoaded', function () {
             row.style.backgroundColor = '';
         });
     });
+
+    const topbar = document.getElementById('topbar');
+    let lastScrollY = window.scrollY;
+
+    if (topbar) {
+        window.addEventListener('scroll', function () {
+            const currentScrollY = window.scrollY;
+
+            if (currentScrollY > lastScrollY && currentScrollY > topbar.offsetHeight) {
+                topbar.classList.add('is-hidden');
+            } else if (currentScrollY < lastScrollY) {
+                topbar.classList.remove('is-hidden');
+            }
+
+            lastScrollY = Math.max(currentScrollY, 0);
+        }, { passive: true });
+    }
 });

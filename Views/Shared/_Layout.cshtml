@@ -10,6 +10,7 @@
 
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=IBM+Plex+Sans:wght@600&family=Hanken+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
@@ -21,19 +22,21 @@
 <body>
 
     <!-- TopAppBar -->
-    <header class="sticky-top z-3 bg-surface border-bottom border-neutral py-2 w-100">
+    <header id="topbar" class="topbar sticky-top z-3 bg-surface border-bottom border-neutral py-2 w-100">
         <div class="container-xl d-flex justify-content-between align-items-center h-100">
             <div class="d-flex align-items-center gap-2">
-                <span class="material-symbols-outlined text-primary fs-4">confirmation_number</span>
+                <i class="fa-solid fa-ticket text-primary fs-4" aria-hidden="true"></i>
                 <h1 class="h5 mb-0 fw-bold text-primary font-headline-md">Xổ Số Việt Nam</h1>
             </div>
             <nav class="d-none d-md-flex gap-4">
-                <a class="text-primary border-bottom border-2 border-primary fw-bold text-decoration-none py-1" asp-controller="Home" asp-action="Index" href="/">Trang Chủ</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac" href="/xo-so-mien-bac">XS Miền Bắc</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott" href="/vietlott">Vietlott</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" href="#">Trực Tiếp</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" href="#">Thống Kê</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" href="#">Soi Cầu</a>
+                <a class="text-primary border-bottom border-2 border-primary fw-bold text-decoration-none py-1" asp-controller="Home" asp-action="Index">Trang Chủ</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac">XS Miền Bắc</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienTrung">XS Miền Trung</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienNam">XS Miền Nam</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott">Vietlott</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Trực Tiếp</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Thống Kê</a>
+                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Soi Cầu</a>
             </nav>
             <button class="btn btn-primary rounded-pill font-label-sm px-4 py-2">
                 Đăng nhập
@@ -47,7 +50,7 @@
         </div>
     </div>
 
-    <main class="container-xl py-4 d-flex flex-column flex-lg-row gap-4">
+    <main class="container-xl py-4 d-flex flex-column flex-lg-row gap-4 page-content">
 
         <!-- Sidebar Navigation Drawer (Desktop Only) -->
         <aside class="d-none d-lg-flex flex-column flex-shrink-0 sticky-top" style="width: 256px; top: 80px; height: max-content;">
@@ -56,16 +59,16 @@
                     <h2 class="font-label-sm text-uppercase opacity-75 mb-0">Khu Vực</h2>
                 </div>
                 <nav class="d-flex flex-column py-2">
-                    <a class="bg-primary-container text-white rounded-pill mx-2 d-flex align-items-center gap-2 px-3 py-2 text-decoration-none mb-1" href="#">
-                        <span class="material-symbols-outlined fs-5">location_on</span>
+                    <a class="bg-primary-container text-white rounded-pill mx-2 d-flex align-items-center gap-2 px-3 py-2 text-decoration-none mb-1" asp-controller="Home" asp-action="XoSoMienBac">
+                        <i class="fa-solid fa-location-dot fs-5" aria-hidden="true"></i>
                         <span>XS Miền Bắc</span>
                     </a>
-                    <a class="text-on-surface-variant px-4 py-2 d-flex align-items-center gap-2 text-decoration-none hover-bg-surface" href="#">
-                        <span class="material-symbols-outlined fs-5">location_on</span>
+                    <a class="text-on-surface-variant px-4 py-2 d-flex align-items-center gap-2 text-decoration-none hover-bg-surface" asp-controller="Home" asp-action="XoSoMienTrung">
+                        <i class="fa-solid fa-location-dot fs-5" aria-hidden="true"></i>
                         <span>XS Miền Trung</span>
                     </a>
-                    <a class="text-on-surface-variant px-4 py-2 d-flex align-items-center gap-2 text-decoration-none hover-bg-surface" href="#">
-                        <span class="material-symbols-outlined fs-5">location_on</span>
+                    <a class="text-on-surface-variant px-4 py-2 d-flex align-items-center gap-2 text-decoration-none hover-bg-surface" asp-controller="Home" asp-action="XoSoMienNam">
+                        <i class="fa-solid fa-location-dot fs-5" aria-hidden="true"></i>
                         <span>XS Miền Nam</span>
                     </a>
                 </nav>
@@ -113,8 +116,8 @@
                 <div class="col-6">
                     <h4 class="font-label-sm text-white text-uppercase mb-3">Thông tin</h4>
                     <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
-                        <li><a class="text-white-50 text-decoration-none" href="#">Về chúng tôi</a></li>
-                        <li><a class="text-white-50 text-decoration-none" href="#">Liên hệ</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Index">Về chúng tôi</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Support">Liên hệ</a></li>
                         <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Support">Hỗ trợ</a></li>
                         <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Privacy">Điều khoản sử dụng</a></li>
                     </ul>
@@ -122,8 +125,8 @@
                 <div class="col-6">
                     <h4 class="font-label-sm text-white text-uppercase mb-3">Ứng dụng</h4>
                     <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
-                        <li><a class="text-white-50 text-decoration-none" href="#">Android App</a></li>
-                        <li><a class="text-white-50 text-decoration-none" href="#">iOS App</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Index">Android App</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Index">iOS App</a></li>
                         <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a></li>
                     </ul>
                 </div>
@@ -136,21 +139,21 @@
 
     <!-- BottomNavBar (Mobile Only) -->
     <nav class="fixed-bottom w-100 z-3 d-flex justify-content-around align-items-center p-2 d-lg-none bg-surface bottom-nav rounded-top-3">
-        <a class="d-flex flex-column align-items-center text-primary text-decoration-none" asp-controller="Home" asp-action="Index">
-            <span class="material-symbols-outlined mb-1">home</span>
-            <span class="font-label-sm">Trang Chủ</span>
+        <a class="d-flex flex-column align-items-center text-primary text-decoration-none" asp-controller="Home" asp-action="XoSoMienBac">
+            <i class="fa-solid fa-location-dot mb-1" aria-hidden="true"></i>
+            <span class="font-label-sm">Miền Bắc</span>
         </a>
-        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" href="#">
-            <span class="material-symbols-outlined mb-1">live_tv</span>
-            <span class="font-label-sm">Trực Tiếp</span>
+        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" asp-controller="Home" asp-action="XoSoMienTrung">
+            <i class="fa-solid fa-location-dot mb-1" aria-hidden="true"></i>
+            <span class="font-label-sm">Miền Trung</span>
         </a>
-        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" href="#">
-            <span class="material-symbols-outlined mb-1">analytics</span>
-            <span class="font-label-sm">Thống Kê</span>
+        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" asp-controller="Home" asp-action="XoSoMienNam">
+            <i class="fa-solid fa-location-dot mb-1" aria-hidden="true"></i>
+            <span class="font-label-sm">Miền Nam</span>
         </a>
-        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" href="#">
-            <span class="material-symbols-outlined mb-1">settings</span>
-            <span class="font-label-sm">Cài Đặt</span>
+        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" asp-controller="Home" asp-action="Vietlott">
+            <i class="fa-solid fa-ticket mb-1" aria-hidden="true"></i>
+            <span class="font-label-sm">Vietlott</span>
         </a>
     </nav>
 
