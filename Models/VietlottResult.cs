@@ -16,6 +16,10 @@ namespace XoSoWeb.Models
 
         public DateTime DrawDate { get; set; }
 
+        public long? EstimatedPrize { get; set; } // Jackpot 1
+
+        public long? EstimatedPrize2 { get; set; } // Jackpot 2
+
         public List<string> Numbers { get; set; }
 
         public List<string> SpecialNumbers { get; set; }

@@ -24,4 +24,267 @@ document.addEventListener('DOMContentLoaded', function () {
             lastScrollY = Math.max(currentScrollY, 0);
         }, { passive: true });
     }
+
+    const liveResults = document.getElementById('live-results');
+
+    if (liveResults) {
+        const liveResultsGrid = document.getElementById('live-results-grid');
+        const liveResultsStatus = document.getElementById('live-results-status');
+        const liveSocketUrl = 'wss://logapp.io.vn/ws';
+        const regionNames = { '1': 'Miền Bắc', '2': 'Miền Nam', '3': 'Miền Trung' };
+        const reconnectDelay = 5000;
+        let socket;
+        let reconnectTimer;
+
+        const escapeHtml = value => String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+
+        const prizeLayouts = {
+            '1': {
+                labels: ['ĐB', 'nhất', 'nhì', 'ba', 'tư', 'năm', 'sáu', 'bảy'],
+                counts: [1, 1, 2, 6, 4, 6, 3, 4]
+            },
+            '2': {
+                labels: ['G8', 'G7', 'G6', 'G5', 'G4', 'G3', 'G2', 'G1', 'ĐB'],
+                counts: [1, 1, 3, 1, 5, 2, 1, 1, 1]
+            },
+            '3': {
+                labels: ['G8', 'G7', 'G6', 'G5', 'G4', 'G3', 'G2', 'G1', 'ĐB'],
+                counts: [1, 1, 3, 1, 5, 2, 1, 1, 1]
+            }
+        };
+
+        const renderNumberCell = (values, expectedCount) => {
+            const numbers = values.slice(0, expectedCount);
+            const missingCount = Math.max(expectedCount - numbers.length, 0);
+            return numbers.map(value => `<span>${escapeHtml(value)}</span>`).join('') +
+                Array.from({ length: missingCount }, () =>
+                    '<span class="live-number-loader" aria-label="Đang quay"><i>0</i><i>0</i><i>0</i></span>'
+                ).join('');
+        };
+
+        const renderHeadStatistics = (records, isNorthern) => {
+            const columns = records.map(record => {
+                const heads = Array.from({ length: 10 }, () => []);
+                const tails = Array.from({ length: 10 }, () => []);
+                record.values.flat().forEach(value => {
+                    const number = String(value).replace(/\D/g, '');
+                    if (number.length < 2) {
+                        return;
+                    }
+
+                    const suffix = number.slice(-2);
+                    heads[Number(suffix[0])].push(suffix);
+                    tails[Number(suffix[1])].push(suffix);
+                });
+
+                return { record, heads, tails };
+            });
+
+            if (isNorthern) {
+                const column = columns[0] || { heads: [], tails: [] };
+                return `
+                    <section class="live-statistics">
+                        <div class="regional-loto-links">
+                            <a href="#">Bảng loto Miền Bắc</a>
+                            <span>/</span>
+                            <a href="#">Lô Miền Bắc hôm nay</a>
+                        </div>
+                        <table class="loto-statistics-table">
+                            <thead><tr><th>Đầu</th><th>Đuôi</th><th>Đầu</th><th>Đuôi</th></tr></thead>
+                            <tbody>
+                                ${Array.from({ length: 10 }, (_, digit) => `
+                                    <tr>
+                                        <th>${digit}</th>
+                                        <td>${column.heads[digit]?.length ? column.heads[digit].join(',') : '-'}</td>
+                                        <td>${column.tails[digit]?.length ? column.tails[digit].join(',') : '-'}</td>
+                                        <th>${digit}</th>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </section>
+                `;
+            }
+
+            return `
+                <section class="live-statistics">
+                    <div class="live-statistics-heading">
+                        <h4>Thống kê đầu số</h4>
+                        <span>Hai số cuối các giải đã quay</span>
+                    </div>
+                    <div class="lottery-table-wrap">
+                        <table class="regional-loto-table live-statistics-table">
+                            <thead>
+                                <tr>
+                                    <th>Đầu</th>
+                                    ${columns.map(({ record }) => `<th>${escapeHtml(record.name)}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Array.from({ length: 10 }, (_, digit) => `
+                                    <tr>
+                                        <th>${digit}</th>
+                                        ${columns.map(({ heads }) => `<td>${heads[digit].length ? heads[digit].join(' - ') : '-'}</td>`).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            `;
+        };
+
+        const renderLiveTable = group => {
+            const layout = prizeLayouts[group.region] || prizeLayouts['1'];
+            const isNorthern = group.region === '1';
+            const completedPrizes = layout.labels.filter((label, index) =>
+                group.records.some(record => record.values[index]?.length > 0)
+            ).length;
+            const totalPrizes = layout.labels.length;
+            const headings = isNorthern ? '' : `<thead><tr><th class="prize-label">G</th>${group.records.map(record =>
+                `<th>${escapeHtml(record.name)}</th>`).join('')}</tr></thead>`;
+            const rows = layout.labels.map((label, index) => {
+                const isSpecial = label === 'ĐB';
+                const isRedPrize = isSpecial || (isNorthern ? label === 'bảy' : label === 'G8');
+                const cells = isNorthern
+                    ? `<td><div class="mb-prize-numbers number-count-${layout.counts[index]}">${renderNumberCell(group.records[0]?.values[index] || [], layout.counts[index])}</div></td>`
+                    : group.records.map(record =>
+                        `<td>${renderNumberCell(record.values[index] || [], layout.counts[index])}</td>`
+                    ).join('');
+
+                return `<tr class="${isSpecial ? 'special-row' : ''} ${isRedPrize ? 'red-prize-row' : ''}"><th class="prize-label">${label}</th>${cells}</tr>`;
+            }).join('');
+            const northernHeader = isNorthern ? `
+                <header class="region-detail-header live-region-detail-header">
+                    <h1>XSMB - Kết quả Xổ số Miền Bắc trực tiếp</h1>
+                    <div class="region-detail-links">
+                        <a href="#">XSMB</a>
+                        <span>/</span>
+                        <a href="#">Đang quay</a>
+                        <span>/</span>
+                        <span>${escapeHtml(group.records[0].name)}</span>
+                    </div>
+                </header>
+                <div class="mb-prize-codes live-mb-prize-codes">
+                    <span></span>
+                    ${(group.records[0].values[8]?.length ? group.records[0].values[8] : ['5GF', '7GF', '8GF', '9GF', '11GF', '14GF'])
+                        .map(code => `<span>${escapeHtml(code)}</span>`).join('')}
+                </div>
+            ` : '';
+            const liveSummary = isNorthern ? '' : `
+                <div class="live-region-heading">
+                    <h3>${group.name}</h3>
+                    <span class="live-region-stat">${completedPrizes}/${totalPrizes} giải đã có số</span>
+                </div>
+            `;
+
+            return `
+                <section class="live-region" data-region="${group.name}">
+                    ${northernHeader}
+                    ${liveSummary}
+                    <div class="lottery-table-wrap live-table-wrap">
+                        <table class="regional-results-table ${isNorthern ? 'mb-results-table' : ''}">
+                            ${headings}
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                    ${renderHeadStatistics(group.records, isNorthern)}
+                </section>
+            `;
+        };
+
+        const renderLiveResults = message => {
+            if (message.startsWith('1!')) {
+                message = message.slice(2).trim();
+            }
+
+            const parts = message.split('!').map(part => part.trim());
+            const control = parts.shift().split('|');
+            const region = control[1] || control[0] || '1';
+            if (parts.length === 0) {
+                return;
+            }
+
+            const records = parts.map(record => {
+                const separatorIndex = record.indexOf('@');
+                const header = (separatorIndex < 0 ? record : record.slice(0, separatorIndex)).split('|');
+                const values = (separatorIndex < 0 ? '' : record.slice(separatorIndex + 1)).split('|').map(value => {
+                    const numbers = value.trim();
+                    return numbers ? numbers.split('-').filter(Boolean) : [];
+                });
+
+                return {
+                    region,
+                    code: header[2] || '',
+                    name: header[3] || header[2] || 'Đài',
+                    values
+                };
+            }).filter(Boolean);
+
+            if (!records.length) {
+                return;
+            }
+
+            const groupedRecords = ['1', '2', '3'].map(region => ({
+                region,
+                name: regionNames[region],
+                records: records.filter(record => record.region === region)
+            })).filter(group => group.records.length > 0);
+
+            liveResultsGrid.innerHTML = groupedRecords.map(renderLiveTable).join('');
+
+            liveResults.hidden = false;
+            liveResultsStatus.textContent = `${records.length} đài đang cập nhật kết quả`;
+        };
+
+        const handleMessage = async event => {
+            const message = typeof event.data === 'string'
+                ? event.data.trim()
+                : (event.data instanceof Blob ? (await event.data.text()).trim() : '');
+            if (!message) {
+                return;
+            }
+
+            console.debug('Live socket message:', message);
+
+            renderLiveResults(message);
+        };
+
+        const connectLiveSocket = () => {
+            try {
+                socket = new WebSocket(liveSocketUrl);
+            } catch (error) {
+                console.error('Không thể khởi tạo live socket:', error);
+                reconnectTimer = window.setTimeout(connectLiveSocket, reconnectDelay);
+                return;
+            }
+
+            socket.addEventListener('open', () => {
+                liveResultsStatus.textContent = 'Đã kết nối, đang chờ dữ liệu quay số';
+            });
+            socket.addEventListener('message', handleMessage);
+            socket.addEventListener('close', () => {
+                clearTimeout(reconnectTimer);
+                liveResultsStatus.textContent = 'Mất kết nối, đang thử kết nối lại';
+                reconnectTimer = window.setTimeout(connectLiveSocket, reconnectDelay);
+            });
+            socket.addEventListener('error', () => {
+                liveResultsStatus.textContent = 'Không kết nối được máy chủ kết quả';
+                socket.close();
+            });
+        };
+
+        connectLiveSocket();
+
+        // Preview live result locally. Uncomment these two lines to preview the table.
+        //const previewLiveMessage = '0|3!1|32|TTH|Huế @96|507|2795-7931-0655|0606|28539-32978-83459-36360-49928-34381-31694|69178-83885|33140|69172|616814|!1|33|PY|Phú Yên@90|062|6272-4853-0247|9267|85789-93792-51450-37719-07609-92709-62869|22837-38481|50811|81505|342609|';
+        //const previewLiveMessage = '0|2!1|13|DT|Đồng Tháp@11|751|9972-0566-8459|8148|81617-06900-04114-95223-48831-72956-22747|67116-91664|99985|08519|728409|!1|14|HCM|TPHCM @98|515|4687-2189-8217|2342|99561-65057-22017-51078-64544-16942-65052|97915-04692|09263|13891|061923|!1|15|CM|Cà Mau@63|335|2187-7933-7778|5563|95280-77906-24414-99378-57105-71759-39239|46687-12541|79042|15863|264432|';
+        //const previewLiveMessage = '0|1!0|46|TD|Hà Nội@|70592|57489-68602|86718-84988-37198-60351-72717-29855|0529-0808-7371-8648|3457-1096-4779-9172-9648|||';
+        //renderLiveResults(previewLiveMessage);
+    }
 });

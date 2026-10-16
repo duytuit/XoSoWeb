@@ -1,12 +1,25 @@
 @{
     Layout = null;
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    bool IsActive(string controller, string action = null)
+    {
+        var isControllerMatch = string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase);
+        if (action == null)
+        {
+            return isControllerMatch;
+        }
+
+        return isControllerMatch && string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase);
+    }
 }
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Xổ Số Việt Nam</title>
+    <title>@ViewData["Title"] - Xổ Số Trực Tiếp</title>
 
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
@@ -25,18 +38,19 @@
     <header id="topbar" class="topbar sticky-top z-3 bg-surface border-bottom border-neutral py-2 w-100">
         <div class="container-xl d-flex justify-content-between align-items-center h-100">
             <div class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-ticket text-primary fs-4" aria-hidden="true"></i>
-                <h1 class="h5 mb-0 fw-bold text-primary font-headline-md">Xổ Số Việt Nam</h1>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" asp-controller="Home" asp-action="Index" aria-label="Về trang chủ">
+                    <i class="fa-solid fa-ticket text-primary fs-4" aria-hidden="true"></i>
+                    <h1 class="h5 mb-0 fw-bold text-primary font-headline-md">Xổ Số Trực Tiếp</h1>
+                </a>
             </div>
             <nav class="d-none d-md-flex gap-4">
-                <a class="text-primary border-bottom border-2 border-primary fw-bold text-decoration-none py-1" asp-controller="Home" asp-action="Index">Trang Chủ</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac">XS Miền Bắc</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienTrung">XS Miền Trung</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienNam">XS Miền Nam</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott">Vietlott</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Trực Tiếp</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Thống Kê</a>
-                <a class="text-on-surface-variant fw-medium text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Soi Cầu</a>
+                <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Trang Chủ</a>
+                <a class="@(IsActive("Home", "XoSoMienBac") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac">XS Miền Bắc</a>
+                <a class="@(IsActive("Home", "XoSoMienTrung") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienTrung">XS Miền Trung</a>
+                <a class="@(IsActive("Home", "XoSoMienNam") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienNam">XS Miền Nam</a>
+                <a class="@(IsActive("Home", "Vietlott") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott">Vietlott</a>
+                <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Thống Kê</a>
+                <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Tin Xổ Số</a>
             </nav>
             <button class="btn btn-primary rounded-pill font-label-sm px-4 py-2">
                 Đăng nhập
@@ -54,20 +68,20 @@
 
         <!-- Sidebar Navigation Drawer (Desktop Only) -->
         <aside class="d-none d-lg-flex flex-column flex-shrink-0 sticky-top" style="width: 256px; top: 80px; height: max-content;">
-            <div class="bg-surface-container shadow-sm rounded overflow-hidden">
-                <div class="p-3 bg-primary text-white">
+            <div class="sidebar-region-panel">
+                <div class="sidebar-region-heading">
                     <h2 class="font-label-sm text-uppercase opacity-75 mb-0">Khu Vực</h2>
                 </div>
-                <nav class="d-flex flex-column py-2">
-                    <a class="bg-primary-container text-white rounded-pill mx-2 d-flex align-items-center gap-2 px-3 py-2 text-decoration-none mb-1" asp-controller="Home" asp-action="XoSoMienBac">
+                <nav class="sidebar-region-nav">
+                    <a class="sidebar-region-link @(IsActive("Home", "XoSoMienBac") ? "is-active" : "")" asp-controller="Home" asp-action="XoSoMienBac">
                         <i class="fa-solid fa-location-dot fs-5" aria-hidden="true"></i>
                         <span>XS Miền Bắc</span>
                     </a>
-                    <a class="text-on-surface-variant px-4 py-2 d-flex align-items-center gap-2 text-decoration-none hover-bg-surface" asp-controller="Home" asp-action="XoSoMienTrung">
+                    <a class="sidebar-region-link @(IsActive("Home", "XoSoMienTrung") ? "is-active" : "")" asp-controller="Home" asp-action="XoSoMienTrung">
                         <i class="fa-solid fa-location-dot fs-5" aria-hidden="true"></i>
                         <span>XS Miền Trung</span>
                     </a>
-                    <a class="text-on-surface-variant px-4 py-2 d-flex align-items-center gap-2 text-decoration-none hover-bg-surface" asp-controller="Home" asp-action="XoSoMienNam">
+                    <a class="sidebar-region-link @(IsActive("Home", "XoSoMienNam") ? "is-active" : "")" asp-controller="Home" asp-action="XoSoMienNam">
                         <i class="fa-solid fa-location-dot fs-5" aria-hidden="true"></i>
                         <span>XS Miền Nam</span>
                     </a>
@@ -87,7 +101,7 @@
         </aside>
 
         <!-- Main Content Area (render theo từng trang con) -->
-        <section class="flex-grow-1 d-flex flex-column gap-4">
+        <section class="flex-grow-1 d-flex flex-column gap-3">
             @RenderBody()
         </section>
 
@@ -104,7 +118,7 @@
     <footer class="bg-inverse-surface text-secondary-container-opacity border-top border-secondary-container-opacity pt-5 pb-3">
         <div class="container-xl d-flex flex-column flex-md-row justify-content-between align-items-start gap-4 pb-4 border-bottom border-light border-opacity-10">
             <div class="mb-4 mb-md-0" style="max-width: 350px;">
-                <h2 class="h5 fw-bold text-white mb-3">Xổ Số Việt Nam</h2>
+                <h2 class="h5 fw-bold mb-3"><a class="text-white text-decoration-none" asp-controller="Home" asp-action="Index">Xổ Số Trực Tiếp</a></h2>
                 <p class="text-white-50 mb-3 fs-7">Cung cấp kết quả xổ số kiến thiết 3 miền nhanh nhất, chính xác nhất từ các công ty XSKT trên toàn quốc.</p>
                 <div class="d-flex gap-3 text-white-50">
                     <span class="material-symbols-outlined" style="cursor: pointer;">qr_code_2</span>
@@ -133,25 +147,25 @@
             </div>
         </div>
         <div class="container-xl pt-3 text-center">
-            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @DateTime.Now.Year Xổ Số Việt Nam - Dữ liệu kết quả chính xác từ các công ty XSKT.</p>
+            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @DateTime.Now.Year Xổ Số - Dữ liệu kết quả chính xác từ các công ty XSKT.</p>
         </div>
     </footer>
 
     <!-- BottomNavBar (Mobile Only) -->
     <nav class="fixed-bottom w-100 z-3 d-flex justify-content-around align-items-center p-2 d-lg-none bg-surface bottom-nav rounded-top-3">
-        <a class="d-flex flex-column align-items-center text-primary text-decoration-none" asp-controller="Home" asp-action="XoSoMienBac">
+        <a class="d-flex flex-column align-items-center @(IsActive("Home", "XoSoMienBac") ? "text-primary" : "text-on-surface-variant") text-decoration-none" asp-controller="Home" asp-action="XoSoMienBac">
             <i class="fa-solid fa-location-dot mb-1" aria-hidden="true"></i>
             <span class="font-label-sm">Miền Bắc</span>
         </a>
-        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" asp-controller="Home" asp-action="XoSoMienTrung">
+        <a class="d-flex flex-column align-items-center @(IsActive("Home", "XoSoMienTrung") ? "text-primary" : "text-on-surface-variant") text-decoration-none" asp-controller="Home" asp-action="XoSoMienTrung">
             <i class="fa-solid fa-location-dot mb-1" aria-hidden="true"></i>
             <span class="font-label-sm">Miền Trung</span>
         </a>
-        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" asp-controller="Home" asp-action="XoSoMienNam">
+        <a class="d-flex flex-column align-items-center @(IsActive("Home", "XoSoMienNam") ? "text-primary" : "text-on-surface-variant") text-decoration-none" asp-controller="Home" asp-action="XoSoMienNam">
             <i class="fa-solid fa-location-dot mb-1" aria-hidden="true"></i>
             <span class="font-label-sm">Miền Nam</span>
         </a>
-        <a class="d-flex flex-column align-items-center text-on-surface-variant text-decoration-none" asp-controller="Home" asp-action="Vietlott">
+        <a class="d-flex flex-column align-items-center @(IsActive("Home", "Vietlott") ? "text-primary" : "text-on-surface-variant") text-decoration-none" asp-controller="Home" asp-action="Vietlott">
             <i class="fa-solid fa-ticket mb-1" aria-hidden="true"></i>
             <span class="font-label-sm">Vietlott</span>
         </a>

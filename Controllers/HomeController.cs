@@ -64,17 +64,17 @@ namespace XoSoWeb.Controllers
         [HttpGet("/xo-so-mien-bac")]
         public async Task<IActionResult> XoSoMienBac([FromQuery] int? day = null)
         {
-            return View("XoSoMienBac", await GetRegionResultsAsync("MB", "Miền Bắc", day));
+            return View("XoSoMienBac", await GetRegionResultsAsync("MB", "Miền Bắc", day, 7));
         }
         [HttpGet("/xo-so-mien-trung")]
         public async Task<IActionResult> XoSoMienTrung([FromQuery] int? day = null)
         {
-            return View("XoSoMienTrung", await GetRegionResultsAsync("MT", "Miền Trung", day));
+            return View("XoSoMienTrung", await GetRegionResultsAsync("MT", "Miền Trung", day, 7));
         }
         [HttpGet("/xo-so-mien-nam")]
         public async Task<IActionResult> XoSoMienNam([FromQuery] int? day = null)
         {
-            return View("XoSoMienNam", await GetRegionResultsAsync("MN", "Miền Nam", day));
+            return View("XoSoMienNam", await GetRegionResultsAsync("MN", "Miền Nam", day, 7));
         }
         [HttpGet("/vietlott")]
         public async Task<IActionResult> Vietlott([FromQuery] string gameCode = null, [FromQuery] int offset = 0)
@@ -91,26 +91,38 @@ namespace XoSoWeb.Controllers
             });
         }
 
-        private async Task<XoSoRegionViewModel> GetRegionResultsAsync(string region, string regionName, int? selectedDay = null)
+        private async Task<XoSoRegionViewModel> GetRegionResultsAsync(string region, string regionName, int? selectedDay = null, int resultDays = 1)
         {
+            selectedDay = selectedDay >= 1 && selectedDay <= 7 ? selectedDay : null;
             var model = new XoSoRegionViewModel { Region = region, RegionName = regionName, SelectedDay = selectedDay };
             var storedRegionName = region switch
             {
                 "MN" => "Miền nam",
                 "MT" => "Miền trung",
-                _ => "Miền bac"
+                _ => "Miền bắc"
             };
             var connection = _context.Database.GetDbConnection();
             await connection.OpenAsync();
 
             await using var command = connection.CreateCommand();
             command.CommandText = @"
+                WITH RankedResults AS
+                (
+                    SELECT Id, Region, ProvinceCode, ProvinceName, DrawDate, Prizes,
+                        DENSE_RANK() OVER (ORDER BY CAST(DrawDate AS date) DESC) AS DrawDateRank
+                    FROM dbo.XoSoResults
+                    WHERE (Region = @region OR Region = @storedRegionName)
+                        AND (@selectedDay IS NULL OR
+                            ((DATEDIFF(day, '19000101', DrawDate) % 7 + 7) % 7) + 1 = @selectedDay)
+                )
                 SELECT Id, Region, ProvinceCode, ProvinceName, DrawDate, Prizes
-                FROM dbo.XoSoResults
-                WHERE Region = @region OR Region = @storedRegionName
-                ORDER BY DrawDate DESC, Id DESC;";
+                FROM RankedResults
+                WHERE DrawDateRank <= @resultDays
+                ORDER BY DrawDate DESC, ProvinceName, Id DESC;";
             AddParameter(command, "@region", region);
             AddParameter(command, "@storedRegionName", storedRegionName);
+            AddParameter(command, "@selectedDay", selectedDay);
+            AddParameter(command, "@resultDays", resultDays);
 
             await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -131,11 +143,7 @@ namespace XoSoWeb.Controllers
             {
                 result.LotoStatistics = BuildLotoStatistics(new List<XoSoResult> { result });
             }
-            if (selectedDay >= 1 && selectedDay <= 7)
-            {
-                var dayOfWeek = selectedDay.Value == 7 ? DayOfWeek.Sunday : (DayOfWeek)selectedDay.Value;
-                model.Results = model.Results.Where(result => result.DrawDate.DayOfWeek == dayOfWeek).ToList();
-            }
+
             model.LotoStatistics = BuildLotoStatistics(model.Results);
 
             return model;
@@ -143,8 +151,8 @@ namespace XoSoWeb.Controllers
 
         private static List<LotoStatisticRow> BuildLotoStatistics(List<XoSoResult> results)
         {
-            var headNumbers = Enumerable.Range(0, 10).ToDictionary(digit => digit, _ => new List<string>());
-            var tailNumbers = Enumerable.Range(0, 10).ToDictionary(digit => digit, _ => new List<string>());
+            var headNumbers = Enumerable.Range(0, 10).ToDictionary(digit => digit, _ => new SortedSet<int>());
+            var tailNumbers = Enumerable.Range(0, 10).ToDictionary(digit => digit, _ => new SortedSet<int>());
 
             foreach (var result in results)
             {
@@ -159,8 +167,11 @@ namespace XoSoWeb.Controllers
                         }
 
                         var loto = digits.Substring(digits.Length - 2);
-                        headNumbers[loto[0] - '0'].Add(loto[1].ToString());
-                        tailNumbers[loto[1] - '0'].Add(loto[0].ToString());
+                        var headDigit = loto[0] - '0';
+                        var tailDigit = loto[1] - '0';
+
+                        headNumbers[headDigit].Add(tailDigit);
+                        tailNumbers[tailDigit].Add(headDigit);
                     }
                 }
             }
@@ -201,6 +212,8 @@ namespace XoSoWeb.Controllers
                         DrawDate,
                         Numbers,
                         SpecialNumbers,
+                        EstimatedPrize,
+                        EstimatedPrize2,
                         Total,
                         OddEven,
                         Size,
@@ -213,21 +226,21 @@ namespace XoSoWeb.Controllers
                         'MAX3D_PLUS', 'MAX3D_PRO', 'MEGA645', 'POWER655'
                     )
                 )
-                SELECT Id, GameCode, DrawNo, DrawDate, Numbers, SpecialNumbers, Total, OddEven, Size, TotalPeriods
+                SELECT Id, GameCode, DrawNo, DrawDate, Numbers, SpecialNumbers, EstimatedPrize, EstimatedPrize2, Total, OddEven, Size, TotalPeriods
                 FROM LatestResults
                 WHERE ResultRank = CASE
                     WHEN @selectedGameCode IS NOT NULL AND GameCode = @selectedGameCode THEN @selectedOffset + 1
                     ELSE 1
                 END
                 ORDER BY CASE GameCode
-                    WHEN 'BINGO18' THEN 1
-                    WHEN 'KENO' THEN 2
-                    WHEN 'LOTTO535' THEN 3
-                    WHEN 'MAX3D' THEN 4
-                    WHEN 'MAX3D_PLUS' THEN 5
-                    WHEN 'MAX3D_PRO' THEN 6
-                    WHEN 'MEGA645' THEN 7
-                    WHEN 'POWER655' THEN 8
+                    WHEN 'LOTTO535' THEN 1
+                    WHEN 'MAX3D' THEN 2
+                    WHEN 'MAX3D_PLUS' THEN 3
+                    WHEN 'MAX3D_PRO' THEN 4
+                    WHEN 'MEGA645' THEN 5
+                    WHEN 'POWER655' THEN 6
+                    WHEN 'BINGO18' THEN 7
+                    WHEN 'KENO' THEN 8
                 END;";
             AddParameter(command, "@selectedGameCode", selectedGameCode);
             AddParameter(command, "@selectedOffset", selectedOffset);
@@ -244,10 +257,12 @@ namespace XoSoWeb.Controllers
                     DrawDate = reader.GetDateTime(3),
                     Numbers = SplitValues(reader.IsDBNull(4) ? null : reader.GetString(4)),
                     SpecialNumbers = SplitValues(reader.IsDBNull(5) ? null : reader.GetString(5)),
-                    Total = reader.IsDBNull(6) ? null : reader.GetInt32(6),
-                    OddEven = reader.IsDBNull(7) ? null : reader.GetString(7),
-                    Size = reader.IsDBNull(8) ? null : reader.GetString(8),
-                    TotalPeriods = reader.GetInt32(9),
+                    EstimatedPrize = reader.IsDBNull(6) ? null : reader.GetInt64(6),
+                    EstimatedPrize2 = reader.IsDBNull(7) ? null : reader.GetInt64(7),
+                    Total = reader.IsDBNull(8) ? null : reader.GetInt32(8),
+                    OddEven = reader.IsDBNull(9) ? null : reader.GetString(9),
+                    Size = reader.IsDBNull(10) ? null : reader.GetString(10),
+                    TotalPeriods = reader.GetInt32(11),
                     Prizes = new List<VietlottPrize>()
                 };
                 results.Add(result);

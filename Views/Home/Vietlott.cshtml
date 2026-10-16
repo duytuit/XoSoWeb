@@ -2,13 +2,14 @@
 @{
     ViewData["Title"] = "Kết Quả Vietlott";
 }
-
-<div class="d-flex justify-content-between align-items-end mb-3">
+<div class="regional-page-title">
     <div>
-        <h1 class="fs-3 fw-bold text-primary mb-1">Kết quả Vietlott</h1>
-        <p class="text-on-surface-variant mb-0">Mega 6/45, Power 6/55 và các sản phẩm Vietlott từ cơ sở dữ liệu.</p>
+        <div class="results-breadcrumb"><a href="/">Trang chủ</a> <span>/</span> Vietlott</div>
+        <h1 class="detail-page-heading">Kết quả Vietlott</h1>
+        <p class="detail-page-description">Bộ số trúng thưởng và giá trị giải theo từng kỳ quay</p>
     </div>
 </div>
+<div class="vietlott-page">
 
 @if (Model.Results.Count == 0)
 {
@@ -21,73 +22,97 @@ else
         var currentOffset = Model.SelectedGameCode == result.GameCode ? Model.SelectedOffset : 0;
         var hasPrevious = currentOffset > 0;
         var hasNext = currentOffset + 1 < result.TotalPeriods;
-        <section id="vietlott-@result.GameCode" class="bg-surface-container-lowest rounded-4 border border-neutral shadow-sm overflow-hidden mb-4">
-            <div class="p-3 bg-surface-container-low border-bottom border-neutral d-flex justify-content-between align-items-center gap-3">
-                <div>
-                    <h2 class="fs-5 text-primary mb-1">@result.GameCode</h2>
-                    <p class="font-label-sm text-on-surface-variant mb-0">Kỳ quay #@result.DrawNo | @result.DrawDate.ToString("dd/MM/yyyy")</p>
+        <section id="vietlott-@result.GameCode" class="vietlott-feature-card">
+            <div class="vietlott-card-header">
+                <div class="vietlott-card-title">
+                    <h2>@(result.GameCode switch {
+                        "MEGA645" => "Mega 6/45", "POWER655" => "Power 6/55",
+                        "LOTTO535" => "Lotto 5/35", "BINGO18" => "Bingo 18",
+                        "MAX3D" => "Max 3D", "MAX3D_PLUS" => "Max 3D+",
+                        "MAX3D_PRO" => "Max 3D Pro", "KENO" => "Keno", _ => result.GameCode
+                    })</h2>
+                    <p>Kỳ quay #@result.DrawNo <span>•</span> @result.DrawDate.ToString("dd/MM/yyyy")</p>
                 </div>
                 <div class="vietlott-period-controls">
-                    @if (hasPrevious)
-                    {
-                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Vietlott", "Home", new { gameCode = result.GameCode, offset = currentOffset - 1 })#vietlott-@result.GameCode" title="Kỳ trước">&#8592; Kỳ trước</a>
-                    }
                     @if (hasNext)
                     {
-                        <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Vietlott", "Home", new { gameCode = result.GameCode, offset = currentOffset + 1 })#vietlott-@result.GameCode" title="Kỳ sau">Kỳ sau &#8594;</a>
+                        <a class="vietlott-period-button" href="@Url.Action("Vietlott", "Home", new { gameCode = result.GameCode, offset = currentOffset + 1 })#vietlott-@result.GameCode" title="Kỳ cũ hơn"><span>← Kỳ cũ hơn</span></a>
+                    }
+                     @if (hasPrevious)
+                    {
+                        <a class="vietlott-period-button" href="@Url.Action("Vietlott", "Home", new { gameCode = result.GameCode, offset = currentOffset - 1 })#vietlott-@result.GameCode" title="Kỳ mới hơn"><span>Kỳ mới hơn</span> →</a>
                     }
                 </div>
             </div>
-            <div class="p-4">
+            <div class="vietlott-card-body">
+                @if (result.EstimatedPrize.HasValue || result.EstimatedPrize2.HasValue)
+                {
+                <div class="vietlott-jackpot-row">
+                    <div class="vietlott-jackpot-card">
+                        <span>JACKPOT 1 ƯỚC TÍNH</span>
+                        <strong>@(result.EstimatedPrize.HasValue ? $"{result.EstimatedPrize.Value:N0} đ" : "Chưa cập nhật")</strong>
+                    </div>
+                    @if (result.EstimatedPrize2.HasValue)
+                    {
+                        <div class="vietlott-jackpot-card vietlott-jackpot-card-secondary">
+                            <span>JACKPOT 2 ƯỚC TÍNH</span>
+                            <strong>@result.EstimatedPrize2.Value.ToString("N0") đ</strong>
+                        </div>
+                    }
+                </div>
+                }
                 @if (result.Numbers.Count > 0)
                 {
-                    <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+                    <div class="vietlott-number-panel">
+                        <div class="vietlott-number-label">BỘ SỐ TRÚNG THƯỞNG</div>
+                        <div class="vietlott-balls">
                         @foreach (var number in result.Numbers)
                         {
-                            <span class="lottery-ball lottery-ball-sm vietlott-red-gradient text-white font-number-display">@number</span>
+                            <span>@number</span>
                         }
                         @foreach (var number in result.SpecialNumbers)
                         {
-                            <span class="lottery-ball lottery-ball-sm bg-accent text-primary font-number-display border border-2 border-primary border-opacity-25">@number</span>
+                            <span class="special-ball">@number</span>
+                        }
+                        </div>
+                        @if (result.SpecialNumbers.Count > 0)
+                        {
+                            <div class="vietlott-special-note"><i></i> Số đặc biệt</div>
                         }
                     </div>
                 }
                 @if (!string.IsNullOrWhiteSpace(result.OddEven) || !string.IsNullOrWhiteSpace(result.Size))
                 {
-                    <p class="text-center text-on-surface-variant mb-3">
-                        @if (!string.IsNullOrWhiteSpace(result.OddEven)) { <span>@result.OddEven</span> }
-                        @if (!string.IsNullOrWhiteSpace(result.OddEven) && !string.IsNullOrWhiteSpace(result.Size)) { <span> | </span> }
-                        @if (!string.IsNullOrWhiteSpace(result.Size)) { <span>@result.Size</span> }
-                    </p>
+                    <div class="vietlott-stats">
+                        @if (!string.IsNullOrWhiteSpace(result.OddEven)) { <span><b>Chẵn lẻ</b> @result.OddEven</span> }
+                        @if (!string.IsNullOrWhiteSpace(result.Size)) { <span><b>Cao thấp</b> @result.Size</span> }
+                    </div>
                 }
                 @if (result.Prizes.Count > 0)
                 {
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead>
-                                <tr class="text-on-surface-variant">
-                                    <th>Giải thưởng</th>
-                                    <th>Kết quả</th>
-                                    <th class="text-end">Giá trị</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var prize in result.Prizes)
-                                {
-                                    <tr>
-                                        <td class="fw-bold">@prize.PrizeName</td>
-                                        <td>@string.Join(", ", prize.Numbers)</td>
-                                        <td class="text-end">@(prize.Value ?? "-")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                    <div class="vietlott-prize-list">
+                        <div class="vietlott-prize-heading"><span>Giải thưởng</span><span>Kết quả</span><span>Giá trị</span></div>
+                        @foreach (var prize in result.Prizes)
+                        {
+                            <div class="vietlott-prize-row">
+                                <strong>@prize.PrizeName</strong>
+                                <span class="vietlott-prize-numbers">
+                                    @foreach (var number in prize.Numbers)
+                                    {
+                                        <span>@number</span>
+                                    }
+                                </span>
+                                <b>@(prize.Value ?? "-")</b>
+                            </div>
+                        }
                     </div>
                 }
             </div>
         </section>
     }
 }
+
+</div>
 
 @section Scripts {
     <script>

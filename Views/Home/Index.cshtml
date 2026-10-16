@@ -1,7 +1,11 @@
 @model XoSoWeb.Models.HomePageViewModel
 @{
     ViewData["Title"] = "Tổng hợp kết quả xổ số hôm nay";
-    var latestVietlott = Model.Vietlott.Results;
+    var latestVietlott = Model.Vietlott.Results
+        .Where(result => result.GameCode == "MEGA645" || result.GameCode == "POWER655" || result.GameCode == "LOTTO535")
+        .ToList();
+    var latestMienTrungProvinceCount = Model.MienTrung.Results.Select(r => r.ProvinceCode).Distinct().Count();
+    var latestMienNamProvinceCount = Model.MienNam.Results.Select(r => r.ProvinceCode).Distinct().Count();
 }
 
 <div class="results-home-intro">
@@ -13,14 +17,16 @@
     <span class="results-status"><span class="red-dot-anim"></span> ĐÃ CẬP NHẬT</span>
 </div>
 
-<nav class="results-quick-links" aria-label="Danh mục kết quả">
-    <a asp-controller="Home" asp-action="XoSoMienBac">XSMB</a>
-    <a asp-controller="Home" asp-action="XoSoMienTrung">XSMT</a>
-    <a asp-controller="Home" asp-action="XoSoMienNam">XSMN</a>
-    <a asp-controller="Home" asp-action="Vietlott">Mega 6/45</a>
-    <a asp-controller="Home" asp-action="Vietlott">Power 6/55</a>
-    <a asp-controller="Home" asp-action="Vietlott">Keno</a>
-</nav>
+<section id="live-results" class="results-section live-results-section" aria-live="polite" hidden>
+    <header class="results-section-header">
+        <div>
+            <h2>Kết quả xổ số trực tiếp</h2>
+            <p id="live-results-status">Đang chờ dữ liệu quay số</p>
+        </div>
+        <span class="results-status"><span class="red-dot-anim"></span> ĐANG QUAY</span>
+    </header>
+    <div id="live-results-grid" class="live-results-grid"></div>
+</section>
 
 <div class="home-region-summary-grid">
     <section class="home-summary-section">
@@ -43,10 +49,15 @@
                 <tbody>
                     @foreach (var prize in result.Prizes)
                     {
-                        var isSpecial = prize.PrizeName.Contains("ĐB") || prize.PrizeName.Contains("Đặc biệt");
+                        var isSpecial = XoSoPrize.IsRedPrize(prize.PrizeName, "MB");
                         <tr class="@(isSpecial ? "special-row" : "")">
                             <th>@prize.PrizeName.Replace("Giải ", "")</th>
-                            <td>@string.Join(" · ", prize.Numbers)</td>
+                            <td><div class="home-prize-numbers @(prize.Numbers.Count == 6 ? "mb-two-row-numbers" : "")">
+                                @foreach (var number in prize.Numbers)
+                                {
+                                    <span>@number</span>
+                                }
+                            </div></td>
                         </tr>
                     }
                 </tbody>
@@ -58,7 +69,7 @@
         <header class="results-section-header">
             <div>
                 <h2><a asp-controller="Home" asp-action="XoSoMienTrung">Xổ số Miền Trung</a></h2>
-                <p>@Model.MienTrung.Results.Count tỉnh mới nhất</p>
+                <p>@latestMienTrungProvinceCount tỉnh mới nhất</p>
             </div>
             <a class="results-more" asp-controller="Home" asp-action="XoSoMienTrung">Chi tiết &#8594;</a>
         </header>
@@ -69,13 +80,28 @@
         else
         {
             <div class="home-province-summary-grid">
-                @foreach (var result in Model.MienTrung.Results.Take(3))
+                @foreach (var result in Model.MienTrung.Results)
                 {
-                    var special = result.Prizes.FirstOrDefault(prize => prize.PrizeName.Contains("ĐB") || prize.PrizeName.Contains("Đặc biệt"));
                     <div class="home-province-summary">
-                        <strong>@result.ProvinceName</strong>
-                        <small>@result.DrawDate.ToString("dd/MM/yyyy")</small>
-                        <b>@(special == null ? "-" : string.Join(" - ", special.Numbers))</b>
+                        <div class="home-province-summary-heading">
+                            <strong>@result.ProvinceName</strong>
+                            <small>@result.DrawDate.ToString("dd/MM/yyyy")</small>
+                        </div>
+                        <div class="home-province-prizes">
+                            @foreach (var prize in result.Prizes.AsEnumerable().Reverse())
+                            {
+                                var isEmphasisPrize = XoSoPrize.IsRedPrize(prize.PrizeName, "MT");
+                                <div class="home-province-prize @(isEmphasisPrize ? "emphasis-prize" : "")">
+                                    <span>@prize.PrizeName.Replace("Giải ", "")</span>
+                                    <div class="home-prize-numbers">
+                                        @foreach (var number in prize.Numbers)
+                                        {
+                                            <b>@number</b>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     </div>
                 }
             </div>
@@ -86,7 +112,7 @@
         <header class="results-section-header">
             <div>
                 <h2><a asp-controller="Home" asp-action="XoSoMienNam">Xổ số Miền Nam</a></h2>
-                <p>@Model.MienNam.Results.Count tỉnh mới nhất</p>
+                <p>@latestMienNamProvinceCount tỉnh mới nhất</p>
             </div>
             <a class="results-more" asp-controller="Home" asp-action="XoSoMienNam">Chi tiết &#8594;</a>
         </header>
@@ -97,13 +123,28 @@
         else
         {
             <div class="home-province-summary-grid">
-                @foreach (var result in Model.MienNam.Results.Take(3))
+                @foreach (var result in Model.MienNam.Results)
                 {
-                    var special = result.Prizes.FirstOrDefault(prize => prize.PrizeName.Contains("ĐB") || prize.PrizeName.Contains("Đặc biệt"));
                     <div class="home-province-summary">
-                        <strong>@result.ProvinceName</strong>
-                        <small>@result.DrawDate.ToString("dd/MM/yyyy")</small>
-                        <b>@(special == null ? "-" : string.Join(" - ", special.Numbers))</b>
+                        <div class="home-province-summary-heading">
+                            <strong>@result.ProvinceName</strong>
+                            <small>@result.DrawDate.ToString("dd/MM/yyyy")</small>
+                        </div>
+                        <div class="home-province-prizes">
+                            @foreach (var prize in result.Prizes.AsEnumerable().Reverse())
+                            {
+                                var isEmphasisPrize = XoSoPrize.IsRedPrize(prize.PrizeName, "MN");
+                                <div class="home-province-prize @(isEmphasisPrize ? "emphasis-prize" : "")">
+                                    <span>@prize.PrizeName.Replace("Giải ", "")</span>
+                                    <div class="home-prize-numbers">
+                                        @foreach (var number in prize.Numbers)
+                                        {
+                                            <b>@number</b>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     </div>
                 }
             </div>
@@ -129,12 +170,38 @@
             @foreach (var result in latestVietlott)
             {
                 <div class="home-vietlott-item">
-                    <div><strong>@result.GameCode</strong><small>#@result.DrawNo · @result.DrawDate.ToString("dd/MM/yyyy")</small></div>
-                    <span>@string.Join(" ", result.Numbers)</span>
-                    @if (result.SpecialNumbers.Count > 0)
+                    <div><strong>@result.GameCode</strong><small class="text-muted">#@result.DrawNo · @result.DrawDate.ToString("dd/MM/yyyy")</small></div>
+                    @if (result.EstimatedPrize.HasValue || result.EstimatedPrize2.HasValue)
                     {
-                        <b>+ @string.Join(" ", result.SpecialNumbers)</b>
+                        <small class="home-vietlott-prize-money">
+                            <span>Jackpot ước tính</span>
+                            <strong>@(result.EstimatedPrize.HasValue ? $"{result.EstimatedPrize.Value:N0} đ" : "-")</strong>
+                            @if (result.EstimatedPrize2.HasValue)
+                            {
+                                <em>Jackpot 2: @result.EstimatedPrize2.Value.ToString("N0") đ</em>
+                            }
+                        </small>
                     }
+                    <div class="home-vietlott-number-wrap">
+                        <div class="home-vietlott-number-line" aria-label="Bộ số Vietlott">
+                            <div class="home-vietlott-numbers">
+                                @foreach (var number in result.Numbers)
+                                {
+                                    <span>@number</span>
+                                }
+                            </div>
+                            @if (result.SpecialNumbers.Count > 0)
+                            {
+                                <span class="home-vietlott-number-separator">|</span>
+                                <div class="home-vietlott-special-numbers" aria-label="Số đặc biệt">
+                                    @foreach (var number in result.SpecialNumbers)
+                                    {
+                                        <b class="special-ball">@number</b>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
             }
         </div>
