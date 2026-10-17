@@ -46,24 +46,31 @@ document.addEventListener('DOMContentLoaded', function () {
         const prizeLayouts = {
             '1': {
                 labels: ['ĐB', 'nhất', 'nhì', 'ba', 'tư', 'năm', 'sáu', 'bảy'],
-                counts: [1, 1, 2, 6, 4, 6, 3, 4]
+                counts: [1, 1, 2, 6, 4, 6, 3, 4],
+                digits: [5, 5, 5, 5, 4, 4, 3, 2]
             },
             '2': {
                 labels: ['G8', 'G7', 'G6', 'G5', 'G4', 'G3', 'G2', 'G1', 'ĐB'],
-                counts: [1, 1, 3, 1, 5, 2, 1, 1, 1]
+                counts: [1, 1, 3, 1, 5, 2, 1, 1, 1],
+                digits: [2, 3, 4, 4, 5, 5, 5, 5, 6]
             },
             '3': {
                 labels: ['G8', 'G7', 'G6', 'G5', 'G4', 'G3', 'G2', 'G1', 'ĐB'],
-                counts: [1, 1, 3, 1, 5, 2, 1, 1, 1]
+                counts: [1, 1, 3, 1, 5, 2, 1, 1, 1],
+                digits: [2, 3, 4, 4, 5, 5, 5, 5, 6]
             }
         };
 
-        const renderNumberCell = (values, expectedCount) => {
+        const renderNumberCell = (values, expectedCount, digitCount, isDrawing) => {
             const numbers = values.slice(0, expectedCount);
             const missingCount = Math.max(expectedCount - numbers.length, 0);
             return numbers.map(value => `<span>${escapeHtml(value)}</span>`).join('') +
-                Array.from({ length: missingCount }, () =>
-                    '<span class="live-number-loader" aria-label="Đang quay"><i>0</i><i>0</i><i>0</i></span>'
+                Array.from({ length: missingCount }, (_, slot) =>
+                    isDrawing && slot === 0
+                    ? `<span class="live-number-loader" role="img" aria-label="Đang quay" title="Đang quay">${Array.from({ length: digitCount }, (_, index) =>
+                        `<i aria-hidden="true"><b style="animation-delay: -${(index * .13 + Math.random()).toFixed(2)}s">${Array.from({ length: 11 }, (_, digit) => `<em>${digit % 10}</em>`).join('')}</b></i>`
+                    ).join('')}</span>`
+                    : isDrawing ? '' : '<span class="live-number-waiting" role="img" aria-label="Chờ quay" title="Chờ quay"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></span>'
                 ).join('');
         };
 
@@ -142,6 +149,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const renderLiveTable = group => {
             const layout = prizeLayouts[group.region] || prizeLayouts['1'];
             const isNorthern = group.region === '1';
+            // Northern draws start at first prize and finish with the special prize.
+            const drawOrder = isNorthern ? [1, 2, 3, 4, 5, 6, 7, 0] : [0, 1, 2, 3, 4, 5, 6, 7, 8];
+            const activePrizes = group.records.map(record => drawOrder.find(index =>
+                (record.values[index]?.length || 0) < layout.counts[index]
+            ));
             const completedPrizes = layout.labels.filter((label, index) =>
                 group.records.some(record => record.values[index]?.length > 0)
             ).length;
@@ -152,9 +164,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const isSpecial = label === 'ĐB';
                 const isRedPrize = isSpecial || (isNorthern ? label === 'bảy' : label === 'G8');
                 const cells = isNorthern
-                    ? `<td><div class="mb-prize-numbers number-count-${layout.counts[index]}">${renderNumberCell(group.records[0]?.values[index] || [], layout.counts[index])}</div></td>`
-                    : group.records.map(record =>
-                        `<td>${renderNumberCell(record.values[index] || [], layout.counts[index])}</td>`
+                    ? `<td><div class="mb-prize-numbers number-count-${layout.counts[index]}">${renderNumberCell(group.records[0]?.values[index] || [], layout.counts[index], layout.digits[index], activePrizes[0] === index)}</div></td>`
+                    : group.records.map((record, recordIndex) =>
+                        `<td>${renderNumberCell(record.values[index] || [], layout.counts[index], layout.digits[index], activePrizes[recordIndex] === index)}</td>`
                     ).join('');
 
                 return `<tr class="${isSpecial ? 'special-row' : ''} ${isRedPrize ? 'red-prize-row' : ''}"><th class="prize-label">${label}</th>${cells}</tr>`;
