@@ -41,7 +41,9 @@ namespace XoSoWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var site = new SiteSettings();
+            var httpContextAccessor = new Microsoft.AspNetCore.Http.HttpContextAccessor();
+            services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor>(httpContextAccessor);
+            var site = new SiteSettings(httpContextAccessor);
             Configuration.GetSection("Site").Bind(site);
             site.Validate(Environment.IsDevelopment());
             if (!Environment.IsProduction()) site.AllowIndexing = false;
@@ -53,8 +55,8 @@ namespace XoSoWeb
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddHttpsRedirection(options =>
             {
-                var origin = new Uri(site.SiteUrl);
-                options.HttpsPort = origin.Scheme == Uri.UriSchemeHttps ? origin.Port : 443;
+                options.HttpsPort = Uri.TryCreate(site.SiteUrl, UriKind.Absolute, out var origin)
+                    && origin.Scheme == Uri.UriSchemeHttps ? origin.Port : 443;
                 options.RedirectStatusCode = 308;
             });
 
@@ -106,7 +108,8 @@ namespace XoSoWeb
             app.UseMiddleware<ExceptionMiddleware>();
             if (!env.IsDevelopment()) app.UseResponseCompression();
             app.UseMiddleware<PublicUrlMiddleware>();
-            if (new Uri(app.ApplicationServices.GetRequiredService<SiteSettings>().SiteUrl).Scheme == Uri.UriSchemeHttps)
+            if (Uri.TryCreate(app.ApplicationServices.GetRequiredService<SiteSettings>().SiteUrl, UriKind.Absolute, out var origin)
+                && origin.Scheme == Uri.UriSchemeHttps)
                 app.UseHttpsRedirection();
             app.UseMiddleware<StagingAccessMiddleware>();
             app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = context =>

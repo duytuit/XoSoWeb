@@ -30,7 +30,7 @@ namespace XoSoWeb.Middlewares
                 if (normalized != path)
                 {
                     context.Response.StatusCode = 301;
-                    // Absolute configured origin prevents a //path redirect from becoming a foreign host.
+                    // An absolute origin keeps a //path from becoming a foreign-host redirect.
                     context.Response.Headers.Location = site.Absolute(normalized) + context.Request.QueryString;
                     return;
                 }

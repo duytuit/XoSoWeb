@@ -1,5 +1,5 @@
 Merge this section into deployment configuration, or use environment variables Site__Property.
-Do not copy production secrets into the repository. SiteUrl intentionally has no default.
+Do not copy production secrets into the repository. Empty SiteUrl automatically uses the current request scheme, host, port and application path. A configured SiteUrl overrides automatic detection.
 
 {
   "Site": {
@@ -41,5 +41,5 @@ Site__StagingUsername=<private username>
 Site__StagingPassword=<strong secret from deployment secret store>
 
 Nonproduction environments always emit noindex. Staging additionally requires Basic authentication.
-Production validates SiteUrl at startup; it does not infer it from a request Host header.
+SiteUrl is optional. Production validates an explicitly configured SiteUrl at startup; otherwise URLs use the current request origin. Configure AllowedHosts for the hostnames served by IIS.
 AnalyticsId accepts only a real GA4 G- identifier. Empty means no tracking script.

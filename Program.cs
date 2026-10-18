@@ -33,6 +33,9 @@ namespace XoSoWeb
             catch (Exception ex)
             {
                 Log.Fatal(ex, "Host terminated unexpectedly");
+                // Keep startup failures visible to IIS even when the file sink is unavailable.
+                Console.Error.WriteLine(ex);
+                System.Environment.ExitCode = 1;
             }
             finally
             {

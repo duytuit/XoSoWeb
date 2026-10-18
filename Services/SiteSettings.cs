@@ -2,12 +2,31 @@ using System;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http;
 
 namespace XoSoWeb.Services
 {
     public sealed class SiteSettings
     {
-        public string SiteUrl { get; set; }
+        private string configuredSiteUrl;
+        private readonly IHttpContextAccessor httpContextAccessor;
+
+        public SiteSettings() { }
+        public SiteSettings(IHttpContextAccessor httpContextAccessor)
+        {
+            this.httpContextAccessor = httpContextAccessor;
+        }
+
+        public string SiteUrl
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(configuredSiteUrl)) return configuredSiteUrl;
+                var request = httpContextAccessor?.HttpContext?.Request;
+                return request == null ? null : $"{request.Scheme}://{request.Host}{request.PathBase}";
+            }
+            set => configuredSiteUrl = value;
+        }
         public string SiteName { get; set; } = "Xổ Số Trực Tiếp";
         public string OrganizationName { get; set; }
         public string ContactEmail { get; set; }
@@ -25,13 +44,16 @@ namespace XoSoWeb.Services
 
         public void Validate(bool development)
         {
-            if (!Uri.TryCreate(SiteUrl, UriKind.Absolute, out var uri)
-                || (uri.Scheme != "https" && !(development && uri.Scheme == "http"))
-                || uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.Query)
-                || !string.IsNullOrEmpty(uri.Fragment) || !string.IsNullOrEmpty(uri.UserInfo)
-                || (!development && (uri.IsLoopback || !uri.Host.Contains('.') || uri.Host.EndsWith(".local", StringComparison.OrdinalIgnoreCase))))
-                throw new InvalidOperationException("Site:SiteUrl must be a public HTTPS origin in production (no path, credentials, query or fragment).");
-            SiteUrl = uri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+            if (!string.IsNullOrWhiteSpace(configuredSiteUrl))
+            {
+                if (!Uri.TryCreate(configuredSiteUrl, UriKind.Absolute, out var uri)
+                    || (uri.Scheme != "https" && !(development && uri.Scheme == "http"))
+                    || uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.Query)
+                    || !string.IsNullOrEmpty(uri.Fragment) || !string.IsNullOrEmpty(uri.UserInfo)
+                    || (!development && (uri.IsLoopback || !uri.Host.Contains('.') || uri.Host.EndsWith(".local", StringComparison.OrdinalIgnoreCase))))
+                    throw new InvalidOperationException("Site:SiteUrl must be a public HTTPS origin in production (no path, credentials, query or fragment).");
+                SiteUrl = uri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+            }
             if (string.IsNullOrWhiteSpace(SiteName)) throw new InvalidOperationException("Site:SiteName is required.");
             if (!string.IsNullOrEmpty(AnalyticsId) && !Regex.IsMatch(AnalyticsId, @"\AG-[A-Z0-9]+\z"))
                 throw new InvalidOperationException("Site:AnalyticsId must be a GA4 G- identifier.");

@@ -31,8 +31,20 @@ void RejectOrigin(string url)
 Check(ArchiveCatalog.HasResultNumbers("[{\"PrizeName\":\"Test\",\"Numbers\":[\"00\"]}]"), "catalog JSON validated without SQL JSON functions");
 foreach (var json in new[] { "[]", "null", "{bad", "[null]", "[{\"PrizeName\":\"Test\",\"Numbers\":[]}]" })
     Check(!ArchiveCatalog.HasResultNumbers(json), "invalid or empty catalog data excluded");
-foreach (var url in new[] { "", "http://example.org", "https://localhost", "https://example.org/path", "https://user@example.org", "https://example.org/?x=1", "//example.org" }) RejectOrigin(url);
+foreach (var url in new[] { "http://example.org", "https://localhost", "https://example.org/path", "https://user@example.org", "https://example.org/?x=1", "//example.org" }) RejectOrigin(url);
 var site = new SiteSettings { SiteUrl = "https://example.org/", OrganizationName = "Test operator" };
+var accessor = new HttpContextAccessor();
+var automaticSite = new SiteSettings(accessor);
+automaticSite.Validate(false);
+accessor.HttpContext = new DefaultHttpContext();
+accessor.HttpContext.Request.Scheme = "https";
+accessor.HttpContext.Request.Host = new HostString("first.example.org");
+Check(automaticSite.Absolute("/sitemap.xml") == "https://first.example.org/sitemap.xml", "automatic origin uses current request");
+accessor.HttpContext = new DefaultHttpContext();
+accessor.HttpContext.Request.Scheme = "http";
+accessor.HttpContext.Request.Host = new HostString("localhost", 5099);
+Check(automaticSite.SiteUrl == "http://localhost:5099", "automatic origin is not retained between requests");
+accessor.HttpContext = null;
 site.Validate(false);
 Check(site.SiteUrl == "https://example.org", "origin normalized");
 Check(LotteryUrls.TryDate("29-02-2024", out _), "valid leap day");
