@@ -50,12 +50,16 @@
             <div class="home-summary-meta">@result.ProvinceName · @result.DrawDate.ToString("dd/MM/yyyy")</div>
             <table class="home-summary-table">
                 <tbody>
-                    @foreach (var prize in result.Prizes)
+                    @foreach (var prize in XoSoPrize.NorthernDisplayPrizes(result.Prizes))
                     {
-                        var isSpecial = XoSoPrize.IsRedPrize(prize.PrizeName, "MB");
-                        <tr class="@(isSpecial ? "special-row" : "")">
-                            <th>@prize.PrizeName.Replace("Giải ", "")</th>
+                        var isSpecial = XoSoPrize.NormalizeName(prize.PrizeName) == "ĐB";
+                        <tr class="@(isSpecial ? "special-row" : "") @(XoSoPrize.IsRedPrize(prize.PrizeName, "MB") ? "red-prize-row" : "")">
+                            <th>@XoSoPrize.DisplayName(prize.PrizeName)</th>
                             <td><div class="home-prize-numbers @(prize.Numbers.Count == 6 ? "mb-two-row-numbers" : "")">
+                                @if (prize.Numbers.Count == 0)
+                                {
+                                    <small class="text-secondary fw-normal">Chưa cập nhật</small>
+                                }
                                 @foreach (var number in prize.Numbers)
                                 {
                                     <span>@number</span>
@@ -92,11 +96,11 @@
                             <small>@result.DrawDate.ToString("dd/MM/yyyy")</small>
                         </div>
                         <div class="home-province-prizes">
-                            @foreach (var prize in result.Prizes.AsEnumerable().Reverse())
+                            @foreach (var prize in result.Prizes.OrderByDescending(prize => XoSoPrize.DisplayOrder(prize.PrizeName)))
                             {
                                 var isEmphasisPrize = XoSoPrize.IsRedPrize(prize.PrizeName, "MT");
                                 <div class="home-province-prize @(isEmphasisPrize ? "emphasis-prize" : "")">
-                                    <span>@prize.PrizeName.Replace("Giải ", "")</span>
+                                    <span>@XoSoPrize.DisplayName(prize.PrizeName)</span>
                                     <div class="home-prize-numbers">
                                         @foreach (var number in prize.Numbers)
                                         {
@@ -136,11 +140,11 @@
                             <small>@result.DrawDate.ToString("dd/MM/yyyy")</small>
                         </div>
                         <div class="home-province-prizes">
-                            @foreach (var prize in result.Prizes.AsEnumerable().Reverse())
+                            @foreach (var prize in result.Prizes.OrderByDescending(prize => XoSoPrize.DisplayOrder(prize.PrizeName)))
                             {
                                 var isEmphasisPrize = XoSoPrize.IsRedPrize(prize.PrizeName, "MN");
                                 <div class="home-province-prize @(isEmphasisPrize ? "emphasis-prize" : "")">
-                                    <span>@prize.PrizeName.Replace("Giải ", "")</span>
+                                    <span>@XoSoPrize.DisplayName(prize.PrizeName)</span>
                                     <div class="home-prize-numbers">
                                         @foreach (var number in prize.Numbers)
                                         {

@@ -28,6 +28,23 @@ void RejectOrigin(string url)
     catch (InvalidOperationException) { checks++; return; }
     throw new Exception("Accepted invalid production SiteUrl: " + url);
 }
+foreach (var alias in new[] { "Giải 8", "G8", "8", "giải tám", " G.8 " })
+    Check(XoSoPrize.NormalizeName(alias) == "8", "eighth prize alias: " + alias);
+foreach (var alias in new[] { "ĐB", "DB", "Giải Đặc Biệt", "Giai DB", "G.ĐB" })
+    Check(XoSoPrize.NormalizeName(alias) == "ĐB", "special prize alias: " + alias);
+Check(XoSoPrize.NormalizeName("Unknown prize") == "Unknown prize", "unrecognized prize labels preserved");
+foreach (var alias in new[] { "Giải 1", "G1", "nhất", "Giai nhat" })
+    Check(XoSoPrize.DisplayName(alias) == "G1", "consistent numbered prize label: " + alias);
+Check(XoSoPrize.DisplayName("DB") == "ĐB" && XoSoPrize.DisplayName("Giải tám") == "G8", "consistent special and eighth prize labels");
+var northernPrizes = XoSoPrize.NorthernDisplayPrizes(new[]
+{
+    new XoSoPrize { PrizeName = "Giải ba", Numbers = new List<string> { "00123" } },
+    new XoSoPrize { PrizeName = "G1", Numbers = new List<string> { "00456" } },
+    new XoSoPrize { PrizeName = "G3", Numbers = new List<string> { "00789" } }
+});
+Check(northernPrizes.Select(prize => XoSoPrize.DisplayName(prize.PrizeName)).SequenceEqual(new[] { "ĐB", "G1", "G2", "G3", "G4", "G5", "G6", "G7" }), "incomplete northern draw retains all eight rows in order");
+Check(northernPrizes[0].Numbers.Count == 0 && northernPrizes[7].Numbers.Count == 0, "missing northern prizes have no invented numbers");
+Check(northernPrizes[3].Numbers.SequenceEqual(new[] { "00123", "00789" }), "northern aliases merge without losing leading zeroes");
 Check(ArchiveCatalog.HasResultNumbers("[{\"PrizeName\":\"Test\",\"Numbers\":[\"00\"]}]"), "catalog JSON validated without SQL JSON functions");
 foreach (var json in new[] { "[]", "null", "{bad", "[null]", "[{\"PrizeName\":\"Test\",\"Numbers\":[]}]" })
     Check(!ArchiveCatalog.HasResultNumbers(json), "invalid or empty catalog data excluded");
@@ -130,6 +147,20 @@ app.MapControllers();
 await app.StartAsync();
 var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>().Addresses.Single();
 using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = new Uri(address) };
+using (var response = await client.GetAsync("/xo-so-mien-trung/17-10-2024"))
+{
+    Check((int)response.StatusCode == 200, "central results render with mixed prize names");
+    var html = System.Net.WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+    var tableStart = html.IndexOf("<table class=\"regional-results-table\"");
+    var tableEnd = html.IndexOf("</table>", tableStart);
+    var table = html.Substring(tableStart, tableEnd - tableStart);
+    var rows = System.Text.RegularExpressions.Regex.Matches(table, @"<tr\b[^>]*>.*?</tr>", System.Text.RegularExpressions.RegexOptions.Singleline)
+        .Cast<System.Text.RegularExpressions.Match>().Select(match => match.Value).ToList();
+    Check(rows.Count == 4, "mixed prize names produce three prize rows and one header");
+    Check(rows[1].Contains(">G8</th>") && rows[1].Contains(">01</span>") && rows[1].Contains(">02</span>"), "eighth prize aligned across provinces");
+    Check(rows[2].Contains(">G4</th>") && rows[2].Contains(">00123</span>") && rows[2].Contains(">00456</span>"), "word and numeric prize names share a row");
+    Check(rows[3].Contains(">ĐB</th>") && rows[3].Contains(">001234</span>") && rows[3].Contains(">005678</span>"), "special prize last with leading zeroes intact");
+}
 foreach (var path in new[] { "/robots.txt", "/sitemap.xml", "/gioi-thieu", "/nguon-du-lieu", "/support", "/privacy", "/terms", "/images/share.png" })
 {
     using var response = await client.GetAsync(path);

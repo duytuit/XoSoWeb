@@ -57,7 +57,12 @@
 .special-statistics-header { padding: .6rem .8rem; background: #fff; border-bottom: 0; }
 .special-statistics-header h2 { color: #452b29; font-size: .95rem; font-weight: 700; }
 .special-statistics-header .statistics-result-count { padding: .2rem .5rem; border-radius: 20px; background: #f7f2ef; color: #74635e; font-size: .72rem; }
-.special-statistics-table-wrap { overscroll-behavior-x: contain; }
+.special-statistics-table-wrap {
+    height: auto;
+    max-height: none;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+}
 .special-statistics-table-wrap:focus-visible, .statistics-region-link:focus-visible { outline: 3px solid #aa4350; outline-offset: -3px; }
 .special-statistics-week-table { min-width: 630px; margin: 0; }
 .special-statistics-week-table th { padding: .4rem .25rem; background: #9e2834; border-color: #b24a54; font-size: .8rem; }

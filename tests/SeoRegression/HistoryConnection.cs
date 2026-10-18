@@ -57,6 +57,12 @@ public sealed class HistoryCommand : DbCommand
             if ((DateTime)parameters.Parameters["@dateEnd"].Value != date.AddDays(1)
                 || !CommandText.Contains("DrawDate >= @exactDate AND DrawDate < @dateEnd")) throw new Exception("Historical query lost its date bounds");
             Columns(typeof(long), typeof(string), typeof(string), typeof(string), typeof(DateTime), typeof(string), typeof(DateTime));
+            if ((string)parameters.Parameters["@region"].Value == "MT" && date == new DateTime(2024, 10, 17))
+            {
+                table.Rows.Add(10L, "MT", "A", "Fixture A", date, "[{\"PrizeName\":\"Giải Đặc Biệt\",\"Numbers\":[\"001234\"]},{\"PrizeName\":\"Giải 8\",\"Numbers\":[\"01\"]},{\"PrizeName\":\"Giải tư\",\"Numbers\":[\"00123\"]}]", date.AddHours(19));
+                table.Rows.Add(11L, "MT", "B", "Fixture B", date, "[{\"PrizeName\":\"G8\",\"Numbers\":[\"02\"]},{\"PrizeName\":\"DB\",\"Numbers\":[\"005678\"]},{\"PrizeName\":\"4\",\"Numbers\":[\"00456\"]}]", date.AddHours(19));
+                return table.CreateDataReader();
+            }
             if (date == new DateTime(2024, 10, 17) || date == new DateTime(2024, 10, 16))
                 table.Rows.Add(1L, parameters.Parameters["@region"].Value, "FX", parameters.Parameters["@provinceName"].Value is string province ? province : "Fixture station", date, "[{\"PrizeName\":\"Test prize\",\"Numbers\":[\"00123\"]}]", date.AddHours(19));
         }

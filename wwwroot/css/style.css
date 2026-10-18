@@ -1637,26 +1637,6 @@ body.mobile-menu-open {
     color: var(--on-surface);
 }
 
-.mb-prize-codes {
-    display: grid;
-    grid-template-columns: 9% repeat(6, 1fr);
-    align-items: center;
-    border-bottom: 1px solid var(--border-neutral);
-    background: var(--surface-container-lowest);
-}
-
-.mb-prize-codes span {
-    padding: .35rem .15rem;
-    color: var(--secondary);
-    border-right: 1px solid var(--border-neutral);
-    font: 700 .78rem var(--font-headline);
-    text-align: center;
-}
-
-.mb-prize-codes span:first-child {
-    color: transparent;
-}
-
 .mb-results-table .mb-prize-numbers {
     display: grid;
     align-items: center;
@@ -2531,30 +2511,34 @@ body.mobile-menu-open {
 .vietlott-page .vietlott-match-description { margin: 0 0 .4rem; font-size: .85rem; font-weight: 400; color: var(--on-surface-variant); }
 .vietlott-page .vietlott-prize-result .vietlott-prize-numbers { font-weight: 700; font-variant-numeric: tabular-nums; }
 .vietlott-page .vietlott-pair-or { font-weight: 400; color: var(--on-surface-variant); }
-.vietlott-page .vietlott-max3d-special-prize { grid-template-columns: minmax(6rem, .75fr) minmax(0, 3fr) minmax(5rem, .55fr); }
-.vietlott-page .vietlott-max3d-number-groups { display: flex; align-items: center; flex-wrap: wrap; gap: .25rem; }
+.vietlott-page .vietlott-max3d-number-groups {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: .25rem;
+}
+.vietlott-page .vietlott-max3d-special-prize .vietlott-prize-result { overflow-x: auto; }
 .vietlott-page .vietlott-max3d-digit {
     display: inline-flex;
-    flex: 0 0 1.65rem;
+    flex: 0 0 2.25rem;
     align-items: center;
     justify-content: center;
-    width: 1.65rem;
-    height: 1.65rem;
+    width: 2.25rem;
+    height: 2.25rem;
     aspect-ratio: 1;
     box-sizing: border-box;
     color: #252525 !important;
     background: #fff;
     border: 2px solid #f40819 !important;
     border-radius: 50% !important;
-    font-size: .95rem;
-    font-weight: 500;
+    font-size: 24px;
+    font-weight: 700;
     line-height: 1;
     font-variant-numeric: tabular-nums;
 }
-.vietlott-page .vietlott-max3d-group-separator { flex: 0 0 .55rem; }
+.vietlott-page .vietlott-max3d-group-separator { flex: 0 0 .75rem; }
 .vietlott-page .vietlott-max3d-plus-number-groups { display: grid; justify-items: start; gap: .35rem; }
-.vietlott-page .vietlott-max3d-plus-number-groups .vietlott-max3d-number-groups > .vietlott-max3d-digit:nth-child(3) { margin-right: .4rem; }
-.vietlott-page .vietlott-max3d-pro-number-groups > .vietlott-max3d-digit:nth-of-type(3) { margin-right: .4rem; }
+.vietlott-page .vietlott-max3d-plus-number-groups .vietlott-max3d-digit:nth-child(3n):not(:last-child) { margin-right: 1rem; }
 .vietlott-page .vietlott-max3d-plus-or { color: var(--on-surface); font-size: .9rem; line-height: 1; }
 .vietlott-page .vietlott-recent-game .vietlott-card-header p { margin-top: .3rem; }
 .vietlott-page .vietlott-recent-grid {
@@ -2664,8 +2648,11 @@ body.mobile-menu-open {
     text-align: center;
 }
 .vietlott-page .vietlott-bingo-table .vietlott-recent-balls {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
     justify-content: flex-start;
-    gap: .65rem;
+    gap: .25rem;
     padding: 0;
 }
 .vietlott-page .vietlott-bingo-table .vietlott-recent-balls > span {
@@ -2715,9 +2702,9 @@ body.mobile-menu-open {
 }
 .vietlott-page .vietlott-keno-balls {
     display: grid;
-    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-columns: repeat(10, 2.1rem);
     justify-items: center;
-    gap: .65rem .45rem;
+    gap: .3rem .2rem;
     padding: .1rem .15rem;
 }
 .vietlott-page .vietlott-keno-balls > span {
@@ -2748,8 +2735,6 @@ body.mobile-menu-open {
     .mb-results-table .mb-prize-numbers { gap: .15rem .4rem; }
     .draw-day-card .regional-loto-section { padding: .5rem; }
     .vietlott-page .vietlott-card-body { padding: .5rem; }
-    .vietlott-page .vietlott-max3d-special-prize { grid-template-columns: minmax(4.5rem, .8fr) minmax(0, 1.6fr); }
-    .vietlott-page .vietlott-max3d-digit { flex-basis: 1.55rem; width: 1.55rem; height: 1.55rem; }
     .vietlott-page .vietlott-bingo-table { min-width: 0; }
     .vietlott-page .vietlott-bingo-table th,
     .vietlott-page .vietlott-bingo-table td { padding: .65rem .35rem; font-size: .78rem; }
@@ -2757,12 +2742,12 @@ body.mobile-menu-open {
     .vietlott-page .vietlott-bingo-table th:nth-child(2) { width: 39%; }
     .vietlott-page .vietlott-bingo-table th:nth-child(3) { width: 12%; }
     .vietlott-page .vietlott-bingo-table th:nth-child(4) { width: 22%; white-space: normal; }
-    .vietlott-page .vietlott-bingo-table .vietlott-recent-balls { gap: .25rem; }
+    .vietlott-page .vietlott-bingo-table .vietlott-recent-balls { gap: .2rem; }
     .vietlott-page .vietlott-bingo-table .vietlott-recent-balls > span { flex-basis: 1.65rem; width: 1.65rem !important; min-width: 1.65rem; height: 1.65rem !important; font-size: .78rem; }
     .vietlott-page .vietlott-keno-table { min-width: 45rem; }
     .vietlott-page .vietlott-keno-table th,
     .vietlott-page .vietlott-keno-table td { padding: .65rem .45rem; font-size: .8rem; }
-    .vietlott-page .vietlott-keno-balls { gap: .4rem .25rem; }
+    .vietlott-page .vietlott-keno-balls { grid-template-columns: repeat(10, 1.8rem); gap: .25rem .2rem; }
     .vietlott-page .vietlott-keno-balls > span { flex-basis: 1.8rem; width: 1.8rem !important; min-width: 1.8rem; height: 1.8rem !important; font-size: .78rem; }
 }
 
@@ -2839,10 +2824,18 @@ body.mobile-menu-open {
 .home-province-prize.emphasis-prize .home-prize-numbers > b,
 .home-province-prize.emphasis-prize > span,
 .home-summary-table .special-row > th,
+.home-summary-table .red-prize-row > th,
+.home-summary-table .red-prize-row .home-prize-numbers > span,
 .regional-results-table .red-prize-row > th,
 .regional-results-table .red-prize-row > td,
 .regional-results-table .red-prize-row > td span {
     color: #ff0000 !important;
+}
+
+.home-summary-table .home-prize-numbers > small,
+.mb-results-table .mb-prize-numbers > small {
+    font-size: .8rem;
+    line-height: 1.5;
 }
 
 /* Compact spacing around the content; keep number sizes and touch targets readable. */

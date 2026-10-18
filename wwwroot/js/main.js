@@ -250,11 +250,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span>${escapeHtml(group.records[0].name)}</span>
                     </div>
                 </header>
-                <div class="mb-prize-codes live-mb-prize-codes">
-                    <span></span>
-                    ${(group.records[0].values[8]?.length ? group.records[0].values[8] : ['5GF', '7GF', '8GF', '9GF', '11GF', '14GF'])
-                        .map(code => `<span>${escapeHtml(code)}</span>`).join('')}
-                </div>
             ` : '';
             const liveSummary = isNorthern ? '' : `
                 <div class="live-region-heading">

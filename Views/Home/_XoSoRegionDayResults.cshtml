@@ -51,13 +51,17 @@
         <div class="lottery-table-wrap">
             <table class="regional-results-table mb-results-table">
                 <tbody>
-                    @foreach (var prize in result.Prizes)
+                    @foreach (var prize in XoSoPrize.NorthernDisplayPrizes(result.Prizes))
                     {
-                        var isSpecial = prize.PrizeName.Contains("ĐB") || prize.PrizeName.Contains("Đặc biệt");
+                        var isSpecial = XoSoPrize.NormalizeName(prize.PrizeName) == "ĐB";
                         <tr class="@(isSpecial ? "special-row" : "") @(XoSoPrize.IsRedPrize(prize.PrizeName, Model.Region) ? "red-prize-row" : "")">
-                            <th class="prize-label">@prize.PrizeName.Replace("Giải ", "")</th>
+                            <th class="prize-label">@XoSoPrize.DisplayName(prize.PrizeName)</th>
                             <td>
                                 <div class="mb-prize-numbers number-count-@prize.Numbers.Count">
+                                @if (prize.Numbers.Count == 0)
+                                {
+                                    <small class="text-secondary fw-normal">Chưa cập nhật</small>
+                                }
                                 @foreach (var number in prize.Numbers)
                                 {
                                     <span>@number</span>
@@ -95,7 +99,8 @@
 else
 {
     var results = Model.Results.ToList();
-    var prizeNames = results.SelectMany(result => result.Prizes.Select(prize => prize.PrizeName)).Distinct().ToList();
+    var prizeNames = results.SelectMany(result => result.Prizes.Select(prize => XoSoPrize.NormalizeName(prize.PrizeName)))
+        .Distinct().OrderBy(XoSoPrize.DisplayOrder).ToList();
     var drawDate = results.Min(result => result.DrawDate);
 
     <section class="region-detail-section">
@@ -119,14 +124,14 @@ else
                     {
                         var isSpecial = prizeName.Contains("ĐB") || prizeName.Contains("Đặc biệt");
                         <tr class="@(isSpecial ? "special-row" : "") @(XoSoPrize.IsRedPrize(prizeName, Model.Region) ? "red-prize-row" : "")">
-                            <th class="prize-label">@prizeName.Replace("Giải ", "")</th>
+                            <th class="prize-label">@XoSoPrize.DisplayName(prizeName)</th>
                             @foreach (var result in results)
                             {
-                                var prize = result.Prizes.FirstOrDefault(item => item.PrizeName == prizeName);
+                                var prizes = result.Prizes.Where(item => XoSoPrize.NormalizeName(item.PrizeName) == prizeName).ToList();
                                 <td>
-                                    @if (prize != null)
+                                    @if (prizes.Count > 0)
                                     {
-                                        foreach (var number in prize.Numbers)
+                                        foreach (var number in prizes.SelectMany(prize => prize.Numbers))
                                         {
                                             <span>@number</span>
                                         }
