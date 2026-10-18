@@ -46,7 +46,7 @@
         else
         {
             var result = Model.MienBac.Results.First();
-            <p><a href="@(XoSoWeb.Services.LotteryUrls.RegionPath("MB") + "/" + result.DrawDate.ToString("dd-MM-yyyy"))">Xem kỳ ngày @result.DrawDate.ToString("dd/MM/yyyy")</a></p>
+            <p class="draw-history-link"><a href="@(XoSoWeb.Services.LotteryUrls.RegionPath("MB") + "/" + result.DrawDate.ToString("dd-MM-yyyy"))">Xem kỳ ngày @result.DrawDate.ToString("dd/MM/yyyy")</a></p>
             <div class="home-summary-meta">@result.ProvinceName · @result.DrawDate.ToString("dd/MM/yyyy")</div>
             <table class="home-summary-table">
                 <tbody>
@@ -82,7 +82,7 @@
         }
         else
         {
-            <p><a href="@("/xo-so-mien-trung/" + Model.MienTrung.Results.First().DrawDate.ToString("dd-MM-yyyy"))">Xem kết quả theo ngày cố định</a></p>
+            <p class="draw-history-link"><a href="@("/xo-so-mien-trung/" + Model.MienTrung.Results.First().DrawDate.ToString("dd-MM-yyyy"))">Xem kết quả theo ngày cố định</a></p>
             <div class="home-province-summary-grid">
                 @foreach (var result in Model.MienTrung.Results)
                 {
@@ -126,7 +126,7 @@
         }
         else
         {
-            <p><a href="@("/xo-so-mien-nam/" + Model.MienNam.Results.First().DrawDate.ToString("dd-MM-yyyy"))">Xem kết quả theo ngày cố định</a></p>
+            <p class="draw-history-link"><a href="@("/xo-so-mien-nam/" + Model.MienNam.Results.First().DrawDate.ToString("dd-MM-yyyy"))">Xem kết quả theo ngày cố định</a></p>
             <div class="home-province-summary-grid">
                 @foreach (var result in Model.MienNam.Results)
                 {

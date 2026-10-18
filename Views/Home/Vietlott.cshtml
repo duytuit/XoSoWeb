@@ -20,7 +20,7 @@ else
 {
     foreach (var resultGroup in Model.Results.GroupBy(result => result.GameCode))
     {
-        <nav class="d-flex flex-wrap gap-3 mb-2" aria-label="Trò chơi và kỳ quay">
+        <nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Trò chơi và kỳ quay">
             <a href="@LotteryUrls.GamePath(resultGroup.Key)">@LotteryUrls.GameName(resultGroup.Key)</a>
             @foreach (var draw in resultGroup) { <a href="@LotteryUrls.DrawPath(draw.GameCode, draw.DrawNo)">Kỳ @draw.DrawNo · @draw.DrawDate.ToString("dd/MM/yyyy")</a> }
         </nav>

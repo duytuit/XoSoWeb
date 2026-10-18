@@ -458,8 +458,6 @@ body.mobile-menu-open {
 }
 
 .home-summary-meta {
-    padding: .65rem .85rem;
-    color: var(--on-surface-variant);
     border-bottom: 1px solid var(--border-neutral);
     font-size: .78rem;
 }
@@ -2092,7 +2090,7 @@ body.mobile-menu-open {
     overflow-wrap: anywhere;
     font-variant-numeric: tabular-nums;
 }
-.vietlott-page { display: grid; gap: 1.25rem; min-width: 0; }
+.vietlott-page { display: grid; gap: 0.5rem; min-width: 0; }
 .vietlott-page .vietlott-feature-card { margin-top: 0; scroll-margin-top: 90px; box-shadow: none; border-color: var(--border-neutral); }
 .vietlott-page .vietlott-card-header { background: var(--surface-container-low); border-top: 3px solid var(--secondary); border-bottom: 1px solid var(--border-neutral); padding: 1rem; }
 .vietlott-page .vietlott-card-header p { margin-top: .35rem; font-size: .85rem; }
@@ -2858,6 +2856,7 @@ body.mobile-menu-open {
     gap: .5rem;
 }
 .page-main-column > p { margin-bottom: .25rem; }
+.page-content p.draw-history-link { margin: 0; }
 .page-main-column > .results-breadcrumb { margin: 0; }
 .page-content .regional-page-title { padding-bottom: 0; }
 .page-content .detail-page-heading { margin: 0 0 .25rem; }

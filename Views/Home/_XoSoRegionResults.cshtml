@@ -14,7 +14,7 @@
     var available = await Catalog.GetAsync(Context.RequestAborted);
     if (Model.Results.Count == 0) ViewData["NoIndex"] = true;
 }
-<nav class="d-flex flex-wrap gap-3" aria-label="Tỉnh và đài có dữ liệu">
+<nav class="d-flex flex-wrap gap-2" aria-label="Tỉnh và đài có dữ liệu">
 @foreach (var province in available.Where(x => x.Region == Model.Region && x.ProvinceCode != null && !x.Date.HasValue))
 { <a href="@province.Path">@province.Label</a> }
 </nav>
@@ -48,7 +48,7 @@ else
             LotoStatistics = dailyResults.First().LotoStatistics
         };
         <article class="draw-day-card" aria-label="Kết quả ngày @drawDay.Key.ToString("dd/MM/yyyy")">
-            <p><a href="@(LotteryUrls.RegionPath(Model.Region) + "/" + drawDay.Key.ToString("dd-MM-yyyy"))">Kết quả cố định ngày @drawDay.Key.ToString("dd/MM/yyyy")</a></p>
+            <p class="draw-history-link"><a href="@(LotteryUrls.RegionPath(Model.Region) + "/" + drawDay.Key.ToString("dd-MM-yyyy"))">Kết quả cố định ngày @drawDay.Key.ToString("dd/MM/yyyy")</a></p>
             <partial name="_XoSoRegionDayResults" model="dailyModel" />
         </article>
     }
