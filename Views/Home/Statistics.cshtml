@@ -1,0 +1,108 @@
+@model XoSoWeb.Models.SpecialPrizeStatisticsViewModel
+@using System.Linq
+@using System
+@{
+    ViewData["Title"] = "Thống kê giải đặc biệt theo tuần";
+    var dayHeaders = new[] { "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật" };
+    var calendarStart = Model.StartDate.AddDays(-(((int)Model.StartDate.DayOfWeek + 6) % 7));
+    var calendarEnd = Model.EndDate.AddDays(6 - (((int)Model.EndDate.DayOfWeek + 6) % 7));
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/statistics.css" asp-append-version="true" />
+}
+
+<div class="regional-page-title">
+    <div>
+        <div class="results-breadcrumb"><a href="/">Trang chủ</a> <span>/</span> Thống kê</div>
+        <h1 class="detail-page-heading">Thống kê giải đặc biệt</h1>
+        <p class="detail-page-description">Theo dõi kết quả ba miền theo từng tuần, từ thứ hai đến chủ nhật.</p>
+    </div>
+</div>
+
+<div class="special-statistics-page">
+    <div class="statistics-toolbar">
+        <div class="statistics-period">
+            <span class="statistics-eyebrow">Khoảng thống kê · 30 ngày</span>
+            <strong>@Model.StartDate.ToString("dd/MM/yyyy") <span>—</span> @Model.EndDate.ToString("dd/MM/yyyy")</strong>
+        </div>
+    <form method="get" asp-controller="Home" asp-action="Statistics" class="statistics-filter">
+        <div class="statistics-date-field">
+            <label for="statistics-end-date" class="form-label">Thống kê 30 ngày đến ngày</label>
+            <input id="statistics-end-date" name="endDate" type="date" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-dd")" max="@DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).ToString("yyyy-MM-dd")" min="1753-01-30" required />
+        </div>
+        <button class="btn btn-primary" type="submit">Xem kết quả</button>
+    </form>
+    </div>
+    <div class="statistics-legend"><span><i aria-hidden="true"></i> Thứ bảy &amp; chủ nhật</span><span class="statistics-scroll-hint">Vuốt ngang để xem đủ 7 ngày →</span></div>
+    @foreach (var region in Model.Regions)
+    {
+        <section id="region-@region.RegionCode" class="special-statistics-region" aria-labelledby="statistics-@region.RegionCode">
+            <header class="special-statistics-header">
+                <div><span class="statistics-eyebrow">Giải đặc biệt</span><h2 id="statistics-@region.RegionCode">Xổ số @region.RegionName</h2></div>
+                <span class="statistics-result-count">@region.Entries.Count kết quả</span>
+            </header>
+            @if (region.Entries.Count == 0)
+            {
+                <p class="special-statistics-empty">Chưa có dữ liệu giải đặc biệt trong khoảng thời gian đã chọn.</p>
+            }
+            else
+            {
+                <div class="special-statistics-table-wrap" tabindex="0" role="region" aria-label="Bảng kết quả @region.RegionName, có thể cuộn ngang">
+                    <table class="special-statistics-week-table">
+                        <caption class="visually-hidden">Giải đặc biệt @region.RegionName từ @Model.StartDate.ToString("dd/MM/yyyy") đến @Model.EndDate.ToString("dd/MM/yyyy")</caption>
+                        <thead>
+                            <tr>
+                                @foreach (var dayHeader in dayHeaders)
+                                {
+                                    <th scope="col">@dayHeader</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var weekStart = calendarStart; weekStart <= calendarEnd; weekStart = weekStart.AddDays(7))
+                            {
+                                <tr>
+                                    @for (var dayOffset = 0; dayOffset < 7; dayOffset++)
+                                    {
+                                        var date = weekStart.AddDays(dayOffset);
+                                        var isInRange = date >= Model.StartDate && date <= Model.EndDate;
+                                        var dayEntries = isInRange
+                                            ? region.Entries.Where(entry => entry.DrawDate.Date == date.Date).OrderBy(entry => entry.ProvinceName).ToList()
+                                            : new List<XoSoWeb.Models.SpecialPrizeStatisticsEntry>();
+                                        <td class="@((dayOffset >= 5 ? "is-weekend " : "") + (!isInRange ? "is-outside-range" : ""))">
+                                            @if (isInRange)
+                                            {
+                                                @foreach (var entry in dayEntries)
+                                                {
+                                                    <div class="special-statistics-day-result">
+                                                        @if (region.RegionCode != "MB")
+                                                        {
+                                                            <span class="special-statistics-province">@entry.ProvinceName</span>
+                                                        }
+                                                        <div class="special-statistics-numbers" aria-label="Số trúng giải đặc biệt">
+                                                            @foreach (var number in entry.Numbers)
+                                                            {
+                                                                <span>@number</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                                @if (dayEntries.Count == 0)
+                                                {
+                                                    <span class="special-statistics-no-result">Chưa cập nhật</span>
+                                                }
+                                                <time class="special-statistics-date" datetime="@date.ToString("yyyy-MM-dd")">@date.ToString("dd/MM/yyyy")</time>
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    }
+    <p class="special-statistics-disclaimer">Dữ liệu thống kê để tham khảo. Vui lòng đối chiếu kết quả với thông tin chính thức của đơn vị phát hành.</p>
+</div>

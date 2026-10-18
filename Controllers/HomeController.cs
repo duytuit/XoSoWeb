@@ -11,6 +11,8 @@ using XoSoWeb.Shares;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using XoSoWeb.Models;
+using XoSoWeb.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace XoSoWeb.Controllers
 {
@@ -51,10 +53,63 @@ namespace XoSoWeb.Controllers
             };
             return View(model);
         }
+        [HttpGet("/lien-he-quang-cao")]
+        public IActionResult About()
+        {
+            return View("About");
+        }
+        [HttpGet("/thong-ke")]
+        public async Task<IActionResult> Statistics([FromQuery] DateTime? endDate = null)
+        {
+            return View("Statistics", await GetSpecialPrizeStatisticsAsync(endDate));
+        }
         [HttpGet("/privacy")]
         public IActionResult Privacy()
         {
             return View("Privacy");
+        }
+
+        [HttpGet("/thong-ke-tan-suat-loto")]
+        public async Task<IActionResult> LotoFrequency([FromQuery] string region = "MB", [FromQuery] DateTime? week = null)
+        {
+            region = (region ?? "MB").ToUpperInvariant();
+            if (region != "MB" && region != "MT" && region != "MN") region = "MB";
+            var today = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).Date;
+            var date = week?.Date ?? today;
+            if (date > today || date < new DateTime(1753, 1, 8)) date = today;
+            var model = new LotoFrequencyViewModel
+            {
+                Region = region,
+                WeekStart = date.AddDays(-(((int)date.DayOfWeek + 6) % 7))
+            };
+            await _context.Database.OpenConnectionAsync();
+            try
+            {
+                await using var command = _context.Database.GetDbConnection().CreateCommand();
+                command.CommandText = @"SELECT Region, DrawDate, Prizes FROM dbo.XoSoResults
+                    WHERE DrawDate >= @start AND DrawDate < @end ORDER BY DrawDate, ProvinceName;";
+                AddParameter(command, "@start", model.WeekStart);
+                AddParameter(command, "@end", model.WeekStart.AddDays(7));
+                await using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    if (GetRegionCode(reader.GetString(0)) != region) continue;
+                    var prizes = JsonSerializer.Deserialize<List<XoSoPrize>>(reader.GetString(2), JsonOptions)
+                        ?? new List<XoSoPrize>();
+                    model.Add(reader.GetDateTime(1), prizes);
+                }
+            }
+            finally
+            {
+                await _context.Database.CloseConnectionAsync();
+            }
+            return View("LotoFrequency", model);
+        }
+
+        [HttpGet("/terms")]
+        public IActionResult Terms()
+        {
+            return View("Terms");
         }
         [HttpGet("/support")]
         public IActionResult Support()
@@ -82,13 +137,120 @@ namespace XoSoWeb.Controllers
             return View("Vietlott", await GetVietlottResultsAsync(gameCode, offset));
         }
         [HttpPost("support")]
-        public async Task<IActionResult> Contact([FromBody] ContactSupportRequest request)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Contact([FromBody] ContactSupportRequest request, [FromServices] TelegramContactService telegram)
         {
+            if (request == null || !ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Vui lòng nhập đầy đủ thông tin hợp lệ." });
+
+            if (!await telegram.SendAsync(request, HttpContext.RequestAborted))
+                return StatusCode(502, new { success = false, message = "Chưa gửi được yêu cầu. Vui lòng thử lại sau." });
+
             return Ok(new
             {
                 success = true,
-                message = "Support request received."
+                message = "Yêu cầu liên hệ đã được gửi thành công."
             });
+        }
+
+        private async Task<SpecialPrizeStatisticsViewModel> GetSpecialPrizeStatisticsAsync(DateTime? selectedEndDate)
+        {
+            var today = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).Date;
+            var endDate = selectedEndDate?.Date ?? today;
+            if (endDate > today) endDate = today;
+            if (endDate < new DateTime(1753, 1, 30)) endDate = today;
+            var startDate = endDate.AddDays(-29);
+            var model = new SpecialPrizeStatisticsViewModel
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                Regions = new List<SpecialPrizeRegionStatistics>
+                {
+                    new SpecialPrizeRegionStatistics { RegionCode = "MB", RegionName = "Miền Bắc" },
+                    new SpecialPrizeRegionStatistics { RegionCode = "MT", RegionName = "Miền Trung" },
+                    new SpecialPrizeRegionStatistics { RegionCode = "MN", RegionName = "Miền Nam" }
+                }
+            };
+
+            var connection = _context.Database.GetDbConnection();
+            await connection.OpenAsync();
+
+            await using var command = connection.CreateCommand();
+            command.CommandText = @"
+                SELECT Region, ProvinceName, DrawDate, Prizes
+                FROM dbo.XoSoResults
+                WHERE DrawDate >= @startDate
+                    AND DrawDate < @endDateExclusive
+                    AND Region IN
+                    (
+                        N'MB', N'Miền bắc', N'Miền Bắc', N'Miền bac', N'Mien Bac',
+                        N'MT', N'Miền trung', N'Miền Trung', N'Mien Trung',
+                        N'MN', N'Miền nam', N'Miền Nam', N'Mien Nam'
+                    )
+                ORDER BY DrawDate DESC, ProvinceName;";
+            AddParameter(command, "@startDate", startDate);
+            AddParameter(command, "@endDateExclusive", endDate.AddDays(1));
+
+            await using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var regionCode = GetRegionCode(reader.GetString(0));
+                var region = model.Regions.FirstOrDefault(item => item.RegionCode == regionCode);
+                if (region == null)
+                {
+                    continue;
+                }
+
+                var prizes = JsonSerializer.Deserialize<List<XoSoPrize>>(reader.GetString(3), JsonOptions)
+                    ?? new List<XoSoPrize>();
+                var specialPrize = prizes.FirstOrDefault(IsSpecialPrize);
+                if (specialPrize == null)
+                {
+                    continue;
+                }
+
+                region.Entries.Add(new SpecialPrizeStatisticsEntry
+                {
+                    DrawDate = reader.GetDateTime(2),
+                    ProvinceName = reader.GetString(1),
+                    Numbers = (specialPrize.Numbers ?? new List<string>())
+                        .Where(number => !string.IsNullOrWhiteSpace(number)).ToList()
+                });
+            }
+
+            await reader.CloseAsync();
+            await connection.CloseAsync();
+            return model;
+        }
+
+        private static string GetRegionCode(string region)
+        {
+            var normalizedRegion = (region ?? string.Empty).Trim().ToLowerInvariant();
+            if (normalizedRegion == "mb" || normalizedRegion.Contains("bac") || normalizedRegion.Contains("bắc"))
+            {
+                return "MB";
+            }
+            if (normalizedRegion == "mt" || normalizedRegion.Contains("trung"))
+            {
+                return "MT";
+            }
+            if (normalizedRegion == "mn" || normalizedRegion.Contains("nam"))
+            {
+                return "MN";
+            }
+
+            return null;
+        }
+
+        private static bool IsSpecialPrize(XoSoPrize prize)
+        {
+            var name = (prize.PrizeName ?? string.Empty).Trim();
+            return name.Contains("đặc biệt", StringComparison.OrdinalIgnoreCase)
+                || name.Contains("dac biet", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("ĐB", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("DB", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("Giải ĐB", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("Giai DB", StringComparison.OrdinalIgnoreCase);
         }
 
         private async Task<XoSoRegionViewModel> GetRegionResultsAsync(string region, string regionName, int? selectedDay = null, int resultDays = 1)
@@ -196,6 +358,10 @@ namespace XoSoWeb.Controllers
                 selectedOffset = 0;
             }
             selectedOffset = Math.Max(0, selectedOffset);
+            if (selectedGameCode == "BINGO18" || selectedGameCode == "KENO")
+            {
+                selectedOffset = selectedOffset / 3 * 3;
+            }
             model.SelectedGameCode = selectedGameCode;
             model.SelectedOffset = selectedOffset;
             var connection = _context.Database.GetDbConnection();
@@ -228,10 +394,22 @@ namespace XoSoWeb.Controllers
                 )
                 SELECT Id, GameCode, DrawNo, DrawDate, Numbers, SpecialNumbers, EstimatedPrize, EstimatedPrize2, Total, OddEven, Size, TotalPeriods
                 FROM LatestResults
-                WHERE ResultRank = CASE
-                    WHEN @selectedGameCode IS NOT NULL AND GameCode = @selectedGameCode THEN @selectedOffset + 1
-                    ELSE 1
-                END
+                WHERE
+                    (
+                        @selectedGameCode IS NULL
+                        AND
+                        (
+                            (GameCode IN ('BINGO18', 'KENO') AND ResultRank <= 3)
+                            OR (GameCode NOT IN ('BINGO18', 'KENO') AND ResultRank = 1)
+                        )
+                    )
+                    OR
+                    (
+                        @selectedGameCode IS NOT NULL
+                        AND GameCode = @selectedGameCode
+                        AND ResultRank BETWEEN @selectedOffset + 1
+                            AND @selectedOffset + CASE WHEN GameCode IN ('BINGO18', 'KENO') THEN 3 ELSE 1 END
+                    )
                 ORDER BY CASE GameCode
                     WHEN 'LOTTO535' THEN 1
                     WHEN 'MAX3D' THEN 2
@@ -241,7 +419,7 @@ namespace XoSoWeb.Controllers
                     WHEN 'POWER655' THEN 6
                     WHEN 'BINGO18' THEN 7
                     WHEN 'KENO' THEN 8
-                END;";
+                END, ResultRank;";
             AddParameter(command, "@selectedGameCode", selectedGameCode);
             AddParameter(command, "@selectedOffset", selectedOffset);
 
@@ -324,8 +502,12 @@ namespace XoSoWeb.Controllers
 }
 public class ContactSupportRequest
 {
+    [Required, StringLength(100)]
     public string FullName { get; set; }
+    [Required, EmailAddress, StringLength(254)]
     public string Email { get; set; }
+    [Required, StringLength(200)]
     public string Subject { get; set; }
+    [Required, StringLength(3000)]
     public string Content { get; set; }
 }

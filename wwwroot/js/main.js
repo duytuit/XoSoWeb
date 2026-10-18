@@ -1,4 +1,58 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileNavigation = document.getElementById('mobile-navigation');
+
+    if (mobileMenuToggle && mobileNavigation) {
+        const closeMobileMenu = () => {
+            mobileNavigation.hidden = true;
+            mobileMenuToggle.setAttribute('aria-expanded', 'false');
+            document.body.classList.remove('mobile-menu-open');
+            mobileMenuToggle.focus();
+        };
+
+        mobileMenuToggle.addEventListener('click', function () {
+            mobileNavigation.hidden = false;
+            mobileMenuToggle.setAttribute('aria-expanded', 'true');
+            document.body.classList.add('mobile-menu-open');
+            mobileNavigation.querySelector('.mobile-navigation-close').focus();
+        });
+
+        mobileNavigation.addEventListener('click', function (event) {
+            if (event.target.closest('[data-close-mobile-menu]')) {
+                closeMobileMenu();
+            }
+        });
+
+        mobileNavigation.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeMobileMenu();
+                return;
+            }
+
+            if (event.key !== 'Tab') {
+                return;
+            }
+
+            const focusableElements = Array.from(mobileNavigation.querySelectorAll('a[href], button:not([disabled])'));
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            } else if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        });
+
+        window.matchMedia('(min-width: 992px)').addEventListener('change', function (event) {
+            if (event.matches && !mobileNavigation.hidden) {
+                closeMobileMenu();
+            }
+        });
+    }
+
     document.querySelectorAll('.lottery-grid-row').forEach(row => {
         row.addEventListener('mouseenter', () => {
             row.style.backgroundColor = 'rgba(0, 25, 118, 0.05)';

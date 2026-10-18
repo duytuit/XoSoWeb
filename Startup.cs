@@ -73,6 +73,7 @@ namespace XoSoWeb
             services.AddResponseCompression();
             services.AddControllersWithViews(); // 👈 hỗ trợ cả View + API
             services.AddHttpClient(); // Add HttpClient factory
+            services.AddSingleton<TelegramContactService>();
             services.AddLotteryModule();
 
         }

@@ -17,8 +17,146 @@
 }
 else
 {
-    foreach (var result in Model.Results)
+    foreach (var resultGroup in Model.Results.GroupBy(result => result.GameCode))
     {
+        var isFrequentDrawGame = resultGroup.Key == "BINGO18" || resultGroup.Key == "KENO";
+        if (isFrequentDrawGame)
+        {
+            var currentOffset = Model.SelectedGameCode == resultGroup.Key ? Model.SelectedOffset : 0;
+            var totalPeriods = resultGroup.First().TotalPeriods;
+            var hasPrevious = currentOffset > 0;
+            var hasNext = currentOffset + 3 < totalPeriods;
+            <section id="vietlott-@resultGroup.Key" class="vietlott-feature-card vietlott-recent-game">
+                <div class="vietlott-card-header">
+                    <div class="vietlott-card-title">
+                        <h2>@(resultGroup.Key == "BINGO18" ? "Bingo 18" : "Keno")</h2>
+                        <p>@resultGroup.Count() kỳ quay gần nhất</p>
+                    </div>
+                    <div class="vietlott-period-controls">
+                        @if (hasNext)
+                        {
+                            <a class="vietlott-period-button" href="@Url.Action("Vietlott", "Home", new { gameCode = resultGroup.Key, offset = currentOffset + 3 })#vietlott-@resultGroup.Key" title="Ba kỳ cũ hơn"><span>← Ba kỳ cũ hơn</span></a>
+                        }
+                        @if (hasPrevious)
+                        {
+                            <a class="vietlott-period-button" href="@Url.Action("Vietlott", "Home", new { gameCode = resultGroup.Key, offset = currentOffset - 3 })#vietlott-@resultGroup.Key" title="Ba kỳ mới hơn"><span>Ba kỳ mới hơn</span> →</a>
+                        }
+                    </div>
+                </div>
+                @if (resultGroup.Key == "BINGO18")
+                {
+                    <div class="vietlott-bingo-table-wrap">
+                        <table class="vietlott-bingo-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Ngày / kỳ</th>
+                                    <th scope="col">Kết quả</th>
+                                    <th scope="col">Tổng</th>
+                                    <th scope="col">Lớn/hòa/nhỏ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var result in resultGroup)
+                                {
+                                    <tr>
+                                        <td>
+                                            <time datetime="@result.DrawDate.ToString("yyyy-MM-dd")">@result.DrawDate.ToString("dd/MM/yyyy")</time>
+                                            <span class="vietlott-bingo-draw-no">#@result.DrawNo</span>
+                                        </td>
+                                        <td>
+                                            <div class="vietlott-recent-balls" aria-label="Kết quả kỳ @result.DrawNo">
+                                                @foreach (var number in result.Numbers)
+                                                {
+                                                    <span>@number</span>
+                                                }
+                                                @foreach (var number in result.SpecialNumbers)
+                                                {
+                                                    <span class="special-ball">@number</span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>@(result.Total?.ToString() ?? "-")</td>
+                                        <td>@(string.IsNullOrWhiteSpace(result.Size) ? "-" : result.Size)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else if (resultGroup.Key == "KENO")
+                {
+                    <div class="vietlott-keno-table-wrap">
+                        <table class="vietlott-keno-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Ngày / kỳ</th>
+                                    <th scope="col">Kết quả</th>
+                                    <th scope="col">Chẵn/lẻ</th>
+                                    <th scope="col">Lớn/nhỏ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var result in resultGroup)
+                                {
+                                    <tr>
+                                        <td>
+                                            <time datetime="@result.DrawDate.ToString("yyyy-MM-dd")">@result.DrawDate.ToString("dd/MM/yyyy")</time>
+                                            <span class="vietlott-bingo-draw-no">#@result.DrawNo</span>
+                                        </td>
+                                        <td>
+                                            <div class="vietlott-keno-balls" aria-label="20 số Keno kỳ @result.DrawNo">
+                                                @foreach (var number in result.Numbers)
+                                                {
+                                                    <span>@number</span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>@(string.IsNullOrWhiteSpace(result.OddEven) ? "-" : result.OddEven)</td>
+                                        <td>@(string.IsNullOrWhiteSpace(result.Size) ? "-" : result.Size)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="vietlott-recent-grid">
+                        @foreach (var result in resultGroup)
+                        {
+                            <article class="vietlott-recent-card">
+                                <header class="vietlott-recent-card-header">
+                                    <strong>Kỳ #@result.DrawNo</strong>
+                                    <time datetime="@result.DrawDate.ToString("yyyy-MM-dd")">@result.DrawDate.ToString("dd/MM/yyyy")</time>
+                                </header>
+                                <div class="vietlott-recent-balls" aria-label="Bộ số trúng thưởng">
+                                    @foreach (var number in result.Numbers)
+                                    {
+                                        <span>@number</span>
+                                    }
+                                    @foreach (var number in result.SpecialNumbers)
+                                    {
+                                        <span class="special-ball">@number</span>
+                                    }
+                                </div>
+                                @if (result.Total.HasValue || !string.IsNullOrWhiteSpace(result.OddEven) || !string.IsNullOrWhiteSpace(result.Size))
+                                {
+                                    <div class="vietlott-recent-stats">
+                                        @if (result.Total.HasValue) { <span><b>Tổng</b> @result.Total</span> }
+                                        @if (!string.IsNullOrWhiteSpace(result.OddEven)) { <span><b>Chẵn lẻ</b> @result.OddEven</span> }
+                                        @if (!string.IsNullOrWhiteSpace(result.Size)) { <span><b>Cao thấp</b> @result.Size</span> }
+                                    </div>
+                                }
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
+        }
+        else
+        {
+        foreach (var result in resultGroup)
+        {
         var currentOffset = Model.SelectedGameCode == result.GameCode ? Model.SelectedOffset : 0;
         var hasPrevious = currentOffset > 0;
         var hasNext = currentOffset + 1 < result.TotalPeriods;
@@ -94,14 +232,77 @@ else
                         <div class="vietlott-prize-heading"><span>Giải thưởng</span><span>Kết quả</span><span>Giá trị</span></div>
                         @foreach (var prize in result.Prizes)
                         {
-                            <div class="vietlott-prize-row">
+                            var isMax3dSpecialPrize = (result.GameCode == "MAX3D" || result.GameCode == "MAX3D_PLUS" || result.GameCode == "MAX3D_PRO")
+                                && prize.PrizeName.Contains("Đặc biệt", StringComparison.OrdinalIgnoreCase);
+                            var max3dSpecialDigits = isMax3dSpecialPrize
+                                ? string.Concat(prize.Numbers ?? new List<string>()).Where(char.IsDigit).ToArray()
+                                : Array.Empty<char>();
+                            <div class="vietlott-prize-row @(isMax3dSpecialPrize ? "vietlott-max3d-special-prize" : "")">
                                 <strong>@prize.PrizeName</strong>
-                                <span class="vietlott-prize-numbers">
-                                    @foreach (var number in prize.Numbers)
-                                    {
-                                        <span>@number</span>
-                                    }
-                                </span>
+                                @if (isMax3dSpecialPrize)
+                                {
+                                    <div class="vietlott-prize-result">
+                                        @if (result.GameCode == "MAX3D_PLUS")
+                                        {
+                                            <p class="vietlott-match-description">Trúng 2 bộ ba số theo thứ tự</p>
+                                            <div class="vietlott-max3d-plus-number-groups" aria-label="Hai bộ ba số trúng giải đặc biệt">
+                                                <div class="vietlott-max3d-number-groups">
+                                                    @for (var digitIndex = 0; digitIndex < Math.Min(6, max3dSpecialDigits.Length); digitIndex++)
+                                                    {
+                                                        <span class="vietlott-max3d-digit">@max3dSpecialDigits[digitIndex]</span>
+                                                    }
+                                                </div>
+                                                @if (max3dSpecialDigits.Length > 6)
+                                                {
+                                                    <span class="vietlott-max3d-plus-or">hoặc</span>
+                                                    <div class="vietlott-max3d-number-groups">
+                                                        @for (var digitIndex = 6; digitIndex < max3dSpecialDigits.Length; digitIndex++)
+                                                        {
+                                                            <span class="vietlott-max3d-digit">@max3dSpecialDigits[digitIndex]</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else if (result.GameCode == "MAX3D_PRO")
+                                        {
+                                            <p class="vietlott-match-description">Trúng 2 bộ ba số theo đúng thứ tự</p>
+                                            <div class="vietlott-max3d-number-groups vietlott-max3d-pro-number-groups" aria-label="Hai bộ ba số trúng giải">
+                                                @for (var digitIndex = 0; digitIndex < max3dSpecialDigits.Length; digitIndex++)
+                                                {
+                                                    @if (digitIndex == 3)
+                                                    {
+                                                        <span class="vietlott-max3d-group-separator" aria-hidden="true"></span>
+                                                    }
+                                                    <span class="vietlott-max3d-digit">@max3dSpecialDigits[digitIndex]</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <p class="vietlott-match-description">Trúng 1 trong 2 bộ ba số</p>
+                                            <div class="vietlott-max3d-number-groups" aria-label="Bộ ba số trúng giải đặc biệt">
+                                                @for (var digitIndex = 0; digitIndex < max3dSpecialDigits.Length; digitIndex++)
+                                                {
+                                                    @if (digitIndex == 3)
+                                                    {
+                                                        <span class="vietlott-max3d-group-separator" aria-hidden="true"></span>
+                                                    }
+                                                    <span class="vietlott-max3d-digit">@max3dSpecialDigits[digitIndex]</span>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="vietlott-prize-numbers">
+                                        @foreach (var number in prize.Numbers)
+                                        {
+                                            <span>@number</span>
+                                        }
+                                    </span>
+                                }
                                 <b>@(prize.Value ?? "-")</b>
                             </div>
                         }
@@ -109,6 +310,8 @@ else
                 }
             </div>
         </section>
+        }
+        }
     }
 }
 

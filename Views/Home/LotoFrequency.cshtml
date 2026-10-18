@@ -1,0 +1,120 @@
+@model XoSoWeb.Models.LotoFrequencyViewModel
+@using System
+@using System.Linq
+@{
+    ViewData["Title"] = "Thống kê tần suất lô tô trong tuần";
+    var headers = new[] { "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật" };
+    var regionName = Model.Region == "MB" ? "Miền Bắc" : Model.Region == "MT" ? "Miền Trung" : "Miền Nam";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/statistics.css" asp-append-version="true" />
+}
+<div class="regional-page-title">
+    <div>
+        <div class="results-breadcrumb"><a href="/">Trang chủ</a> <span>/</span> Thống kê lô tô</div>
+        <h1 class="detail-page-heading">Tần suất lô tô trong tuần</h1>
+        <p class="detail-page-description">Đếm số lần xuất hiện của hai số cuối tất cả các giải. Một số xuất hiện nhiều lần trong ngày được tính đủ số lần.</p>
+    </div>
+</div>
+<div class="special-statistics-page">
+    <form method="get" class="statistics-toolbar">
+        <div class="statistics-date-field">
+            <label for="frequency-region" class="form-label">Khu vực</label>
+            <select id="frequency-region" name="region" class="form-select">
+                <option value="MB" selected="@(Model.Region == "MB")">Miền Bắc</option>
+                <option value="MT" selected="@(Model.Region == "MT")">Miền Trung</option>
+                <option value="MN" selected="@(Model.Region == "MN")">Miền Nam</option>
+            </select>
+        </div>
+        <div class="statistics-date-field">
+            <label for="frequency-week" class="form-label">Chọn ngày trong tuần cần xem</label>
+            <input id="frequency-week" type="date" name="week" class="form-control" value="@Model.WeekStart.ToString("yyyy-MM-dd")" min="1753-01-08" max="@DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).ToString("yyyy-MM-dd")" required />
+        </div>
+        <button class="btn btn-primary align-self-end" type="submit">Xem thống kê</button>
+    </form>
+    <section class="special-statistics-region">
+        <header class="special-statistics-header">
+            <div><h2>@regionName</h2><small>@Model.WeekStart.ToString("dd/MM/yyyy") – @Model.WeekStart.AddDays(6).ToString("dd/MM/yyyy")</small></div>
+            <span class="statistics-result-count">@Model.DrawCount kỳ quay / tỉnh</span>
+        </header>
+        @if (Model.DrawCount == 0)
+        {
+            <p class="special-statistics-empty">Chưa cập nhật dữ liệu trong tuần đã chọn.</p>
+        }
+        else
+        {
+            <div class="frequency-overview">
+                <div class="frequency-overview-heading"><strong>Tổng lần xuất hiện trong tuần</strong><span>Chọn số để xem chi tiết theo ngày</span></div>
+                <div class="frequency-number-grid">
+                    @for (var number = 0; number < 100; number++)
+                    {
+                        var total = Model.Total(number);
+                        <a href="#frequency-group-@(number / 10)" class="frequency-number @(total == 0 ? "is-zero" : total >= 5 ? "is-frequent" : "")" aria-label="Lô tô @number.ToString("D2"): @total lần, xem chi tiết">
+                            <strong>@number.ToString("D2")</strong><small>@total lần</small>
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="frequency-groups">
+            @for (var head = 0; head < 10; head++)
+            {
+                var groupTotal = Enumerable.Range(head * 10, 10).Sum(number => Model.Total(number));
+                <details id="frequency-group-@head" class="frequency-group" name="frequency-groups" open="@(head == 0)">
+                    <summary><strong>Đầu @head <span>· @((head * 10).ToString("D2"))–@((head * 10 + 9).ToString("D2"))</span></strong><small>@groupTotal lần</small></summary>
+            <div class="special-statistics-table-wrap" tabindex="0" role="region" aria-label="Tần suất lô tô đầu @head theo ngày, có thể cuộn ngang">
+                <table class="table table-sm table-bordered text-center align-middle mb-0 loto-frequency-table">
+                    <caption class="visually-hidden">Số lần xuất hiện lô tô đầu @head trong tuần ở @regionName</caption>
+                    <thead><tr><th scope="col">Lô tô</th>
+                        @for (var day = 0; day < 7; day++)
+                        {
+                            <th scope="col">@headers[day]<small class="d-block fw-normal">@Model.WeekStart.AddDays(day).ToString("dd/MM")</small></th>
+                        }
+                        <th scope="col">Tổng</th>
+                    </tr></thead>
+                    <tbody>
+                        @for (var number = head * 10; number < head * 10 + 10; number++)
+                        {
+                            <tr id="frequency-number-@number"><th scope="row">@number.ToString("D2")</th>
+                                @for (var day = 0; day < 7; day++)
+                                {
+                                    <td class="@(day >= 5 ? "frequency-weekend" : "") @(Model.Counts[number, day] > 0 ? "frequency-hit" : "text-muted")">@(Model.Counts[number, day] > 0 ? Model.Counts[number, day].ToString() : "—")</td>
+                                }
+                                <td class="fw-bold">@Model.Total(number)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+                </details>
+            }
+            </div>
+        }
+    </section>
+    <p class="special-statistics-disclaimer">Miền Trung và miền Nam cộng số lần xuất hiện của tất cả các tỉnh trong ngày. Dấu — nghĩa là chưa ghi nhận lần xuất hiện trong dữ liệu hiện có. Thống kê để tham khảo, không dự đoán kết quả tương lai.</p>
+</div>
+
+@section Scripts {
+    <script>
+        var frequencyGroups = document.querySelectorAll('.frequency-group');
+        function openFrequencyGroup(group) {
+            frequencyGroups.forEach(function (other) {
+                if (other !== group) other.open = false;
+            });
+            group.open = true;
+        }
+        frequencyGroups.forEach(function (group) {
+            group.querySelector('summary').addEventListener('click', function (event) {
+                if (!group.open) {
+                    event.preventDefault();
+                    openFrequencyGroup(group);
+                }
+            });
+        });
+        document.querySelectorAll('.frequency-number').forEach(function (link) {
+            link.addEventListener('click', function () {
+                var group = document.getElementById(link.hash.slice(1));
+                if (group) openFrequencyGroup(group);
+            });
+        });
+    </script>
+}

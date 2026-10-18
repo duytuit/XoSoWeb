@@ -1,4 +1,4 @@
-@{
+﻿@{
     Layout = null;
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -37,19 +37,23 @@
     <!-- TopAppBar -->
     <header id="topbar" class="topbar sticky-top z-3 bg-surface border-bottom border-neutral py-2 w-100">
         <div class="container-xl d-flex justify-content-between align-items-center h-100">
+            <button class="mobile-menu-toggle d-lg-none" id="mobile-menu-toggle" type="button"
+                    aria-label="Mở menu điều hướng" aria-controls="mobile-navigation" aria-expanded="false">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
             <div class="d-flex align-items-center gap-2">
                 <a class="d-flex align-items-center gap-2 text-decoration-none" asp-controller="Home" asp-action="Index" aria-label="Về trang chủ">
                     <i class="fa-solid fa-ticket text-primary fs-4" aria-hidden="true"></i>
                     <h1 class="h5 mb-0 fw-bold text-primary font-headline-md">Xổ Số Trực Tiếp</h1>
                 </a>
             </div>
-            <nav class="d-none d-md-flex gap-4">
+            <nav class="d-none d-lg-flex gap-4">
                 <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Trang Chủ</a>
                 <a class="@(IsActive("Home", "XoSoMienBac") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac">XS Miền Bắc</a>
                 <a class="@(IsActive("Home", "XoSoMienTrung") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienTrung">XS Miền Trung</a>
                 <a class="@(IsActive("Home", "XoSoMienNam") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienNam">XS Miền Nam</a>
                 <a class="@(IsActive("Home", "Vietlott") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott">Vietlott</a>
-                <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Thống Kê</a>
+                <a class="@(IsActive("Home", "Statistics") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Statistics">Thống Kê</a>
                 <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Tin Xổ Số</a>
             </nav>
             <button class="btn btn-primary rounded-pill font-label-sm px-4 py-2">
@@ -57,6 +61,53 @@
             </button>
         </div>
     </header>
+
+    <div class="mobile-navigation-layer" id="mobile-navigation" hidden>
+        <button class="mobile-navigation-backdrop" type="button" data-close-mobile-menu aria-label="Đóng menu"></button>
+        <aside class="mobile-navigation-drawer" role="dialog" aria-modal="true" aria-labelledby="mobile-navigation-title">
+            <div class="mobile-navigation-header">
+                <h2 id="mobile-navigation-title">Danh mục</h2>
+                <button class="mobile-navigation-close" type="button" data-close-mobile-menu aria-label="Đóng menu">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+            <nav class="mobile-navigation-links" aria-label="Điều hướng chính">
+                <a class="mobile-navigation-link @(IsActive("Home", "Index") ? "is-active" : "")" asp-controller="Home" asp-action="Index">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i><span>Trang chủ</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "XoSoMienBac") ? "is-active" : "")" asp-controller="Home" asp-action="XoSoMienBac">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Xổ số Miền Bắc</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "XoSoMienTrung") ? "is-active" : "")" asp-controller="Home" asp-action="XoSoMienTrung">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Xổ số Miền Trung</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "XoSoMienNam") ? "is-active" : "")" asp-controller="Home" asp-action="XoSoMienNam">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Xổ số Miền Nam</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "Vietlott") ? "is-active" : "")" asp-controller="Home" asp-action="Vietlott">
+                    <i class="fa-solid fa-ticket" aria-hidden="true"></i><span>Vietlott</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "Statistics") ? "is-active" : "")" asp-controller="Home" asp-action="Statistics">
+                    <i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Thống kê giải đặc biệt</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">
+                    <i class="fa-solid fa-chart-simple" aria-hidden="true"></i><span>Thống kê tần suất lô tô trong tuần</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "About") ? "is-active" : "")" asp-controller="Home" asp-action="About">
+                    <i class="fa-solid fa-bullhorn" aria-hidden="true"></i><span>Liên hệ quảng cáo</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "Support") ? "is-active" : "")" asp-controller="Home" asp-action="Support">
+                    <i class="fa-solid fa-headset" aria-hidden="true"></i><span>Hỗ trợ</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "Terms") ? "is-active" : "")" asp-controller="Home" asp-action="Terms">
+                    <i class="fa-solid fa-file-lines" aria-hidden="true"></i><span>Điều khoản sử dụng</span>
+                </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "Privacy") ? "is-active" : "")" asp-controller="Home" asp-action="Privacy">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Chính sách bảo mật</span>
+                </a>
+            </nav>
+        </aside>
+    </div>
 
     <div class="container-xl mt-3">
         <div class="w-100 bg-surface-container-highest rounded ad-banner" style="height: 96px;">
@@ -87,16 +138,20 @@
                     </a>
                 </nav>
             </div>
-
-            <!-- Quick Links / Statistics Chips -->
-            <div class="mt-4">
-                <h3 class="h6 text-primary mb-3 px-2">Tiện ích nhanh</h3>
-                <div class="d-flex flex-wrap gap-2 px-2">
-                    <span class="badge bg-surface-blue text-primary border border-neutral rounded-pill py-2 px-3 fw-normal hover-bg-primary" style="cursor:pointer">Lô Gan</span>
-                    <span class="badge bg-surface-blue text-primary border border-neutral rounded-pill py-2 px-3 fw-normal hover-bg-primary" style="cursor:pointer">Lịch quay</span>
-                    <span class="badge bg-surface-blue text-primary border border-neutral rounded-pill py-2 px-3 fw-normal hover-bg-primary" style="cursor:pointer">Sổ mơ</span>
-                    <span class="badge bg-surface-blue text-primary border border-neutral rounded-pill py-2 px-3 fw-normal hover-bg-primary" style="cursor:pointer">Quay thử</span>
+            <div class="sidebar-region-panel mt-3">
+                <div class="sidebar-region-heading">
+                    <h2 class="font-label-sm text-uppercase opacity-75 mb-0">Thống kê</h2>
                 </div>
+                <nav class="sidebar-region-nav" aria-label="Menu thống kê">
+                    <a class="sidebar-region-link @(IsActive("Home", "Statistics") ? "is-active" : "")" asp-controller="Home" asp-action="Statistics">
+                        <i class="fa-solid fa-trophy" aria-hidden="true"></i>
+                        <span>Thống kê giải đặc biệt</span>
+                    </a>
+                    <a class="sidebar-region-link @(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">
+                        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+                        <span>Thống kê tần suất lô tô trong tuần</span>
+                    </a>
+                </nav>
             </div>
         </aside>
 
@@ -130,10 +185,9 @@
                 <div class="col-6">
                     <h4 class="font-label-sm text-white text-uppercase mb-3">Thông tin</h4>
                     <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
-                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Index">Về chúng tôi</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="About">Liên hệ quảng cáo</a></li>
                         <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Support">Liên hệ</a></li>
-                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Support">Hỗ trợ</a></li>
-                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Privacy">Điều khoản sử dụng</a></li>
+                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Terms">Điều khoản sử dụng</a></li>
                     </ul>
                 </div>
                 <div class="col-6">
