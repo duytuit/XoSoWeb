@@ -51,7 +51,12 @@ namespace XoSoWeb
             services.AddMemoryCache();
             services.AddSingleton<ArchiveCatalog>();
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddHttpsRedirection(options => { options.HttpsPort = 443; options.RedirectStatusCode = 308; });
+            services.AddHttpsRedirection(options =>
+            {
+                var origin = new Uri(site.SiteUrl);
+                options.HttpsPort = origin.Scheme == Uri.UriSchemeHttps ? origin.Port : 443;
+                options.RedirectStatusCode = 308;
+            });
 
              services.AddCors(options =>
             {
@@ -101,7 +106,8 @@ namespace XoSoWeb
             app.UseMiddleware<ExceptionMiddleware>();
             if (!env.IsDevelopment()) app.UseResponseCompression();
             app.UseMiddleware<PublicUrlMiddleware>();
-            if (!env.IsDevelopment()) app.UseHttpsRedirection();
+            if (new Uri(app.ApplicationServices.GetRequiredService<SiteSettings>().SiteUrl).Scheme == Uri.UriSchemeHttps)
+                app.UseHttpsRedirection();
             app.UseMiddleware<StagingAccessMiddleware>();
             app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = context =>
             {
