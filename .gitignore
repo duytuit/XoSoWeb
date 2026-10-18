@@ -17,6 +17,7 @@ obj/
 **/obj/
 
 *.json
+!Properties/launchSettings.json
 publish/
 
 Logs/

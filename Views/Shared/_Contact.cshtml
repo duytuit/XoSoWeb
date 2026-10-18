@@ -1,0 +1,5 @@
+@inject XoSoWeb.Services.SiteSettings Site
+@if (!string.IsNullOrWhiteSpace(Site.ContactEmail)) { <p>Email: <a href="mailto:@Site.ContactEmail">@Site.ContactEmail</a></p> }
+@if (!string.IsNullOrWhiteSpace(Site.ContactPhone)) { <p>Điện thoại: @Site.ContactPhone</p> }
+@if (!string.IsNullOrWhiteSpace(Site.ContactAddress)) { <p>Địa chỉ: @Site.ContactAddress</p> }
+<p><a href="/support">Gửi yêu cầu hỗ trợ</a></p>

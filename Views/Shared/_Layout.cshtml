@@ -1,4 +1,5 @@
-﻿@{
+@inject XoSoWeb.Services.SiteSettings Site
+@{
     Layout = null;
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -19,13 +20,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Xổ Số Trực Tiếp</title>
+    <partial name="_Seo" />
 
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=IBM+Plex+Sans:wght@600&family=Hanken+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
     <!-- Site CSS -->
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
@@ -44,7 +43,7 @@
             <div class="d-flex align-items-center gap-2">
                 <a class="d-flex align-items-center gap-2 text-decoration-none" asp-controller="Home" asp-action="Index" aria-label="Về trang chủ">
                     <i class="fa-solid fa-ticket text-primary fs-4" aria-hidden="true"></i>
-                    <h1 class="h5 mb-0 fw-bold text-primary font-headline-md">Xổ Số Trực Tiếp</h1>
+                    <span class="h5 mb-0 fw-bold text-primary font-headline-md">@Site.SiteName</span>
                 </a>
             </div>
             <nav class="d-none d-lg-flex gap-4">
@@ -54,7 +53,6 @@
                 <a class="@(IsActive("Home", "XoSoMienNam") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienNam">XS Miền Nam</a>
                 <a class="@(IsActive("Home", "Vietlott") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott">Vietlott</a>
                 <a class="@(IsActive("Home", "Statistics") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Statistics">Thống Kê</a>
-                <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Tin Xổ Số</a>
             </nav>
             <button class="btn btn-primary rounded-pill font-label-sm px-4 py-2">
                 Đăng nhập
@@ -109,16 +107,16 @@
         </aside>
     </div>
 
-    <div class="container-xl mt-3">
+    <div class="container-xl mt-2">
         <div class="w-100 bg-surface-container-highest rounded ad-banner" style="height: 96px;">
             Google AdSense - Top Banner
         </div>
     </div>
 
-    <main class="container-xl py-4 d-flex flex-column flex-lg-row gap-4 page-content">
+    <main class="container-xl d-flex flex-column flex-lg-row page-content">
 
         <!-- Sidebar Navigation Drawer (Desktop Only) -->
-        <aside class="d-none d-lg-flex flex-column flex-shrink-0 sticky-top" style="width: 256px; top: 80px; height: max-content;">
+        <aside class="page-sidebar d-none d-lg-flex flex-column flex-shrink-0 sticky-top" style="top: 80px; height: max-content;">
             <div class="sidebar-region-panel">
                 <div class="sidebar-region-heading">
                     <h2 class="font-label-sm text-uppercase opacity-75 mb-0">Khu Vực</h2>
@@ -138,7 +136,7 @@
                     </a>
                 </nav>
             </div>
-            <div class="sidebar-region-panel mt-3">
+            <div class="sidebar-region-panel mt-2">
                 <div class="sidebar-region-heading">
                     <h2 class="font-label-sm text-uppercase opacity-75 mb-0">Thống kê</h2>
                 </div>
@@ -156,14 +154,18 @@
         </aside>
 
         <!-- Main Content Area (render theo từng trang con) -->
-        <section class="flex-grow-1 d-flex flex-column gap-3">
+        <section class="page-main-column flex-grow-1 d-flex flex-column">
+            @if (Context.Request.Path != "/")
+            {
+                <nav aria-label="Breadcrumb" class="results-breadcrumb"><a href="/">Trang chủ</a> / @if (ViewData["ParentPath"] != null) { <a href="@ViewData["ParentPath"]">@ViewData["ParentLabel"]</a><span> / </span> }<span>@ViewData["Title"]</span></nav>
+            }
             @RenderBody()
         </section>
 
     </main>
 
     <!-- Footer Ad -->
-    <div class="container-xl mb-5 mt-2">
+    <div class="container-xl mb-3 mt-2">
         <div class="w-100 bg-surface-container-highest rounded-4 ad-banner" style="height: 256px;">
             Google AdSense - Large Rectangular Ad
         </div>
@@ -173,35 +175,31 @@
     <footer class="bg-inverse-surface text-secondary-container-opacity border-top border-secondary-container-opacity pt-5 pb-3">
         <div class="container-xl d-flex flex-column flex-md-row justify-content-between align-items-start gap-4 pb-4 border-bottom border-light border-opacity-10">
             <div class="mb-4 mb-md-0" style="max-width: 350px;">
-                <h2 class="h5 fw-bold mb-3"><a class="text-white text-decoration-none" asp-controller="Home" asp-action="Index">Xổ Số Trực Tiếp</a></h2>
-                <p class="text-white-50 mb-3 fs-7">Cung cấp kết quả xổ số kiến thiết 3 miền nhanh nhất, chính xác nhất từ các công ty XSKT trên toàn quốc.</p>
-                <div class="d-flex gap-3 text-white-50">
-                    <span class="material-symbols-outlined" style="cursor: pointer;">qr_code_2</span>
-                    <span class="material-symbols-outlined" style="cursor: pointer;">youtube_activity</span>
-                    <span class="material-symbols-outlined" style="cursor: pointer;">share</span>
-                </div>
+                <h2 class="h5 fw-bold mb-3"><a class="text-white text-decoration-none" asp-controller="Home" asp-action="Index">@Site.SiteName</a></h2>
+                <p class="text-white-50 mb-3 fs-7">Tra cứu kết quả xổ số ba miền và Vietlott theo dữ liệu được lưu trong hệ thống.</p>
+                @if (!string.IsNullOrWhiteSpace(Site.OrganizationName)) { <p>Đơn vị vận hành: @Site.OrganizationName</p> }
             </div>
             <div class="row w-100" style="max-width: 500px;">
                 <div class="col-6">
-                    <h4 class="font-label-sm text-white text-uppercase mb-3">Thông tin</h4>
+                    <h3 class="font-label-sm text-white text-uppercase mb-3">Thông tin</h3>
                     <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                        <li><a class="text-white-50 text-decoration-none" href="/gioi-thieu">Giới thiệu</a></li>
+                        <li><a class="text-white-50 text-decoration-none" href="/nguon-du-lieu">Nguồn dữ liệu và đối soát</a></li>
                         <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="About">Liên hệ quảng cáo</a></li>
                         <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Support">Liên hệ</a></li>
                         <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Terms">Điều khoản sử dụng</a></li>
                     </ul>
                 </div>
                 <div class="col-6">
-                    <h4 class="font-label-sm text-white text-uppercase mb-3">Ứng dụng</h4>
+                    <h3 class="font-label-sm text-white text-uppercase mb-3">Chính sách</h3>
                     <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
-                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Index">Android App</a></li>
-                        <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Index">iOS App</a></li>
                         <li><a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="container-xl pt-3 text-center">
-            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @DateTime.Now.Year Xổ Số - Dữ liệu kết quả chính xác từ các công ty XSKT.</p>
+            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @DateTime.Now.Year @Site.SiteName · Thông tin tham khảo, cần đối chiếu với kết quả chính thức.</p>
         </div>
     </footer>
 
@@ -225,11 +223,6 @@
         </a>
     </nav>
 
-
-    <!-- jQuery JS -->
-    <script src="~/lib/jquery/jquery-4.0.0.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <!-- Site JS -->
     <script src="~/js/main.js" asp-append-version="true"></script>

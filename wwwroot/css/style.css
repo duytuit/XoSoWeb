@@ -56,10 +56,6 @@ h1, h2, h3, h4, h5, h6, .font-headline-md, .font-headline-lg, .font-display-lg, 
     font-weight: 600;
 }
 
-.material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
 .bg-primary { background-color: var(--bs-primary) !important; }
 .text-primary { color: var(--bs-primary) !important; }
 .bg-primary-container { background-color: var(--primary-container) !important; color: white !important; }
@@ -2849,4 +2845,53 @@ body.mobile-menu-open {
 .regional-results-table .red-prize-row > td,
 .regional-results-table .red-prize-row > td span {
     color: #ff0000 !important;
+}
+
+/* Compact spacing around the content; keep number sizes and touch targets readable. */
+.page-content {
+    gap: 1rem;
+    padding-block: .75rem;
+}
+.page-sidebar { width: 220px; }
+.page-main-column {
+    min-width: 0;
+    gap: .5rem;
+}
+.page-main-column > p { margin-bottom: .25rem; }
+.page-main-column > .results-breadcrumb { margin: 0; }
+.page-content .regional-page-title { padding-bottom: 0; }
+.page-content .detail-page-heading { margin: 0 0 .25rem; }
+.page-content .detail-page-description { margin: 0; }
+.page-content .draw-day-card { margin-bottom: .25rem; }
+.page-content .region-detail-header,
+.page-content .draw-day-card .region-detail-header,
+.page-content .results-section-header,
+.page-content .vietlott-card-header {
+    padding: .5rem .65rem;
+    gap: .5rem;
+}
+.page-content .draw-day-meta { margin-top: .15rem; }
+.page-content .draw-day-card .regional-loto-section { padding: .4rem .5rem; }
+.page-content .loto-section-heading { margin-bottom: .35rem; }
+.page-content .draw-day-card .regional-results-table tbody td { padding: .2rem .25rem; }
+.page-content .draw-day-card .regional-results-table thead th { padding: .35rem .25rem; }
+.page-content .sidebar-region-heading { padding: .5rem .65rem; }
+.page-content .sidebar-region-nav { padding: .25rem; gap: .1rem; }
+.page-content .sidebar-region-link {
+    min-height: 36px;
+    padding: .4rem .5rem;
+    gap: .5rem;
+}
+@media (max-width: 575.98px) {
+    .page-content {
+        --bs-gutter-x: 1rem;
+        padding-block: .5rem;
+        gap: .5rem;
+    }
+    .page-main-column { gap: .4rem; }
+    .page-content .region-detail-header,
+    .page-content .draw-day-card .region-detail-header,
+    .page-content .results-section-header,
+    .page-content .vietlott-card-header { padding: .4rem .5rem; }
+    .page-content .draw-day-card .regional-results-table tbody td { padding: .15rem; }
 }

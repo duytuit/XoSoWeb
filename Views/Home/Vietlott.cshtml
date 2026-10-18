@@ -1,10 +1,11 @@
+@using XoSoWeb.Services
 @model XoSoWeb.Models.VietlottPageViewModel
 @{
     ViewData["Title"] = "Kết Quả Vietlott";
+    if (Model.Results.Count == 0) ViewData["NoIndex"] = true;
 }
 <div class="regional-page-title">
     <div>
-        <div class="results-breadcrumb"><a href="/">Trang chủ</a> <span>/</span> Vietlott</div>
         <h1 class="detail-page-heading">Kết quả Vietlott</h1>
         <p class="detail-page-description">Bộ số trúng thưởng và giá trị giải theo từng kỳ quay</p>
     </div>
@@ -19,6 +20,10 @@ else
 {
     foreach (var resultGroup in Model.Results.GroupBy(result => result.GameCode))
     {
+        <nav class="d-flex flex-wrap gap-3 mb-2" aria-label="Trò chơi và kỳ quay">
+            <a href="@LotteryUrls.GamePath(resultGroup.Key)">@LotteryUrls.GameName(resultGroup.Key)</a>
+            @foreach (var draw in resultGroup) { <a href="@LotteryUrls.DrawPath(draw.GameCode, draw.DrawNo)">Kỳ @draw.DrawNo · @draw.DrawDate.ToString("dd/MM/yyyy")</a> }
+        </nav>
         var isFrequentDrawGame = resultGroup.Key == "BINGO18" || resultGroup.Key == "KENO";
         if (isFrequentDrawGame)
         {

@@ -1,5 +1,6 @@
 @model XoSoWeb.Models.XoSoRegionViewModel
 @{
+    if (Model.Results.Count == 0) ViewData["NoIndex"] = true;
     ViewData["Title"] = "Kết Quả Xổ Số Miền Nam";
 }
 

@@ -1,0 +1,37 @@
+@model XoSoWeb.Models.ArchivePage
+@using XoSoWeb.Services
+<h1 class="detail-page-heading">@Model.Title</h1>
+<p><a href="@Model.ParentPath">@Model.ParentLabel</a></p>
+@if (Model.Regional != null)
+{
+    foreach (var day in Model.Regional.Results.GroupBy(x => x.DrawDate.Date).OrderByDescending(x => x.Key))
+    {
+        var daily = new XoSoWeb.Models.XoSoRegionViewModel { Region = Model.Regional.Region, RegionName = Model.Regional.RegionName, IsHistorical = true,
+            Results = day.ToList(), LotoStatistics = day.First().LotoStatistics };
+        <partial name="_XoSoRegionDayResults" model="daily" />
+    }
+}
+@if (Model.Vietlott != null)
+{
+    foreach (var result in Model.Vietlott.Results)
+    {
+        <section class="card card-body">
+            <h2>@LotteryUrls.GameName(result.GameCode) · Kỳ @result.DrawNo</h2>
+            <p>Ngày quay: <time datetime="@result.DrawDate.ToString("yyyy-MM-dd")">@result.DrawDate.ToString("dd/MM/yyyy")</time></p>
+            <div class="d-flex flex-wrap gap-2">@foreach (var number in result.Numbers) { <strong>@number</strong> }
+                @foreach (var number in result.SpecialNumbers) { <strong class="text-primary">@number</strong> }</div>
+            @if (result.Prizes.Count > 0)
+            {
+                <div class="lottery-table-wrap"><table class="table"><thead><tr><th>Giải</th><th>Kết quả</th><th>Giá trị</th></tr></thead><tbody>
+                @foreach (var prize in result.Prizes) { <tr><th>@prize.PrizeName</th><td>@string.Join(" · ", prize.Numbers)</td><td>@prize.Value</td></tr> }
+                </tbody></table></div>
+            }
+        </section>
+    }
+}
+<nav class="d-flex justify-content-between gap-3" aria-label="Kỳ liền kề">
+    @if (Model.Previous != null) { <a href="@Model.Previous.Path">← Kỳ trước: @Model.Previous.Label</a> }
+    @if (Model.Next != null) { <a href="@Model.Next.Path">Kỳ tiếp theo: @Model.Next.Label →</a> }
+</nav>
+<h2>Lịch sử có dữ liệu</h2>
+<ul>@foreach (var link in Model.Links) { <li><a href="@link.Path">@link.Label</a></li> }</ul>

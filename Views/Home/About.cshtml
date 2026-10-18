@@ -1,3 +1,4 @@
+@inject XoSoWeb.Services.SiteSettings Site
 @{
     ViewData["Title"] = "Liên hệ quảng cáo";
 }
@@ -6,7 +7,7 @@
     <div class="card-body p-3 p-md-5">
         <h1 class="h2 fw-bold text-primary mb-3">LIÊN HỆ QUẢNG CÁO</h1>
         <h2 class="h4 fw-bold mb-3">Kết nối thương hiệu với người quan tâm thông tin xổ số</h2>
-        <p><strong>xoso.logapp.io.vn</strong> là website tổng hợp, thống kê và cập nhật thông tin xổ số Việt Nam, giúp người dùng thuận tiện tra cứu kết quả và theo dõi dữ liệu qua giao diện trực quan, dễ sử dụng.</p>
+        <p><strong>@Site.SiteName</strong> là website tổng hợp, thống kê và cập nhật thông tin xổ số Việt Nam, giúp người dùng thuận tiện tra cứu kết quả và theo dõi dữ liệu qua giao diện trực quan, dễ sử dụng.</p>
         <p>Chúng tôi chào đón các đối tác có nhu cầu giới thiệu thương hiệu, sản phẩm và dịch vụ phù hợp với nội dung website.</p>
 
         <section class="mt-4">
@@ -17,7 +18,7 @@
                 <li class="mb-2"><strong>Thống kê xổ số ba miền:</strong> cung cấp các bảng và công cụ thống kê trực quan, dễ hiểu, phục vụ nhu cầu tham khảo dữ liệu.</li>
                 <li class="mb-2"><strong>Các tiện ích tra cứu:</strong> tập hợp công cụ hỗ trợ tìm kiếm, theo dõi và so sánh kết quả qua các kỳ quay.</li>
             </ul>
-            <p>Dữ liệu được tổng hợp từ nhiều nguồn. Chúng tôi nỗ lực duy trì độ chính xác và tính cập nhật; người dùng cần đối chiếu với kết quả chính thức của đơn vị phát hành khi xác định trúng thưởng. Các thống kê phản ánh dữ liệu quá khứ, không bảo đảm hay dự đoán chắc chắn kết quả tương lai.</p>
+            <p>Thông tin hiện có về nguồn dữ liệu được công bố tại <a href="/nguon-du-lieu">trang nguồn dữ liệu và đối soát</a>. Người dùng cần đối chiếu với kết quả chính thức của đơn vị phát hành khi xác định trúng thưởng. Các thống kê phản ánh dữ liệu quá khứ, không bảo đảm kết quả tương lai.</p>
         </section>
 
         <section class="mt-4">
@@ -58,9 +59,9 @@
             <p>Để nhận tư vấn và báo giá, vui lòng liên hệ:</p>
             <ul class="list-unstyled">
                 <li><strong>Bộ phận:</strong> Hợp tác và quảng cáo</li>
-                <li><strong>Website:</strong> <a href="https://xoso.logapp.io.vn/">https://xoso.logapp.io.vn/</a></li>
-                <li><strong>Thời gian tiếp nhận:</strong> [Điền thời gian làm việc]</li>
+                <li><strong>Website:</strong> <a href="@Site.Absolute("/")">@Site.SiteName</a></li>
             </ul>
+            <partial name="_Contact" />
             <p>Khi liên hệ, vui lòng cung cấp tên thương hiệu, sản phẩm hoặc dịch vụ cần quảng bá, hình thức mong muốn, thời gian dự kiến và ngân sách để chúng tôi đề xuất phương án phù hợp.</p>
         </section>
 

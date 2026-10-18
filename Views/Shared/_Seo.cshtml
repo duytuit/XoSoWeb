@@ -1,0 +1,21 @@
+@using System.Text.Json
+@inject XoSoWeb.Services.SiteSettings Site
+@{ var seo = XoSoWeb.Services.SeoMetadata.Create(Site, Context.Request, ViewData); }
+<title>@seo.Title</title>
+<meta name="description" content="@seo.Description" />
+<meta name="robots" content="@(seo.NoIndex ? "noindex,follow" : "index,follow")" />
+<link rel="canonical" href="@seo.Canonical" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="vi_VN" />
+<meta property="og:site_name" content="@Site.SiteName" />
+<meta property="og:title" content="@seo.Title" />
+<meta property="og:description" content="@seo.Description" />
+<meta property="og:url" content="@seo.Canonical" />
+<meta property="og:image" content="@Site.Absolute(Site.ShareImagePath)" />
+@if (!string.IsNullOrWhiteSpace(Site.SearchConsoleVerification)) { <meta name="google-site-verification" content="@Site.SearchConsoleVerification" /> }
+<script type="application/ld+json">@Html.Raw(seo.StructuredJson)</script>
+@if (!string.IsNullOrWhiteSpace(Site.AnalyticsId) && Site.AllowIndexing)
+{
+    <script async src="https://www.googletagmanager.com/gtag/js?id=@Site.AnalyticsId"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config',@Html.Raw(JsonSerializer.Serialize(Site.AnalyticsId)));</script>
+}

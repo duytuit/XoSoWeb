@@ -1,0 +1,28 @@
+@model string
+@inject XoSoWeb.Services.SiteSettings Site
+@{
+    var sources = Model == "sources";
+    ViewData["Title"] = sources ? "Nguồn dữ liệu và đối soát" : "Giới thiệu";
+    ViewData["Description"] = sources ? "Thông tin nguồn dữ liệu, tình trạng đối soát và cách báo sai kết quả xổ số." : "Giới thiệu website tra cứu kết quả xổ số và thông tin đơn vị vận hành.";
+}
+<article class="card card-body">
+    <h1>@ViewData["Title"]</h1>
+    @if (sources)
+    {
+        <h2>Nguồn dữ liệu</h2>
+        <p>@(string.IsNullOrWhiteSpace(Site.DataSourceDescription) ? "Đơn vị vận hành chưa công bố đầy đủ danh sách nguồn dữ liệu. Kết quả trên website là dữ liệu được lưu trong hệ thống, cần đối chiếu với thông báo chính thức của đơn vị phát hành." : Site.DataSourceDescription)</p>
+        <h2>Quy trình đối soát</h2>
+        <p>@(string.IsNullOrWhiteSpace(Site.VerificationProcess) ? "Chưa có quy trình đối soát được công bố. Website chưa xác nhận từng kết quả đã được đối soát. Dữ liệu đang cập nhật có thể chưa đầy đủ hoặc đến chậm." : Site.VerificationProcess)</p>
+        <h2>Báo sai kết quả</h2>
+        <p>Gửi đường dẫn trang, miền hoặc tỉnh/trò chơi, ngày quay, mã kỳ, giải bị sai và đường dẫn thông báo chính thức qua <a href="/support">biểu mẫu hỗ trợ</a>. Không gửi ảnh chứa thông tin cá nhân không cần thiết.</p>
+    }
+    else
+    {
+        <p>@Site.SiteName hỗ trợ tra cứu kết quả xổ số ba miền, Vietlott và thống kê từ dữ liệu được lưu trong hệ thống. Thống kê quá khứ không dự đoán kết quả tương lai.</p>
+        <h2>Đơn vị vận hành</h2>
+        <p>@(string.IsNullOrWhiteSpace(Site.OrganizationName) ? "Thông tin đơn vị vận hành chưa được công bố." : Site.OrganizationName)</p>
+        <p><a href="/nguon-du-lieu">Nguồn dữ liệu và quy trình đối soát</a></p>
+    }
+    <h2>Liên hệ</h2>
+    <partial name="_Contact" />
+</article>

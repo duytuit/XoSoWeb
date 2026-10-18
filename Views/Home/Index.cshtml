@@ -1,6 +1,7 @@
+@inject XoSoWeb.Services.SiteSettings Site
 @model XoSoWeb.Models.HomePageViewModel
 @{
-    ViewData["Title"] = "Tổng hợp kết quả xổ số hôm nay";
+    ViewData["Title"] = "Tổng hợp kết quả xổ số";
     var latestVietlott = Model.Vietlott.Results
         .Where(result => result.GameCode == "MEGA645" || result.GameCode == "POWER655" || result.GameCode == "LOTTO535")
         .ToList();
@@ -11,19 +12,20 @@
 <div class="results-home-intro">
     <div>
         <span class="font-label-sm text-secondary text-uppercase">Tổng hợp kết quả</span>
-        <h1 class="fs-2 fw-bold text-primary mb-1">Kết quả xổ số hôm nay</h1>
+        <h1 class="fs-2 fw-bold text-primary mb-1">Kết quả xổ số mới nhất</h1>
         <p class="text-on-surface-variant mb-0">Miền Bắc, Miền Trung, Miền Nam và Vietlott.</p>
     </div>
-    <span class="results-status"><span class="red-dot-anim"></span> ĐÃ CẬP NHẬT</span>
+    <span class="results-status">DỮ LIỆU ĐÃ LƯU</span>
 </div>
 
-<section id="live-results" class="results-section live-results-section" aria-live="polite" hidden>
+<p id="live-connection-status" class="small text-secondary" role="status">@(string.IsNullOrWhiteSpace(Site.LiveSocketUrl) ? "Kênh trực tiếp chưa được cấu hình. Dưới đây là dữ liệu đã lưu." : "Đang kết nối kênh trực tiếp…")</p>
+<section data-socket-url="@Site.LiveSocketUrl" id="live-results" class="results-section live-results-section" aria-live="polite" hidden>
     <header class="results-section-header">
         <div>
             <h2>Kết quả xổ số trực tiếp</h2>
             <p id="live-results-status">Đang chờ dữ liệu quay số</p>
         </div>
-        <span class="results-status"><span class="red-dot-anim"></span> ĐANG QUAY</span>
+        <span class="results-status"><span class="red-dot-anim"></span> DỮ LIỆU TRỰC TIẾP</span>
     </header>
     <div id="live-results-grid" class="live-results-grid"></div>
 </section>
@@ -44,6 +46,7 @@
         else
         {
             var result = Model.MienBac.Results.First();
+            <p><a href="@(XoSoWeb.Services.LotteryUrls.RegionPath("MB") + "/" + result.DrawDate.ToString("dd-MM-yyyy"))">Xem kỳ ngày @result.DrawDate.ToString("dd/MM/yyyy")</a></p>
             <div class="home-summary-meta">@result.ProvinceName · @result.DrawDate.ToString("dd/MM/yyyy")</div>
             <table class="home-summary-table">
                 <tbody>
@@ -79,6 +82,7 @@
         }
         else
         {
+            <p><a href="@("/xo-so-mien-trung/" + Model.MienTrung.Results.First().DrawDate.ToString("dd-MM-yyyy"))">Xem kết quả theo ngày cố định</a></p>
             <div class="home-province-summary-grid">
                 @foreach (var result in Model.MienTrung.Results)
                 {
@@ -122,6 +126,7 @@
         }
         else
         {
+            <p><a href="@("/xo-so-mien-nam/" + Model.MienNam.Results.First().DrawDate.ToString("dd-MM-yyyy"))">Xem kết quả theo ngày cố định</a></p>
             <div class="home-province-summary-grid">
                 @foreach (var result in Model.MienNam.Results)
                 {

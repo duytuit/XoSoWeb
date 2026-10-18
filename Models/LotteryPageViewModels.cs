@@ -8,6 +8,7 @@ namespace XoSoWeb.Models
         public string Region { get; set; }
         public string RegionName { get; set; }
         public int? SelectedDay { get; set; }
+        public bool IsHistorical { get; set; }
         public List<XoSoResult> Results { get; set; } = new List<XoSoResult>();
         public List<LotoStatisticRow> LotoStatistics { get; set; } = new List<LotoStatisticRow>();
     }

@@ -81,14 +81,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const liveResults = document.getElementById('live-results');
 
-    if (liveResults) {
+    if (liveResults && liveResults.dataset.socketUrl) {
         const liveResultsGrid = document.getElementById('live-results-grid');
         const liveResultsStatus = document.getElementById('live-results-status');
-        const liveSocketUrl = 'wss://logapp.io.vn/ws';
+        const connectionStatus = document.getElementById('live-connection-status');
+        const liveSocketUrl = liveResults.dataset.socketUrl;
         const regionNames = { '1': 'Miền Bắc', '2': 'Miền Nam', '3': 'Miền Trung' };
         const reconnectDelay = 5000;
         let socket;
         let reconnectTimer;
+        let lastMessage = '';
+        let lastMessageAt = 0;
+        let reconnectAttempt = 0;
+        let unloading = false;
+        const setConnectionStatus = text => {
+            if (connectionStatus) connectionStatus.textContent = text;
+        };
+        const scheduleReconnect = () => {
+            if (unloading) return;
+            clearTimeout(reconnectTimer);
+            const delay = Math.min(60000, reconnectDelay * (2 ** Math.min(reconnectAttempt++, 4)));
+            reconnectTimer = window.setTimeout(connectLiveSocket, delay + Math.random() * 1000);
+        };
 
         const escapeHtml = value => String(value)
             .replaceAll('&', '&amp;')
@@ -227,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }).join('');
             const northernHeader = isNorthern ? `
                 <header class="region-detail-header live-region-detail-header">
-                    <h1>XSMB - Kết quả Xổ số Miền Bắc trực tiếp</h1>
+                    <h2>XSMB - Kết quả Xổ số Miền Bắc trực tiếp</h2>
                     <div class="region-detail-links">
                         <a href="#">XSMB</a>
                         <span>/</span>
@@ -316,8 +330,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            console.debug('Live socket message:', message);
-
+            lastMessageAt = Date.now();
+            setConnectionStatus('Đang nhận dữ liệu trực tiếp.');
+            if (message === lastMessage) return;
+            lastMessage = message;
             renderLiveResults(message);
         };
 
@@ -326,18 +342,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 socket = new WebSocket(liveSocketUrl);
             } catch (error) {
                 console.error('Không thể khởi tạo live socket:', error);
-                reconnectTimer = window.setTimeout(connectLiveSocket, reconnectDelay);
+                scheduleReconnect();
                 return;
             }
 
             socket.addEventListener('open', () => {
+                reconnectAttempt = 0;
+                setConnectionStatus('Đã kết nối, đang chờ dữ liệu quay số.');
                 liveResultsStatus.textContent = 'Đã kết nối, đang chờ dữ liệu quay số';
             });
             socket.addEventListener('message', handleMessage);
             socket.addEventListener('close', () => {
                 clearTimeout(reconnectTimer);
                 liveResultsStatus.textContent = 'Mất kết nối, đang thử kết nối lại';
-                reconnectTimer = window.setTimeout(connectLiveSocket, reconnectDelay);
+                setConnectionStatus('Mất kết nối trực tiếp, đang thử lại. Bảng kết quả đã lưu vẫn có thể tra cứu.');
+                scheduleReconnect();
             });
             socket.addEventListener('error', () => {
                 liveResultsStatus.textContent = 'Không kết nối được máy chủ kết quả';
@@ -346,6 +365,17 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         connectLiveSocket();
+        const staleTimer = window.setInterval(() => {
+            if (lastMessageAt && Date.now() - lastMessageAt > 120000 && socket?.readyState === WebSocket.OPEN)
+                setConnectionStatus('Chưa nhận dữ liệu trực tiếp mới trong 2 phút. Nguồn có thể chậm hoặc tạm ngừng gửi.');
+        }, 30000);
+        window.addEventListener('pagehide', () => {
+            unloading = true;
+            clearInterval(staleTimer);
+            clearTimeout(reconnectTimer);
+            if (socket) socket.close();
+        });
+        window.addEventListener('pageshow', event => { if (event.persisted) window.location.reload(); });
 
         // Preview live result locally. Uncomment these two lines to preview the table.
         //const previewLiveMessage = '0|3!1|32|TTH|Huế @96|507|2795-7931-0655|0606|28539-32978-83459-36360-49928-34381-31694|69178-83885|33140|69172|616814|!1|33|PY|Phú Yên@90|062|6272-4853-0247|9267|85789-93792-51450-37719-07609-92709-62869|22837-38481|50811|81505|342609|';

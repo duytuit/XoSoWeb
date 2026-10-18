@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -16,16 +16,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace XoSoWeb.Controllers
 {
-    public class HomeController : Controller
+    public partial class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly XoSoDBContext _context;
-        private readonly RedisService _redisService;
 
-        public HomeController(ILogger<HomeController> logger, RedisService redisService, XoSoDBContext context)
+        public HomeController(ILogger<HomeController> logger, XoSoDBContext context)
         {
             _logger = logger;
-            _redisService = redisService;
             _context = context;
         }
 
@@ -61,6 +59,7 @@ namespace XoSoWeb.Controllers
         [HttpGet("/thong-ke")]
         public async Task<IActionResult> Statistics([FromQuery] DateTime? endDate = null)
         {
+            if (!ModelState.IsValid || endDate > LotteryUrls.Today || endDate < new DateTime(1753, 1, 30)) return BadRequest();
             return View("Statistics", await GetSpecialPrizeStatisticsAsync(endDate));
         }
         [HttpGet("/privacy")]
@@ -72,8 +71,9 @@ namespace XoSoWeb.Controllers
         [HttpGet("/thong-ke-tan-suat-loto")]
         public async Task<IActionResult> LotoFrequency([FromQuery] string region = "MB", [FromQuery] DateTime? week = null)
         {
+            if (!ModelState.IsValid || week > LotteryUrls.Today || week < new DateTime(1753, 1, 8)) return BadRequest();
             region = (region ?? "MB").ToUpperInvariant();
-            if (region != "MB" && region != "MT" && region != "MN") region = "MB";
+            if (region != "MB" && region != "MT" && region != "MN") return BadRequest();
             var today = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).Date;
             var date = week?.Date ?? today;
             if (date > today || date < new DateTime(1753, 1, 8)) date = today;
@@ -87,9 +87,15 @@ namespace XoSoWeb.Controllers
             {
                 await using var command = _context.Database.GetDbConnection().CreateCommand();
                 command.CommandText = @"SELECT Region, DrawDate, Prizes FROM dbo.XoSoResults
-                    WHERE DrawDate >= @start AND DrawDate < @end ORDER BY DrawDate, ProvinceName;";
+                    WHERE DrawDate >= @start AND DrawDate < @end
+                    AND Region IN (@region, @storedRegion, @unaccentedRegion, @mixedRegion)
+                    ORDER BY DrawDate, ProvinceName;";
                 AddParameter(command, "@start", model.WeekStart);
-                AddParameter(command, "@end", model.WeekStart.AddDays(7));
+                AddParameter(command, "@end", model.WeekStart.AddDays(7) < today.AddDays(1) ? model.WeekStart.AddDays(7) : today.AddDays(1));
+                AddParameter(command, "@region", region);
+                AddParameter(command, "@storedRegion", region == "MB" ? "Miền bắc" : region == "MT" ? "Miền trung" : "Miền nam");
+                AddParameter(command, "@unaccentedRegion", region == "MB" ? "Mien Bac" : region == "MT" ? "Mien Trung" : "Mien Nam");
+                AddParameter(command, "@mixedRegion", region == "MB" ? "Miền bac" : region == "MT" ? "Miền Trung" : "Miền Nam");
                 await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
@@ -119,22 +125,30 @@ namespace XoSoWeb.Controllers
         [HttpGet("/xo-so-mien-bac")]
         public async Task<IActionResult> XoSoMienBac([FromQuery] int? day = null)
         {
+            if (!ModelState.IsValid || day < 1 || day > 7) return BadRequest();
             return View("XoSoMienBac", await GetRegionResultsAsync("MB", "Miền Bắc", day, 7));
         }
         [HttpGet("/xo-so-mien-trung")]
         public async Task<IActionResult> XoSoMienTrung([FromQuery] int? day = null)
         {
+            if (!ModelState.IsValid || day < 1 || day > 7) return BadRequest();
             return View("XoSoMienTrung", await GetRegionResultsAsync("MT", "Miền Trung", day, 7));
         }
         [HttpGet("/xo-so-mien-nam")]
         public async Task<IActionResult> XoSoMienNam([FromQuery] int? day = null)
         {
+            if (!ModelState.IsValid || day < 1 || day > 7) return BadRequest();
             return View("XoSoMienNam", await GetRegionResultsAsync("MN", "Miền Nam", day, 7));
         }
         [HttpGet("/vietlott")]
         public async Task<IActionResult> Vietlott([FromQuery] string gameCode = null, [FromQuery] int offset = 0)
         {
-            return View("Vietlott", await GetVietlottResultsAsync(gameCode, offset));
+            if (!ModelState.IsValid || offset < 0 || offset > 100000 || (offset > 0 && gameCode == null)) return BadRequest();
+            if (gameCode != null && !ArchiveCatalog.SupportedGames.Contains(gameCode)) return NotFound();
+            if (gameCode != null && offset == 0) return RedirectPermanent(LotteryUrls.GamePath(gameCode));
+            var model = await GetVietlottResultsAsync(gameCode, offset);
+            if (offset > 0 && model.Results.Count == 0) return NotFound();
+            return View("Vietlott", model);
         }
         [HttpPost("support")]
         [ValidateAntiForgeryToken]
@@ -253,7 +267,7 @@ namespace XoSoWeb.Controllers
                 || name.Equals("Giai DB", StringComparison.OrdinalIgnoreCase);
         }
 
-        private async Task<XoSoRegionViewModel> GetRegionResultsAsync(string region, string regionName, int? selectedDay = null, int resultDays = 1)
+        private async Task<XoSoRegionViewModel> GetRegionResultsAsync(string region, string regionName, int? selectedDay = null, int resultDays = 1, DateTime? exactDate = null, string provinceName = null)
         {
             selectedDay = selectedDay >= 1 && selectedDay <= 7 ? selectedDay : null;
             var model = new XoSoRegionViewModel { Region = region, RegionName = regionName, SelectedDay = selectedDay };
@@ -270,18 +284,27 @@ namespace XoSoWeb.Controllers
             command.CommandText = @"
                 WITH RankedResults AS
                 (
-                    SELECT Id, Region, ProvinceCode, ProvinceName, DrawDate, Prizes,
+                    SELECT Id, Region, ProvinceCode, ProvinceName, DrawDate, Prizes, UpdatedAt,
                         DENSE_RANK() OVER (ORDER BY CAST(DrawDate AS date) DESC) AS DrawDateRank
                     FROM dbo.XoSoResults
-                    WHERE (Region = @region OR Region = @storedRegionName)
+                    WHERE (Region = @region OR Region = @storedRegionName OR Region = @unaccentedRegion OR Region = @mixedRegion)
+                        AND DrawDate < @tomorrow
+                        AND (@exactDate IS NULL OR (DrawDate >= @exactDate AND DrawDate < @dateEnd))
+                        AND (@provinceName IS NULL OR ProvinceName = @provinceName)
                         AND (@selectedDay IS NULL OR
                             ((DATEDIFF(day, '19000101', DrawDate) % 7 + 7) % 7) + 1 = @selectedDay)
                 )
-                SELECT Id, Region, ProvinceCode, ProvinceName, DrawDate, Prizes
+                SELECT Id, Region, ProvinceCode, ProvinceName, DrawDate, Prizes, UpdatedAt
                 FROM RankedResults
                 WHERE DrawDateRank <= @resultDays
                 ORDER BY DrawDate DESC, ProvinceName, Id DESC;";
             AddParameter(command, "@region", region);
+            AddParameter(command, "@unaccentedRegion", region == "MB" ? "Mien Bac" : region == "MT" ? "Mien Trung" : "Mien Nam");
+            AddParameter(command, "@mixedRegion", region == "MB" ? "Miền bac" : storedRegionName);
+            AddParameter(command, "@tomorrow", LotteryUrls.Today.AddDays(1));
+            AddParameter(command, "@exactDate", exactDate);
+            AddParameter(command, "@dateEnd", exactDate?.AddDays(1));
+            AddParameter(command, "@provinceName", provinceName);
             AddParameter(command, "@storedRegionName", storedRegionName);
             AddParameter(command, "@selectedDay", selectedDay);
             AddParameter(command, "@resultDays", resultDays);
@@ -292,6 +315,7 @@ namespace XoSoWeb.Controllers
                 model.Results.Add(new XoSoResult
                 {
                     Id = reader.GetInt64(0),
+                    UpdatedAt = reader.IsDBNull(6) ? null : reader.GetDateTime(6),
                     Region = reader.GetString(1),
                     ProvinceCode = reader.GetString(2),
                     ProvinceName = reader.GetString(3),
@@ -348,7 +372,7 @@ namespace XoSoWeb.Controllers
                 .ToList();
         }
 
-        private async Task<VietlottPageViewModel> GetVietlottResultsAsync(string selectedGameCode = null, int selectedOffset = 0)
+        private async Task<VietlottPageViewModel> GetVietlottResultsAsync(string selectedGameCode = null, int selectedOffset = 0, string exactDraw = null)
         {
             var model = new VietlottPageViewModel();
             var supportedGames = new[] { "BINGO18", "KENO", "LOTTO535", "MAX3D", "MAX3D_PLUS", "MAX3D_PRO", "MEGA645", "POWER655" };
@@ -386,7 +410,8 @@ namespace XoSoWeb.Controllers
                         COUNT(*) OVER (PARTITION BY GameCode) AS TotalPeriods,
                         ROW_NUMBER() OVER (PARTITION BY GameCode ORDER BY DrawDate DESC, Id DESC) AS ResultRank
                     FROM dbo.VietlottResults
-                    WHERE GameCode IN
+                    WHERE DrawDate < @tomorrow AND (@selectedGameCode IS NULL OR GameCode = @selectedGameCode)
+                    AND (@exactDraw IS NULL OR DrawNo = @exactDraw) AND GameCode IN
                     (
                         'BINGO18', 'KENO', 'LOTTO535', 'MAX3D',
                         'MAX3D_PLUS', 'MAX3D_PRO', 'MEGA645', 'POWER655'
@@ -421,6 +446,8 @@ namespace XoSoWeb.Controllers
                     WHEN 'KENO' THEN 8
                 END, ResultRank;";
             AddParameter(command, "@selectedGameCode", selectedGameCode);
+            AddParameter(command, "@exactDraw", exactDraw);
+            AddParameter(command, "@tomorrow", LotteryUrls.Today.AddDays(1));
             AddParameter(command, "@selectedOffset", selectedOffset);
 
             var results = new List<VietlottResult>();
@@ -447,9 +474,10 @@ namespace XoSoWeb.Controllers
             }
 
             await reader.CloseAsync();
+            var prizesByResult = await GetVietlottPrizesAsync(connection, results.Select(x => x.Id).ToList());
             foreach (var result in results)
             {
-                result.Prizes = await GetVietlottPrizesAsync(connection, result.Id);
+                result.Prizes = prizesByResult.TryGetValue(result.Id, out var prizes) ? prizes : new List<VietlottPrize>();
                 model.Results.Add(result);
             }
             await connection.CloseAsync();
@@ -457,21 +485,25 @@ namespace XoSoWeb.Controllers
             return model;
         }
 
-        private static async Task<List<VietlottPrize>> GetVietlottPrizesAsync(System.Data.Common.DbConnection connection, long resultId)
+        private static async Task<Dictionary<long, List<VietlottPrize>>> GetVietlottPrizesAsync(System.Data.Common.DbConnection connection, List<long> resultIds)
         {
+            var prizes = new Dictionary<long, List<VietlottPrize>>();
+            if (resultIds.Count == 0) return prizes;
             await using var command = connection.CreateCommand();
-            command.CommandText = @"SELECT PrizeName, Numbers, PrizeValue FROM dbo.VietlottPrizes WHERE ResultId = @resultId ORDER BY Id;";
-            AddParameter(command, "@resultId", resultId);
+            var names = resultIds.Select((id, index) => "@id" + index).ToList();
+            command.CommandText = "SELECT ResultId, PrizeName, Numbers, PrizeValue FROM dbo.VietlottPrizes WHERE ResultId IN (" + string.Join(",", names) + ") ORDER BY ResultId, Id;";
+            for (var index = 0; index < resultIds.Count; index++) AddParameter(command, names[index], resultIds[index]);
 
-            var prizes = new List<VietlottPrize>();
             await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                prizes.Add(new VietlottPrize
+                var id = reader.GetInt64(0);
+                if (!prizes.TryGetValue(id, out var rows)) prizes[id] = rows = new List<VietlottPrize>();
+                rows.Add(new VietlottPrize
                 {
-                    PrizeName = reader.GetString(0),
-                    Numbers = SplitValues(reader.IsDBNull(1) ? null : reader.GetString(1)),
-                    Value = reader.IsDBNull(2) ? null : reader.GetString(2)
+                    PrizeName = reader.GetString(1),
+                    Numbers = SplitValues(reader.IsDBNull(2) ? null : reader.GetString(2)),
+                    Value = reader.IsDBNull(3) ? null : reader.GetString(3)
                 });
             }
 

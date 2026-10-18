@@ -14,6 +14,7 @@ namespace XoSoWeb.Models
         public string ProvinceName { get; set; }
 
         public DateTime DrawDate { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         public List<XoSoPrize> Prizes { get; set; }
             = new List<XoSoPrize>();

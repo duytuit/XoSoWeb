@@ -29,16 +29,30 @@ namespace XoSoWeb
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            Environment = environment;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Environment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var site = new SiteSettings();
+            Configuration.GetSection("Site").Bind(site);
+            site.Validate(Environment.IsDevelopment());
+            if (!Environment.IsProduction()) site.AllowIndexing = false;
+            if (Environment.IsStaging() && (string.IsNullOrWhiteSpace(site.StagingUsername) || string.IsNullOrWhiteSpace(site.StagingPassword)))
+                throw new InvalidOperationException("Staging requires Site:StagingUsername and Site:StagingPassword.");
+            services.AddSingleton(site);
+            services.AddMemoryCache();
+            services.AddSingleton<ArchiveCatalog>();
+            services.AddRouting(options => options.LowercaseUrls = true);
+            services.AddHttpsRedirection(options => { options.HttpsPort = 443; options.RedirectStatusCode = 308; });
+
              services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",
@@ -61,7 +75,7 @@ namespace XoSoWeb
             services.AddDbContext<XoSoDBContext>(options =>
                 {
                         options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-                        options.EnableSensitiveDataLogging();
+                        // Sensitive data logging is intentionally disabled.
                         options.EnableDetailedErrors();
                 }
             );
@@ -70,7 +84,7 @@ namespace XoSoWeb
             services.AddTransient<AdoXoSoDB>();
             services.AddSingleton<RedisService>();
             
-            services.AddResponseCompression();
+            services.AddResponseCompression(options => options.EnableForHttps = true);
             services.AddControllersWithViews(); // 👈 hỗ trợ cả View + API
             services.AddHttpClient(); // Add HttpClient factory
             services.AddSingleton<TelegramContactService>();
@@ -84,26 +98,25 @@ namespace XoSoWeb
             var telegramConfig = app.ApplicationServices.GetRequiredService<IOptions<TelegramSettings>>();
             Helper.ConfigureTelegram(telegramConfig.Value);
 
-            app.UseStaticFiles();
-
-            app.UseHttpsRedirection();
+            app.UseMiddleware<ExceptionMiddleware>();
+            if (!env.IsDevelopment()) app.UseResponseCompression();
+            app.UseMiddleware<PublicUrlMiddleware>();
+            if (!env.IsDevelopment()) app.UseHttpsRedirection();
+            app.UseMiddleware<StagingAccessMiddleware>();
+            app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = context =>
+            {
+                context.Context.Response.Headers["Cache-Control"] = context.Context.Request.Query.ContainsKey("v")
+                    ? "public,max-age=31536000,immutable" : "public,max-age=3600";
+            }});
 
             app.UseRouting();
 
             app.UseCors("AllowAll"); // Quan trọng: phải đặt trước UseAuthorization nếu có
 
-            app.UseMiddleware<ExceptionMiddleware>();
-
             app.UseAuthorization();
-
-            app.UseResponseCompression();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-
                 endpoints.MapControllers(); // API route
             });
         }

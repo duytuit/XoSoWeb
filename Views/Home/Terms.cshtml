@@ -1,10 +1,11 @@
+@inject XoSoWeb.Services.SiteSettings Site
 @{
     ViewData["Title"] = "Điều khoản sử dụng";
 }
 <article class="card border-0 shadow-sm">
     <div class="card-body p-3 p-md-5">
         <h1 class="h2 fw-bold text-primary mb-4">Điều khoản sử dụng</h1>
-            <p><strong>Website:</strong> <a href="https://xoso.logapp.io.vn/">https://xoso.logapp.io.vn/</a><br />
+            <p><strong>Website:</strong> <a href="@Site.Absolute("/")">@Site.SiteName</a><br />
                 <strong>Ngày có hiệu lực:</strong>12/01/2023</p>
             <p>Bằng việc truy cập và sử dụng website, bạn xác nhận đã đọc và đồng ý với các điều khoản dưới đây. Nếu không đồng ý, vui lòng ngừng sử dụng website.</p>
         <section class="mt-4">
@@ -89,7 +90,7 @@
             <h2 class="h5 text-primary mb-3">13. Thông tin liên hệ</h2>
             <p><strong>Đơn vị/cá nhân vận hành:</strong> Mr. Duy<br />
                 <strong>Địa chỉ liên hệ:</strong>Cổ Điển, Xã Vĩnh Thanh, Thành phố Hà Nội<br />
-                <strong>Website:</strong> <a href="https://xoso.logapp.io.vn/">https://xoso.logapp.io.vn/</a></p>
+                <strong>Website:</strong> <a href="@Site.Absolute("/")">@Site.SiteName</a></p>
         </section>
         <nav class="border-top pt-3 mt-4"><a asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a></nav>
     </div>

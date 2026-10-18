@@ -1,0 +1,45 @@
+Merge this section into deployment configuration, or use environment variables Site__Property.
+Do not copy production secrets into the repository. SiteUrl intentionally has no default.
+
+{
+  "Site": {
+    "SiteUrl": "",
+    "SiteName": "Xổ Số Trực Tiếp",
+    "OrganizationName": "",
+    "ContactEmail": "",
+    "ContactPhone": "",
+    "ContactAddress": "",
+    "DataSourceDescription": "",
+    "VerificationProcess": "",
+    "SearchConsoleVerification": "",
+    "AnalyticsId": "",
+    "ShareImagePath": "/images/share.png",
+    "LiveSocketUrl": "",
+    "AllowIndexing": true,
+    "StagingUsername": "",
+    "StagingPassword": ""
+  }
+}
+
+Development only:
+ASPNETCORE_ENVIRONMENT=Development
+Site__SiteUrl=http://localhost:5099
+ASPNETCORE_URLS=http://localhost:5099
+
+Production:
+ASPNETCORE_ENVIRONMENT=Production
+Site__SiteUrl=<actual public HTTPS origin without a path>
+AllowedHosts=<actual public hostname>
+
+Existing live endpoint (configure only if still operated/authorized by the owner):
+Site__LiveSocketUrl=wss://logapp.io.vn/ws
+
+Staging:
+ASPNETCORE_ENVIRONMENT=Staging
+Site__SiteUrl=<actual staging HTTPS origin>
+Site__StagingUsername=<private username>
+Site__StagingPassword=<strong secret from deployment secret store>
+
+Nonproduction environments always emit noindex. Staging additionally requires Basic authentication.
+Production validates SiteUrl at startup; it does not infer it from a request Host header.
+AnalyticsId accepts only a real GA4 G- identifier. Empty means no tracking script.

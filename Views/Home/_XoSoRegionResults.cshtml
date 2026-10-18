@@ -1,14 +1,23 @@
+@inject XoSoWeb.Services.ArchiveCatalog Catalog
+@using XoSoWeb.Services
 @model XoSoWeb.Models.XoSoRegionViewModel
 @using System.Linq
 
 <div class="regional-page-title">
     <div>
-        <div class="results-breadcrumb"><a href="/">Trang chủ</a> <span>/</span> Xổ số @Model.RegionName</div>
         <h1 class="detail-page-heading">Kết quả xổ số @Model.RegionName</h1>
         <p class="detail-page-description">@(Model.SelectedDay.HasValue ? "7 kỳ gần nhất theo thứ được chọn" : "7 ngày có kết quả gần nhất") · Mới nhất ở trên</p>
     </div>
 </div>
 
+@{
+    var available = await Catalog.GetAsync(Context.RequestAborted);
+    if (Model.Results.Count == 0) ViewData["NoIndex"] = true;
+}
+<nav class="d-flex flex-wrap gap-3" aria-label="Tỉnh và đài có dữ liệu">
+@foreach (var province in available.Where(x => x.Region == Model.Region && x.ProvinceCode != null && !x.Date.HasValue))
+{ <a href="@province.Path">@province.Label</a> }
+</nav>
 <nav class="weekday-filter" aria-label="Lọc kết quả theo thứ">
     <a class="@(Model.SelectedDay == null ? "active" : "")" asp-route-day="">@Model.RegionName</a>
     <a class="@(Model.SelectedDay == 1 ? "active" : "")" asp-route-day="1">Thứ 2</a>
@@ -32,12 +41,14 @@ else
         var dailyModel = new XoSoWeb.Models.XoSoRegionViewModel
         {
             Region = Model.Region,
+            IsHistorical = true,
             RegionName = Model.RegionName,
             SelectedDay = Model.SelectedDay,
             Results = dailyResults,
             LotoStatistics = dailyResults.First().LotoStatistics
         };
         <article class="draw-day-card" aria-label="Kết quả ngày @drawDay.Key.ToString("dd/MM/yyyy")">
+            <p><a href="@(LotteryUrls.RegionPath(Model.Region) + "/" + drawDay.Key.ToString("dd-MM-yyyy"))">Kết quả cố định ngày @drawDay.Key.ToString("dd/MM/yyyy")</a></p>
             <partial name="_XoSoRegionDayResults" model="dailyModel" />
         </article>
     }
