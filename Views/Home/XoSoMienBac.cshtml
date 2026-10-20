@@ -2,6 +2,12 @@
 @{
     if (Model.Results.Count == 0) ViewData["NoIndex"] = true;
     ViewData["Title"] = "Kết Quả Xổ Số Miền Bắc";
+    if (Model.SelectedDay.HasValue)
+    {
+        var weekday = Model.SelectedDay == 7 ? "Chủ nhật" : "Thứ " + (Model.SelectedDay + 1);
+        ViewData["Title"] += " · " + weekday;
+        ViewData["Description"] = "Kết quả xổ số " + Model.RegionName + " vào " + weekday + ", gồm bảng giải và liên kết đến từng ngày quay đã lưu.";
+    }
 }
 
 <partial name="_XoSoRegionResults" model="Model" />

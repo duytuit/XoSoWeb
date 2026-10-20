@@ -20,6 +20,14 @@
             <p>Ngày quay: <time datetime="@result.DrawDate.ToString("yyyy-MM-dd")">@result.DrawDate.ToString("dd/MM/yyyy")</time></p>
             <div class="d-flex flex-wrap gap-2">@foreach (var number in result.Numbers) { <strong>@number</strong> }
                 @foreach (var number in result.SpecialNumbers) { <strong class="text-primary">@number</strong> }</div>
+            @if (result.Total.HasValue || !string.IsNullOrWhiteSpace(result.OddEven) || !string.IsNullOrWhiteSpace(result.Size))
+            {
+                <dl class="d-flex flex-wrap gap-3">
+                    @if (result.Total.HasValue) { <div><dt>Tổng</dt><dd>@result.Total</dd></div> }
+                    @if (!string.IsNullOrWhiteSpace(result.OddEven)) { <div><dt>Chẵn/lẻ</dt><dd>@result.OddEven</dd></div> }
+                    @if (!string.IsNullOrWhiteSpace(result.Size)) { <div><dt>Lớn/hòa/nhỏ</dt><dd>@result.Size</dd></div> }
+                </dl>
+            }
             @if (result.Prizes.Count > 0)
             {
                 <div class="lottery-table-wrap"><table class="table"><thead><tr><th>Giải</th><th>Kết quả</th><th>Giá trị</th></tr></thead><tbody>

@@ -15,6 +15,9 @@ namespace XoSoWeb.Controllers
         {
             DateTime parsed = default;
             if (date != null && !LotteryUrls.TryDate(date, out parsed)) return NotFound();
+            var station = StationCatalog.Find(slug);
+            if (station != null && slug != station.Slug)
+                return RedirectPermanent("/xo-so-" + station.Slug + (date == null ? "" : "/" + date) + Request.QueryString);
             var path = "/xo-so-" + slug + (date == null ? "" : "/" + date);
             var entries = await catalog.GetAsync(HttpContext.RequestAborted);
             var entry = entries.FirstOrDefault(x => x.Path == path && x.GameCode == null);
@@ -56,7 +59,7 @@ namespace XoSoWeb.Controllers
         public async Task<IActionResult> VietlottArchive(string game, string drawNo, [FromServices] ArchiveCatalog catalog)
         {
             var code = ArchiveCatalog.SupportedGames.FirstOrDefault(x => LotteryUrls.Slug(x) == game);
-            if (code == null) return NotFound();
+            if (code == null || (drawNo != null && !LotteryUrls.ValidDrawNo(drawNo))) return NotFound();
             var entries = await catalog.GetAsync(HttpContext.RequestAborted);
             var path = drawNo == null ? LotteryUrls.GamePath(code) : LotteryUrls.DrawPath(code, drawNo);
             var entry = entries.FirstOrDefault(x => x.Path == path);
@@ -64,15 +67,30 @@ namespace XoSoWeb.Controllers
                 entry = new ArchiveLink { Path = path, GameCode = code, DrawNo = drawNo, Label = LotteryUrls.GameName(code) + " · kỳ " + drawNo };
             if (entry == null) return NotFound();
             var page = await GetVietlottResultsAsync(code, 0, drawNo);
+            if (drawNo == null && page.Results.Count == 0)
+            {
+                var latest = entries.Where(x => x.GameCode == code && x.DrawNo != null)
+                    .OrderByDescending(x => x.Date).ThenByDescending(x => x.DrawNo.Length).ThenByDescending(x => x.DrawNo, StringComparer.Ordinal).FirstOrDefault();
+                if (latest != null) page = await GetVietlottResultsAsync(code, 0, latest.DrawNo);
+            }
             if (page.Results.Count == 0) return NotFound();
-            var siblings = entries.Where(x => x.GameCode == code && x.DrawNo != null).OrderByDescending(x => x.Date).ThenByDescending(x => x.DrawNo, StringComparer.Ordinal).ToList();
+            if (drawNo != null && page.Results.Any(r => r.DrawNo != drawNo || r.GameCode != code)) return NotFound();
+            var siblings = entries.Where(x => x.GameCode == code && x.DrawNo != null).OrderByDescending(x => x.Date).ThenByDescending(x => x.DrawNo.Length).ThenByDescending(x => x.DrawNo, StringComparer.Ordinal).ToList();
+            var drawDate = page.Results.First().DrawDate;
+            var drawLabel = LotteryUrls.GameName(code) + " · kỳ " + drawNo + " · " + drawDate.ToString("dd/MM/yyyy");
+            var orderedPaths = siblings.Select(x => x.Path).ToList();
+            if (drawNo != null && !orderedPaths.Contains(path))
+            {
+                siblings.Add(new ArchiveLink { Path = path, GameCode = code, DrawNo = drawNo, Date = drawDate, Label = drawLabel });
+                siblings = siblings.OrderByDescending(x => x.Date).ThenByDescending(x => x.DrawNo.Length).ThenByDescending(x => x.DrawNo, StringComparer.Ordinal).ToList();
+            }
             var index = siblings.FindIndex(x => x.Path == path);
-            var model = new ArchivePage { Title = entry.Label, ParentPath = drawNo == null ? "/vietlott" : LotteryUrls.GamePath(code),
+            var model = new ArchivePage { Title = "Kết quả " + (drawNo == null ? entry.Label : drawLabel), ParentPath = drawNo == null ? "/vietlott" : LotteryUrls.GamePath(code),
                 ParentLabel = drawNo == null ? "Vietlott" : LotteryUrls.GameName(code), Vietlott = page, Links = siblings.Take(30).ToList(),
                 Previous = index >= 0 && index + 1 < siblings.Count ? siblings[index + 1] : null,
                 Next = index > 0 ? siblings[index - 1] : null };
-            ViewData["Title"] = "Kết quả " + model.Title;
-            ViewData["Description"] = "Kết quả " + model.Title + ", mã kỳ quay, ngày quay và bảng giải được lưu trong hệ thống.";
+            ViewData["Title"] = model.Title;
+            ViewData["Description"] = model.Title + ". Xem bộ số, bảng giải và các kỳ quay liền kề đã lưu.";
             ViewData["ParentPath"] = model.ParentPath;
             ViewData["ParentLabel"] = model.ParentLabel;
             return View("Archive", model);

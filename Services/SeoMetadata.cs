@@ -32,8 +32,8 @@ namespace XoSoWeb.Services
         ["/lien-he-quang-cao"] = "Thông tin các hình thức hợp tác và liên hệ quảng cáo trên website." };
     var description = viewData["Description"]?.ToString() ?? (descriptions.TryGetValue(path, out var desc) ? desc : "Tra cứu " + viewData["Title"] + " và các kết quả liên quan.");
     var filterKeys = new[] { "day", "gameCode", "offset", "endDate", "region", "week" };
-    var filters = request.Query.Where(x => filterKeys.Contains(x.Key)).OrderBy(x => x.Key, StringComparer.Ordinal).ToList();
-    var canonicalPath = path + (filters.Count == 0 ? "" : "?" + string.Join("&", filters.Select(x => Uri.EscapeDataString(x.Key) + "=" + Uri.EscapeDataString(x.Value.ToString()))));
+    var filters = request.Query.Where(x => filterKeys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)).OrderBy(x => x.Key, StringComparer.Ordinal).ToList();
+    var canonicalPath = path + (filters.Count == 0 ? "" : "?" + string.Join("&", filters.Select(x => Uri.EscapeDataString(filterKeys.First(k => k.Equals(x.Key, StringComparison.OrdinalIgnoreCase))) + "=" + Uri.EscapeDataString(x.Value.ToString()))));
     var canonical = Site.Absolute(canonicalPath);
     var noindex = !Site.AllowIndexing || filters.Count > 0 || (bool?)viewData["NoIndex"] == true;
     var graph = new List<object> { new Dictionary<string, object> { ["@type"] = "WebSite", ["@id"] = Site.Absolute("/#website"), ["url"] = Site.Absolute("/"), ["name"] = Site.SiteName, ["inLanguage"] = "vi" } };
@@ -44,7 +44,7 @@ namespace XoSoWeb.Services
         if (!string.IsNullOrWhiteSpace(Site.ContactPhone)) organization["telephone"] = Site.ContactPhone;
         graph.Add(organization);
     }
-    var crumbs = new List<object> { new { @type = "ListItem", position = 1, name = "Trang chủ", item = Site.Absolute("/") } };
+    var crumbs = new List<object> { new Dictionary<string, object> { ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Trang chủ", ["item"] = Site.Absolute("/") } };
     var parentPath = viewData["ParentPath"]?.ToString();
     var parentLabel = viewData["ParentLabel"]?.ToString();
     if (path != "/")

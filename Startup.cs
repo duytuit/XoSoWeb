@@ -24,6 +24,7 @@ using XoSoWeb.Shares.Connects;
 using Microsoft.Extensions.Options;
 using XoSoWeb.Middlewares;
 using XoSoWeb.Lotterys;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace XoSoWeb
 {
@@ -51,6 +52,19 @@ namespace XoSoWeb
                 throw new InvalidOperationException("Staging requires Site:StagingUsername and Site:StagingPassword.");
             services.AddSingleton(site);
             services.AddMemoryCache();
+            var chatProtection = services.AddDataProtection().SetApplicationName("XoSoWeb.CommunityChat");
+            var chatKeys = Configuration["Chat:DataProtectionKeysPath"];
+            if (!string.IsNullOrWhiteSpace(chatKeys))
+                chatProtection.PersistKeysToFileSystem(new System.IO.DirectoryInfo(chatKeys));
+            services.AddSingleton<XoSoWeb.Chat.ChatIdentity>();
+            services.AddSingleton<XoSoWeb.Chat.ChatStore>();
+            services.AddHostedService<XoSoWeb.Chat.ChatEvents>();
+            services.AddHostedService<XoSoWeb.Chat.ChatRetentionService>();
+            services.AddSignalR(options => {
+                options.MaximumReceiveMessageSize = 4096;
+                options.MaximumParallelInvocationsPerClient = 1;
+                options.EnableDetailedErrors = false;
+            });
             services.AddSingleton<ArchiveCatalog>();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddHttpsRedirection(options =>
@@ -94,7 +108,7 @@ namespace XoSoWeb
             services.AddResponseCompression(options => options.EnableForHttps = true);
             services.AddControllersWithViews(); // 👈 hỗ trợ cả View + API
             services.AddHttpClient(); // Add HttpClient factory
-            services.AddSingleton<TelegramContactService>();
+            services.AddHttpClient<TelegramContactService>(client => client.Timeout = TimeSpan.FromSeconds(15));
             services.AddLotteryModule();
 
         }
@@ -120,6 +134,8 @@ namespace XoSoWeb
 
             app.UseRouting();
 
+            app.UseMiddleware<XoSoWeb.Chat.ChatOriginMiddleware>();
+
             app.UseCors("AllowAll"); // Quan trọng: phải đặt trước UseAuthorization nếu có
 
             app.UseAuthorization();
@@ -127,6 +143,10 @@ namespace XoSoWeb
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers(); // API route
+                endpoints.MapHub<XoSoWeb.Chat.ChatHub>("/community-chat/hub", options => {
+                    options.ApplicationMaxBufferSize = 8192;
+                    options.TransportMaxBufferSize = 8192;
+                });
             });
         }
     }

@@ -176,7 +176,7 @@
         <div class="container-xl d-flex flex-column flex-md-row justify-content-between align-items-start gap-4 pb-4 border-bottom border-light border-opacity-10">
             <div class="mb-4 mb-md-0" style="max-width: 350px;">
                 <h2 class="h5 fw-bold mb-3"><a class="text-white text-decoration-none" asp-controller="Home" asp-action="Index">@Site.SiteName</a></h2>
-                <p class="text-white-50 mb-3 fs-7">Tra cứu kết quả xổ số ba miền và Vietlott theo dữ liệu được lưu trong hệ thống.</p>
+                <p class="text-white-50 mb-3 fs-7">Tra cứu kết quả xổ số ba miền và Vietlott trên giao diện rõ ràng, dễ sử dụng. Chúng tôi liên tục cải thiện tốc độ cập nhật và độ ổn định để bạn thuận tiện theo dõi kết quả mới nhất và tìm lại các kỳ quay trước.</p>
                 @if (!string.IsNullOrWhiteSpace(Site.OrganizationName)) { <p>Đơn vị vận hành: @Site.OrganizationName</p> }
             </div>
             <div class="row w-100" style="max-width: 500px;">
@@ -199,7 +199,7 @@
             </div>
         </div>
         <div class="container-xl pt-3 text-center">
-            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @DateTime.Now.Year @Site.SiteName · Thông tin tham khảo, cần đối chiếu với kết quả chính thức.</p>
+            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @DateTime.Now.Year @Site.SiteName · Cập nhật kết quả xổ số nhanh chóng — dễ xem, dễ tra cứu mỗi ngày.</p>
         </div>
     </footer>
 
@@ -225,6 +225,7 @@
 
 
     <!-- Site JS -->
+    <partial name="_Chat" />
     <script src="~/js/main.js" asp-append-version="true"></script>
 
     @RenderSection("Scripts", required: false)

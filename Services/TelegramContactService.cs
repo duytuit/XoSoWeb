@@ -11,14 +11,15 @@ namespace XoSoWeb.Services
 {
     public class TelegramContactService
     {
-        private static readonly HttpClient Client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+        private readonly HttpClient client;
         private readonly IConfiguration _configuration;
         private readonly ILogger<TelegramContactService> _logger;
 
-        public TelegramContactService(IConfiguration configuration, ILogger<TelegramContactService> logger)
+        public TelegramContactService(IConfiguration configuration, ILogger<TelegramContactService> logger, HttpClient client)
         {
             _configuration = configuration;
             _logger = logger;
+            this.client = client;
         }
 
         public async Task<bool> SendAsync(ContactSupportRequest request, CancellationToken cancellationToken)
@@ -34,7 +35,7 @@ namespace XoSoWeb.Services
             var text = $"LIÊN HỆ WEBSITE XỔ SỐ\nHọ tên: {request.FullName.Trim()}\nEmail: {request.Email.Trim()}\nTiêu đề: {request.Subject.Trim()}\n\n{request.Content.Trim()}";
             try
             {
-                using var response = await Client.PostAsJsonAsync($"https://api.telegram.org/bot{token}/sendMessage",
+                using var response = await client.PostAsJsonAsync($"https://api.telegram.org/bot{token}/sendMessage",
                     new { chat_id = chatId, text }, cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {

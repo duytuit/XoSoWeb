@@ -2,7 +2,9 @@
 @using System.Linq
 @using System
 @{
-    ViewData["Title"] = "Thống kê giải đặc biệt theo tuần";
+    ViewData["Title"] = "Thống kê giải đặc biệt ba miền · " + Model.StartDate.ToString("dd/MM/yyyy") + " – " + Model.EndDate.ToString("dd/MM/yyyy");
+    ViewData["Description"] = "Bảng giải đặc biệt ba miền từ " + Model.StartDate.ToString("dd/MM/yyyy") + " đến " + Model.EndDate.ToString("dd/MM/yyyy") + ", trình bày theo tuần để tra cứu và đối chiếu.";
+    if (Model.Regions.All(r => r.Entries.Count == 0)) ViewData["NoIndex"] = true;
     var dayHeaders = new[] { "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật" };
     var calendarStart = Model.StartDate.AddDays(-(((int)Model.StartDate.DayOfWeek + 6) % 7));
     var calendarEnd = Model.EndDate.AddDays(6 - (((int)Model.EndDate.DayOfWeek + 6) % 7));

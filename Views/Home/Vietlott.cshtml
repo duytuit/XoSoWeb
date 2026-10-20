@@ -1,12 +1,16 @@
 @using XoSoWeb.Services
 @model XoSoWeb.Models.VietlottPageViewModel
 @{
-    ViewData["Title"] = "Kết Quả Vietlott";
+    var pageTitle = Model.SelectedGameCode == null ? "Kết quả Vietlott" : "Kết quả " + LotteryUrls.GameName(Model.SelectedGameCode);
+    if (Model.SelectedOffset > 0 && Model.Results.Count > 0)
+        pageTitle += " · kỳ " + string.Join(", ", Model.Results.Select(r => r.DrawNo));
+    ViewData["Title"] = pageTitle;
+    if (Model.SelectedGameCode != null) ViewData["Description"] = pageTitle + ". Xem ngày quay, bộ số và bảng giải của các kỳ được chọn.";
     if (Model.Results.Count == 0) ViewData["NoIndex"] = true;
 }
 <div class="regional-page-title">
     <div>
-        <h1 class="detail-page-heading">Kết quả Vietlott</h1>
+        <h1 class="detail-page-heading">@pageTitle</h1>
         <p class="detail-page-description">Bộ số trúng thưởng và giá trị giải theo từng kỳ quay</p>
     </div>
 </div>
@@ -35,7 +39,7 @@ else
                 <div class="vietlott-card-header">
                     <div class="vietlott-card-title">
                         <h2>@(resultGroup.Key == "BINGO18" ? "Bingo 18" : "Keno")</h2>
-                        <p>@resultGroup.Count() kỳ quay gần nhất</p>
+                        <p>@resultGroup.Count() kỳ quay @(currentOffset == 0 ? "gần nhất" : "được chọn")</p>
                     </div>
                     <div class="vietlott-period-controls">
                         @if (hasNext)

@@ -5,13 +5,16 @@
     ViewData["Title"] = "Thống kê tần suất lô tô trong tuần";
     var headers = new[] { "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật" };
     var regionName = Model.Region == "MB" ? "Miền Bắc" : Model.Region == "MT" ? "Miền Trung" : "Miền Nam";
+    ViewData["Title"] = "Tần suất lô tô " + regionName + " · tuần " + Model.WeekStart.ToString("dd/MM/yyyy");
+    ViewData["Description"] = "Tần suất hai số cuối các giải " + regionName + " trong tuần từ " + Model.WeekStart.ToString("dd/MM/yyyy") + " đến " + Model.WeekStart.AddDays(6).ToString("dd/MM/yyyy") + ". Mỗi lần xuất hiện được tính riêng.";
+    if (Model.DrawCount == 0) ViewData["NoIndex"] = true;
 }
 @section Styles {
     <link rel="stylesheet" href="~/css/statistics.css" asp-append-version="true" />
 }
 <div class="regional-page-title">
     <div>
-        <h1 class="detail-page-heading">Tần suất lô tô trong tuần</h1>
+        <h1 class="detail-page-heading">Tần suất lô tô @regionName trong tuần</h1>
         <p class="detail-page-description">Đếm số lần xuất hiện của hai số cuối tất cả các giải. Một số xuất hiện nhiều lần trong ngày được tính đủ số lần.</p>
     </div>
 </div>

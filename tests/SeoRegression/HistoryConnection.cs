@@ -45,17 +45,22 @@ public sealed class HistoryCommand : DbCommand
             Columns(typeof(string), typeof(string), typeof(string), typeof(DateTime), typeof(DateTime), typeof(string));
             foreach (var code in new[] { "FX", "SOURCE-FX" })
                 table.Rows.Add("MN", code, "Fixture station", new DateTime(2024, 10, 17), new DateTime(2024, 10, 17, 19, 0, 0), "[{\"PrizeName\":\"Test prize\",\"Numbers\":[\"00123\"]}]");
+            foreach (var name in new[] { "TPHCM", "TP HCM" })
+                table.Rows.Add("MN", name, name, new DateTime(2024, 10, 17), new DateTime(2024, 10, 17, 19, 0, 0), "[{\"PrizeName\":\"G1\",\"Numbers\":[\"00123\"]}]");
         }
         else if (CommandText.StartsWith("SELECT v.GameCode"))
         {
-            Columns(typeof(string), typeof(string), typeof(DateTime));
-            table.Rows.Add("MEGA645", "00019", new DateTime(2024, 10, 17));
+            Columns(typeof(string), typeof(string), typeof(DateTime), typeof(string), typeof(int));
+            table.Rows.Add("MEGA645", "00019", new DateTime(2024, 10, 17), "01 07 09", 0);
+            table.Rows.Add("KENO", "00999", new DateTime(2024, 10, 17), "01 02", 0);
+            table.Rows.Add("BINGO18", "00998", new DateTime(2024, 10, 17), "[]", 0);
         }
         else if (CommandText.Contains("FROM RankedResults"))
         {
-            var date = (DateTime)parameters.Parameters["@exactDate"].Value;
-            if ((DateTime)parameters.Parameters["@dateEnd"].Value != date.AddDays(1)
-                || !CommandText.Contains("DrawDate >= @exactDate AND DrawDate < @dateEnd")) throw new Exception("Historical query lost its date bounds");
+            var exact = parameters.Parameters["@exactDate"].Value is DateTime;
+            var date = exact ? (DateTime)parameters.Parameters["@exactDate"].Value : new DateTime(2024, 10, 17);
+            if (exact && ((DateTime)parameters.Parameters["@dateEnd"].Value != date.AddDays(1)
+                || !CommandText.Contains("DrawDate >= @exactDate AND DrawDate < @dateEnd"))) throw new Exception("Historical query lost its date bounds");
             Columns(typeof(long), typeof(string), typeof(string), typeof(string), typeof(DateTime), typeof(string), typeof(DateTime));
             if ((string)parameters.Parameters["@region"].Value == "MT" && date == new DateTime(2024, 10, 17))
             {
@@ -68,9 +73,8 @@ public sealed class HistoryCommand : DbCommand
         }
         else if (CommandText.Contains("FROM LatestResults"))
         {
-            var draw = (string)parameters.Parameters["@exactDraw"].Value;
-            if ((string)parameters.Parameters["@selectedGameCode"].Value != "MEGA645"
-                || !CommandText.Contains("DrawNo = @exactDraw")) throw new Exception("Draw query lost its identifier");
+            var draw = parameters.Parameters["@exactDraw"].Value as string ?? "00019";
+            if (!CommandText.Contains("DrawNo = @exactDraw")) throw new Exception("Draw query lost its identifier");
             Columns(typeof(long), typeof(string), typeof(string), typeof(DateTime), typeof(string), typeof(string), typeof(long), typeof(long), typeof(int), typeof(string), typeof(string), typeof(int));
             if (draw == "00019" || draw == "00020")
                 table.Rows.Add(2L, "MEGA645", draw, new DateTime(2024, 10, 17), "01 07 09", "00", DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, 1);
@@ -80,6 +84,16 @@ public sealed class HistoryCommand : DbCommand
             if (!CommandText.Contains("ResultId IN (@id0)") || (long)parameters.Parameters["@id0"].Value != 2L) throw new Exception("Prizes are not batched by result id");
             Columns(typeof(long), typeof(string), typeof(string), typeof(string));
             table.Rows.Add(2L, "Fixture prize", "001 007", "Fixture value");
+        }
+        else if (CommandText.Contains("SELECT Region, ProvinceName, DrawDate, Prizes"))
+        {
+            Columns(typeof(string), typeof(string), typeof(DateTime), typeof(string));
+            table.Rows.Add("MB", "Fixture station", (DateTime)parameters.Parameters["@startDate"].Value, "[{\"PrizeName\":\"DB\",\"Numbers\":[\"00123\"]}]");
+        }
+        else if (CommandText.StartsWith("SELECT Region, DrawDate, Prizes"))
+        {
+            Columns(typeof(string), typeof(DateTime), typeof(string));
+            table.Rows.Add(parameters.Parameters["@region"].Value, (DateTime)parameters.Parameters["@start"].Value, "[{\"PrizeName\":\"DB\",\"Numbers\":[\"00123\"]}]");
         }
         else throw new Exception("Unexpected fixture query");
         return table.CreateDataReader();

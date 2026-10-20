@@ -22,13 +22,14 @@ namespace XoSoWeb.Controllers
         [HttpGet("/sitemap-{part:int}.xml")]
         public async Task<IActionResult> Sitemap(int? part = null)
         {
+            Response.Headers["Cache-Control"] = site.AllowIndexing ? "public,max-age=120" : "no-store";
             XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
             if (!site.AllowIndexing) return Content(new XDocument(new XElement(ns + "urlset")).ToString(), "application/xml; charset=utf-8");
             var links = await catalog.GetAsync(HttpContext.RequestAborted);
             var landingPages = links.Where(x => x.Region != null).Select(x => LotteryUrls.RegionPath(x.Region)).Distinct().ToList();
             if (links.Any(x => x.GameCode != null)) landingPages.Add("/vietlott");
             var urls = links.Select(x => (x.Path, x.Modified)).Concat(new[] { "/", "/gioi-thieu", "/nguon-du-lieu", "/support", "/privacy", "/terms", "/lien-he-quang-cao" }.Concat(landingPages)
-                .Select(path => (Path: path, Modified: (DateTime?)null))).GroupBy(x => x.Path).Select(g => g.First()).OrderBy(x => x.Path, StringComparer.Ordinal).ToList();
+                .Select(path => (Path: path, Modified: (DateTime?)null))).GroupBy(x => x.Path, StringComparer.Ordinal).Select(g => (Path: g.Key, Modified: g.Max(x => x.Modified))).OrderBy(x => x.Path, StringComparer.Ordinal).ToList();
             const int pageSize = 10000;
             int pages = (urls.Count + pageSize - 1) / pageSize;
             if (part.HasValue && (part < 1 || part > pages)) return NotFound();

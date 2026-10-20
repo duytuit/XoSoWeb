@@ -6,6 +6,8 @@ namespace XoSoWeb.Models
    public class XoSoResult
     {
         public long Id { get; set; }
+        public string SourceName { get; set; }
+        public int SourcePriority { get; set; }
 
         public string Region { get; set; }
 

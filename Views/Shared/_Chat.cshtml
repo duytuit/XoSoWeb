@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+<div id="community-chat">
+    <button id="chat-launch" type="button" aria-controls="chat-panel" aria-expanded="false"><span aria-hidden="true">💬</span> Chat cộng đồng <span class="chat-dot" aria-hidden="true"></span><span id="chat-badge" hidden></span></button>
+    <section id="chat-panel" role="dialog" aria-labelledby="chat-title" tabindex="-1" hidden>
+        <header class="chat-header">
+            <span aria-hidden="true">💬</span><div><strong id="chat-title">Chat cộng đồng</strong><small id="chat-status" role="status">Chưa kết nối</small></div>
+            <button id="chat-minimize" type="button" aria-label="Thu nhỏ chat">−</button><button id="chat-close" type="button" aria-label="Đóng chat">×</button>
+        </header>
+        <div class="chat-rules">Trao đổi lịch sự. Không spam, quảng cáo hoặc chia sẻ thông tin cá nhân.</div>
+        <div class="chat-identity"><span id="chat-name"></span><button id="chat-rename" type="button">Đổi tên</button><button id="chat-unhide" type="button" hidden>Bỏ ẩn</button></div>
+        <form id="chat-name-form" hidden><label for="chat-name-input">Tên hiển thị (2–40 ký tự)</label><input id="chat-name-input" maxlength="40" minlength="2" required /><button type="submit">Lưu tên</button></form>
+        <div id="chat-messages" tabindex="0" aria-label="Danh sách tin nhắn"><button id="chat-history" type="button">Tải tin cũ hơn</button><div id="chat-items"></div><p id="chat-empty">Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện!</p></div>
+        <button id="chat-new" type="button" hidden>Tin nhắn mới ↓</button>
+        <p id="chat-error" role="status" hidden></p>
+        <form id="chat-compose">
+            <div id="chat-emojis" aria-label="Chọn emoji" hidden></div>
+            <label class="visually-hidden" for="chat-input">Tin nhắn</label><textarea id="chat-input" rows="2" maxlength="500" placeholder="Nhắn với cộng đồng…"></textarea>
+            <div class="chat-compose-actions"><button id="chat-emoji-toggle" type="button" aria-label="Chọn emoji" aria-expanded="false">😊</button><small id="chat-count" hidden></small><button id="chat-send" type="submit" disabled>Gửi ➤</button></div>
+        </form>
+    </section>
+</div>
+<script src="~/js/chat.js" asp-append-version="true" defer></script>

@@ -91,9 +91,10 @@ namespace XoSoWeb.Services
         }
         public static string ProvincePath(string name)
         {
-            var slug = Slug(name);
+            var slug = StationCatalog.Find(name)?.Slug ?? Slug(name);
             return "/" + (slug.StartsWith("xo-so-") ? slug : "xo-so-" + slug);
         }
+        public static bool ValidDrawNo(string value) => value != null && Regex.IsMatch(value, @"\A[0-9]{1,30}\z");
         public static string GamePath(string code) => "/vietlott/" + Slug(code);
         public static string DrawPath(string code, string drawNo) => GamePath(code) + "/ky/" + Uri.EscapeDataString(drawNo);
         public static string GameName(string code) => code switch

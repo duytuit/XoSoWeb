@@ -10,7 +10,8 @@
     @if (sources)
     {
         <h2>Nguồn dữ liệu</h2>
-        <p>@(string.IsNullOrWhiteSpace(Site.DataSourceDescription) ? "Đơn vị vận hành chưa công bố đầy đủ danh sách nguồn dữ liệu. Kết quả trên website là dữ liệu được lưu trong hệ thống, cần đối chiếu với thông báo chính thức của đơn vị phát hành." : Site.DataSourceDescription)</p>
+        <p>Website tổng hợp và lưu trữ kết quả để tra cứu. Cần đối chiếu dữ liệu với thông báo chính thức của đơn vị phát hành.</p>
+        <p>@(string.IsNullOrWhiteSpace(Site.DataSourceDescription) ? "Đơn vị vận hành chưa công bố đầy đủ danh sách nguồn dữ liệu." : Site.DataSourceDescription)</p>
         <h2>Quy trình đối soát</h2>
         <p>@(string.IsNullOrWhiteSpace(Site.VerificationProcess) ? "Chưa có quy trình đối soát được công bố. Website chưa xác nhận từng kết quả đã được đối soát. Dữ liệu đang cập nhật có thể chưa đầy đủ hoặc đến chậm." : Site.VerificationProcess)</p>
         <h2>Báo sai kết quả</h2>

@@ -27,6 +27,12 @@ namespace XoSoWeb.Middlewares
                 if (drawMarker >= 0) normalized = path.Substring(0, drawMarker).ToLowerInvariant() + "/ky/" + path.Substring(drawMarker + 4).TrimEnd('/');
                 if (normalized == "") normalized = "/";
                 if (aliases.TryGetValue(normalized, out var target)) normalized = target;
+                if (PublicQueryPolicy.Applies(normalized) && !PublicQueryPolicy.IsValid(normalized, context.Request.Query))
+                {
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    context.Response.Headers["X-Robots-Tag"] = "noindex, follow";
+                    return;
+                }
                 if (normalized != path)
                 {
                     context.Response.StatusCode = 301;

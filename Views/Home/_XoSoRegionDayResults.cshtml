@@ -2,7 +2,7 @@
 @using System.Linq
 @{
     var currentResult = Model.Results.FirstOrDefault();
-    var currentDate = currentResult?.DrawDate ?? DateTime.Today;
+    var currentDate = currentResult?.DrawDate ?? XoSoWeb.Services.LotteryUrls.Today;
     var selectedDayLabel = Model.SelectedDay switch
     {
         1 => "Thứ Hai",
