@@ -39,5 +39,6 @@
   </ItemGroup>
  <Target Name="CreateLogsDirectory" AfterTargets="Publish">
   <MakeDir Directories="$(PublishDir)Logs" />
+  <MakeDir Directories="$(PublishDir)wwwroot\Images" />
 </Target>
 </Project>
