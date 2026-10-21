@@ -33,6 +33,9 @@
     <Content Update="web.config">
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
+    <Content Update="wwwroot\images\news\**">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
  <Target Name="CreateLogsDirectory" AfterTargets="Publish">
   <MakeDir Directories="$(PublishDir)Logs" />
