@@ -27,6 +27,9 @@ else
         <nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Trò chơi và kỳ quay">
             <a href="@LotteryUrls.GamePath(resultGroup.Key)">@LotteryUrls.GameName(resultGroup.Key)</a>
             @foreach (var draw in resultGroup) { <a href="@LotteryUrls.DrawPath(draw.GameCode, draw.DrawNo)">Kỳ @draw.DrawNo · @draw.DrawDate.ToString("dd/MM/yyyy")</a> }
+            <a href="/thong-ke/vietlott/@LotteryUrls.Slug(resultGroup.Key)">Thống kê @LotteryUrls.GameName(resultGroup.Key)</a>
+            <a href="/lich-quay/vietlott?game=@LotteryUrls.Slug(resultGroup.Key)">Lịch quay @LotteryUrls.GameName(resultGroup.Key)</a>
+            <a href="/co-cau-giai-thuong/vietlott/@LotteryUrls.Slug(resultGroup.Key)">Cơ cấu giải @LotteryUrls.GameName(resultGroup.Key)</a>
         </nav>
         var isFrequentDrawGame = resultGroup.Key == "BINGO18" || resultGroup.Key == "KENO";
         if (isFrequentDrawGame)

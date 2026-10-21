@@ -4,6 +4,14 @@
 <p><a href="@Model.ParentPath">@Model.ParentLabel</a></p>
 @if (Model.Regional != null)
 {
+    var regionSlug = Model.Regional.Region == "MB" ? "mien-bac" : Model.Regional.Region == "MT" ? "mien-trung" : "mien-nam";
+    var stationNames = Model.Regional.Results.Select(result => result.ProvinceName).Where(name => !string.IsNullOrWhiteSpace(name)).Distinct().ToList();
+    var isRegionalArchive = Context.Request.Path.Value.StartsWith(LotteryUrls.RegionPath(Model.Regional.Region), StringComparison.OrdinalIgnoreCase);
+    var stationName = !isRegionalArchive && stationNames.Count == 1 ? stationNames[0] : null;
+    <nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Lịch quay và cơ cấu giải">
+        <a href="/lich-quay/@regionSlug@(stationName != null ? "?station=" + Uri.EscapeDataString(stationName) : "")">Lịch quay @(stationName ?? Model.Regional.RegionName)</a>
+        <a href="/co-cau-giai-thuong/@regionSlug">Cơ cấu giải @Model.Regional.RegionName</a>
+    </nav>
     foreach (var day in Model.Regional.Results.GroupBy(x => x.DrawDate.Date).OrderByDescending(x => x.Key))
     {
         var daily = new XoSoWeb.Models.XoSoRegionViewModel { Region = Model.Regional.Region, RegionName = Model.Regional.RegionName, IsHistorical = true,
@@ -15,6 +23,10 @@
 {
     foreach (var result in Model.Vietlott.Results)
     {
+        <nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Thông tin trò chơi Vietlott">
+            <a href="/lich-quay/vietlott?game=@LotteryUrls.Slug(result.GameCode)">Lịch quay @LotteryUrls.GameName(result.GameCode)</a>
+            <a href="/co-cau-giai-thuong/vietlott/@LotteryUrls.Slug(result.GameCode)">Cơ cấu giải @LotteryUrls.GameName(result.GameCode)</a>
+        </nav>
         <section class="card card-body">
             <h2>@LotteryUrls.GameName(result.GameCode) · Kỳ @result.DrawNo</h2>
             <p>Ngày quay: <time datetime="@result.DrawDate.ToString("yyyy-MM-dd")">@result.DrawDate.ToString("dd/MM/yyyy")</time></p>

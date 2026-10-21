@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,9 @@ using Microsoft.Extensions.Options;
 using XoSoWeb.Middlewares;
 using XoSoWeb.Lotterys;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text.RegularExpressions;
+using XoSoWeb.Controllers;
 
 namespace XoSoWeb
 {
@@ -66,6 +70,39 @@ namespace XoSoWeb
                 options.EnableDetailedErrors = false;
             });
             services.AddSingleton<ArchiveCatalog>();
+            services.AddScoped<VietlottStatisticsService>();
+            services.AddScoped<INewsArticleService, NewsArticleService>();
+            services.AddScoped<NewsCollectionService>();
+            services.AddScoped<NewsSourceChangeTracker>();
+            services.AddSingleton<IVietlottNewsSourceAdapter, VietlottNewsSourceAdapter>();
+            services.Configure<NewsCollectionOptions>(Configuration.GetSection("NewsCollection"));
+            services.Configure<NewsAdminOptions>(Configuration.GetSection("NewsAdmin"));
+            var newsAdminUsername = Configuration["NewsAdmin:Username"];
+            var newsAdminPasswordHash = Configuration["NewsAdmin:PasswordHash"];
+            if (string.IsNullOrWhiteSpace(newsAdminUsername) != string.IsNullOrWhiteSpace(newsAdminPasswordHash)
+                || (!string.IsNullOrWhiteSpace(newsAdminPasswordHash)
+                    && !Regex.IsMatch(newsAdminPasswordHash, @"\A\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\z")))
+                throw new InvalidOperationException("Configure both NewsAdmin:Username and a valid BCrypt NewsAdmin:PasswordHash.");
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = "NewsAdminCookie";
+                    options.DefaultSignInScheme = "NewsAdminCookie";
+                    options.DefaultChallengeScheme = "NewsAdminCookie";
+                })
+                .AddCookie("NewsAdminCookie", options =>
+                {
+                    options.Cookie.Name = "__Host-XoSoNewsAdmin";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+                    options.Cookie.Path = "/";
+                    options.ExpireTimeSpan = TimeSpan.FromHours(6);
+                    options.SlidingExpiration = true;
+                    options.LoginPath = "/quan-tri/tin-tuc/dang-nhap";
+                    options.AccessDeniedPath = "/quan-tri/tin-tuc/dang-nhap";
+                });
+            services.AddAuthorization();
+            services.AddHostedService<NewsCollectionWorker>();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddHttpsRedirection(options =>
             {
@@ -138,6 +175,7 @@ namespace XoSoWeb
 
             app.UseCors("AllowAll"); // Quan trọng: phải đặt trước UseAuthorization nếu có
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -22,6 +22,10 @@ CREATE TABLE dbo.VietlottResults
 
     SpecialNumbers NVARCHAR(500) NULL,
 
+    EstimatedPrize BIGINT NULL,
+
+    EstimatedPrize2 BIGINT NULL,
+
     Total INT NULL,
 
     OddEven NVARCHAR(100) NULL,
@@ -212,3 +216,35 @@ CREATE TABLE dbo.XoSoResults
 );
 Id	Region	ProvinceCode	ProvinceName	DrawDate	Prizes	CreatedAt	UpdatedAt
 6	Miền bac	Xổ số Miền Bắc	Xổ số Miền Bắc	2026-09-13	[{"PrizeName":"Giải ĐB","Numbers":["83799"]},{"PrizeName":"Giải nhất","Numbers":["63029"]},{"PrizeName":"Giải nhì","Numbers":["21509","71228"]},{"PrizeName":"Giải ba","Numbers":["28530","12732","41085","43205","58675","62527"]},{"PrizeName":"Giải tư","Numbers":["2812","7409","9962","7240"]},{"PrizeName":"Giải năm","Numbers":["5439","8360","4126","2579","5130","5884"]},{"PrizeName":"Giải sáu","Numbers":["988","648","462"]},{"PrizeName":"Giải bảy","Numbers":["21","88","40","27"]}]	2026-09-13 18:51:27.160	2026-09-13 18:51:27.277
+
+## Vietlott statistics
+
+The public statistics pages query `VietlottResults` and, for Max 3D variants,
+`VietlottPrizes`. Queries read at most 400 recent source draws per game; each
+calculation uses at most 200 complete draws (20/50/100/200 presets). Statistics
+are cached for two minutes. Incomplete records are reported as excluded, not
+counted as draws with zero occurrences. A draw link uses the existing
+`/vietlott/{game}/ky/{DrawNo}` route.
+Cached values expire within two minutes so newly stored results are picked up
+without changing the existing live-result update path.
+
+Completeness checks are game-specific: Mega 6/45 requires six distinct values
+from 1–45; Power 6/55 requires six distinct main values from 1–55 plus one
+separate special value in that range; Lotto 5/35 requires five distinct main
+values from 1–35 and one stored special value (the special range is not
+inferred); Keno requires twenty distinct values from 1–80; Bingo18 requires
+three stored values from 1–6 and checks `Total` when present. Max 3D, Max 3D+
+and Max 3D Pro each require their own observed prize-name set. Only prize
+tokens containing exactly three digits are counted, preserving leading zeroes;
+separate digits are never joined to invent a triple.
+Max 3D triple-frequency, ending, position and absence tools can be restricted
+to a prize name present in the selected complete draws; the default explicitly
+means all stored prize categories.
+
+Power 6/55 main-number calculations exclude its special number; the special
+number has a separate frequency page. Jackpot pages use only the stored
+`EstimatedPrize` / `EstimatedPrize2` fields, label them as estimates, and never
+describe them as amounts paid. Keno small/large is explicitly 01–40 / 41–80.
+Bingo18 result-set frequency counts the stored sequence as-is and does not
+claim that it is draw order. The schema stores dates but no reliable draw time,
+so hourly statistics are intentionally not offered for Keno or Bingo18.

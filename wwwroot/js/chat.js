@@ -14,7 +14,7 @@
         $('status').textContent = value === 'connected' ? `Đã kết nối · ${online ?? '…'} người online` : value === 'connecting' ? 'Đang kết nối…' : 'Mất kết nối · đang thử lại';
         $('send').disabled = value !== 'connected';
     }
-    function badge() { $('badge').hidden = !unread; $('badge').textContent = unread > 99 ? '99+' : unread; $('launch').setAttribute('aria-label', `Chat cộng đồng${unread ? `, ${unread} tin chưa đọc` : ''}`); }
+    function badge() { $('badge').hidden = !unread; $('badge').textContent = unread > 99 ? '99+' : unread; $('launch').setAttribute('aria-label', `Chat tán gẫu${unread ? `, ${unread} tin chưa đọc` : ''}`); }
     function bottom() { return list.scrollHeight - list.scrollTop - list.clientHeight < 65; }
     function scrollEnd() { list.scrollTop = list.scrollHeight; $('new').hidden = true; unread = 0; badge(); }
     function button(label, action, aria) { const node = document.createElement('button'); node.type = 'button'; node.textContent = label; if (aria) node.setAttribute('aria-label', aria); node.onclick = action; return node; }

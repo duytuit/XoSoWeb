@@ -1,4 +1,4 @@
-# Chat cộng đồng
+# Chat tán gẫu
 
 ## Thành phần và cách chạy
 

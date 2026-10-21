@@ -18,6 +18,10 @@
 @foreach (var province in available.Where(x => x.Region == Model.Region && x.ProvinceCode != null && !x.Date.HasValue))
 { <a href="@province.Path">@province.Label</a> }
 </nav>
+<nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Lịch quay và cơ cấu giải">
+    <a href="/lich-quay/@(Model.Region == "MB" ? "mien-bac" : Model.Region == "MT" ? "mien-trung" : "mien-nam")">Lịch quay @Model.RegionName</a>
+    <a href="/co-cau-giai-thuong/@(Model.Region == "MB" ? "mien-bac" : Model.Region == "MT" ? "mien-trung" : "mien-nam")">Cơ cấu giải @Model.RegionName</a>
+</nav>
 <nav class="weekday-filter" aria-label="Lọc kết quả theo thứ">
     <a class="@(Model.SelectedDay == null ? "active" : "")" asp-route-day="">@Model.RegionName</a>
     <a class="@(Model.SelectedDay == 1 ? "active" : "")" asp-route-day="1">Thứ 2</a>

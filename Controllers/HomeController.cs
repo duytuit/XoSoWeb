@@ -20,11 +20,13 @@ namespace XoSoWeb.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly XoSoDBContext _context;
+        private readonly INewsArticleService _news;
 
-        public HomeController(ILogger<HomeController> logger, XoSoDBContext context)
+        public HomeController(ILogger<HomeController> logger, XoSoDBContext context, INewsArticleService news)
         {
             _logger = logger;
             _context = context;
+            _news = news;
         }
 
         /// <summary>
@@ -47,7 +49,8 @@ namespace XoSoWeb.Controllers
                 MienBac = await GetRegionResultsAsync("MB", "Miền Bắc"),
                 MienTrung = await GetRegionResultsAsync("MT", "Miền Trung"),
                 MienNam = await GetRegionResultsAsync("MN", "Miền Nam"),
-                Vietlott = await GetVietlottResultsAsync()
+                Vietlott = await GetVietlottResultsAsync(),
+                LatestNews = await _news.GetLatestAsync(5, HttpContext.RequestAborted)
             };
             return View(model);
         }

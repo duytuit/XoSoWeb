@@ -6,6 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 namespace XoSoWeb.Services
 {
+    public sealed class BreadcrumbLink
+    {
+        public string Label { get; set; }
+        public string Path { get; set; }
+    }
+
     public sealed class SeoMetadata
     {
         public string Title { get; set; }
@@ -31,7 +37,7 @@ namespace XoSoWeb.Services
         ["/support"] = "Liên hệ hỗ trợ, báo lỗi hoặc gửi yêu cầu sửa thông tin kết quả xổ số.",
         ["/lien-he-quang-cao"] = "Thông tin các hình thức hợp tác và liên hệ quảng cáo trên website." };
     var description = viewData["Description"]?.ToString() ?? (descriptions.TryGetValue(path, out var desc) ? desc : "Tra cứu " + viewData["Title"] + " và các kết quả liên quan.");
-    var filterKeys = new[] { "day", "gameCode", "offset", "endDate", "region", "week" };
+    var filterKeys = new[] { "day", "gameCode", "offset", "endDate", "region", "week", "periods", "endDraw", "prize", "sort", "q", "page", "station", "weekday", "game" };
     var filters = request.Query.Where(x => filterKeys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)).OrderBy(x => x.Key, StringComparer.Ordinal).ToList();
     var canonicalPath = path + (filters.Count == 0 ? "" : "?" + string.Join("&", filters.Select(x => Uri.EscapeDataString(filterKeys.First(k => k.Equals(x.Key, StringComparison.OrdinalIgnoreCase))) + "=" + Uri.EscapeDataString(x.Value.ToString()))));
     var canonical = Site.Absolute(canonicalPath);
@@ -45,15 +51,29 @@ namespace XoSoWeb.Services
         graph.Add(organization);
     }
     var crumbs = new List<object> { new Dictionary<string, object> { ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Trang chủ", ["item"] = Site.Absolute("/") } };
-    var parentPath = viewData["ParentPath"]?.ToString();
-    var parentLabel = viewData["ParentLabel"]?.ToString();
+    var ancestors = viewData["BreadcrumbAncestors"] as IEnumerable<BreadcrumbLink>;
+    if (ancestors != null)
+    {
+        foreach (var ancestor in ancestors.Where(item => !string.IsNullOrWhiteSpace(item.Label)
+            && !string.IsNullOrWhiteSpace(item.Path) && item.Path != "/"
+            && !string.Equals(item.Path, path, StringComparison.OrdinalIgnoreCase)))
+            crumbs.Add(new Dictionary<string, object> { ["@type"] = "ListItem", ["position"] = crumbs.Count + 1, ["name"] = ancestor.Label, ["item"] = Site.Absolute(ancestor.Path) });
+    }
+    else if (viewData["ParentPath"] is string parentPath && parentPath != "/"
+        && !string.Equals(parentPath, path, StringComparison.OrdinalIgnoreCase))
+    {
+        crumbs.Add(new Dictionary<string, object> { ["@type"] = "ListItem", ["position"] = crumbs.Count + 1, ["name"] = viewData["ParentLabel"]?.ToString(), ["item"] = Site.Absolute(parentPath) });
+    }
     if (path != "/")
     {
-        if (parentPath != null && parentPath != "/" && parentPath != path)
-            crumbs.Add(new Dictionary<string, object> { ["@type"] = "ListItem", ["position"] = crumbs.Count + 1, ["name"] = parentLabel, ["item"] = Site.Absolute(parentPath) });
-        crumbs.Add(new Dictionary<string, object> { ["@type"] = "ListItem", ["position"] = crumbs.Count + 1, ["name"] = viewData["Title"]?.ToString() ?? Site.SiteName, ["item"] = canonical });
+        crumbs.Add(new Dictionary<string, object> { ["@type"] = "ListItem", ["position"] = crumbs.Count + 1, ["name"] = viewData["BreadcrumbCurrentLabel"]?.ToString() ?? viewData["Title"]?.ToString() ?? Site.SiteName, ["item"] = canonical });
         graph.Add(new Dictionary<string, object> { ["@type"] = "BreadcrumbList", ["itemListElement"] = crumbs });
     }
+            if (viewData["ArticleStructuredJson"] is string articleStructuredJson)
+            {
+                using var articleDocument = JsonDocument.Parse(articleStructuredJson);
+                graph.Add(articleDocument.RootElement.Clone());
+            }
             return new SeoMetadata { Title = title, Description = description, Canonical = canonical, NoIndex = noindex,
                 StructuredJson = JsonSerializer.Serialize(new Dictionary<string, object> { ["@context"] = "https://schema.org", ["@graph"] = graph }) };
         }

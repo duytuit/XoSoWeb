@@ -40,6 +40,89 @@ body {
     transform: translateY(-100%);
 }
 
+.top-navigation {
+    align-items: center;
+}
+
+.top-navigation-dropdown {
+    position: relative;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+}
+
+.top-navigation-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .35rem 0;
+    color: var(--on-surface-variant);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.top-navigation-dropdown-trigger i {
+    font-size: .65rem;
+    transition: transform 150ms ease;
+}
+
+.top-navigation-dropdown:hover .top-navigation-dropdown-trigger i,
+.top-navigation-dropdown:focus-within .top-navigation-dropdown-trigger i {
+    transform: rotate(180deg);
+}
+
+.top-navigation-dropdown:hover .top-navigation-dropdown-trigger,
+.top-navigation-dropdown-trigger.is-active,
+.top-navigation-dropdown:focus-within .top-navigation-dropdown-trigger {
+    color: var(--bs-primary);
+}
+
+.top-navigation-submenu {
+    position: absolute;
+    z-index: 10;
+    top: calc(100% - 2px);
+    left: -.75rem;
+    display: none;
+    min-width: 230px;
+    padding: .35rem;
+    border: 1px solid var(--border-neutral);
+    border-radius: .35rem;
+    background: var(--surface);
+    box-shadow: 0 8px 20px rgba(21, 29, 34, .14);
+}
+
+.top-navigation-dropdown:hover .top-navigation-submenu,
+.top-navigation-dropdown:focus-within .top-navigation-submenu {
+    display: grid;
+}
+
+.top-navigation {
+    gap: 1rem !important;
+}
+
+.top-navigation-submenu a {
+    display: block;
+    padding: .6rem .7rem;
+    border-radius: .25rem;
+    color: var(--on-surface-variant);
+    font-size: .9rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.top-navigation-submenu a:hover,
+.top-navigation-submenu a:focus-visible,
+.top-navigation-submenu a.is-active {
+    background: #fff1f2;
+    color: var(--bs-primary);
+}
+
+.top-navigation-dropdown-trigger:focus-visible,
+.top-navigation-submenu a:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
 .page-content {
     min-width: 0;
     font-size: 15px;

@@ -3,6 +3,11 @@
     Layout = null;
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isVietlottStatisticsPage = Context.Request.Path.StartsWithSegments("/thong-ke/vietlott");
+    var isReferencePage = Context.Request.Path.StartsWithSegments("/lich-quay")
+        || Context.Request.Path.StartsWithSegments("/co-cau-giai-thuong");
+    var isStatisticsPage = isVietlottStatisticsPage
+        || IsStatisticsRoute(Context.Request.Path.Value);
 
     bool IsActive(string controller, string action = null)
     {
@@ -13,6 +18,11 @@
         }
 
         return isControllerMatch && string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase);
+    }
+
+    bool IsStatisticsRoute(string path)
+    {
+        return path == "/thong-ke" || path == "/thong-ke-tan-suat-loto";
     }
 }
 <!DOCTYPE html>
@@ -46,13 +56,42 @@
                     <span class="h5 mb-0 fw-bold text-primary font-headline-md">@Site.SiteName</span>
                 </a>
             </div>
-            <nav class="d-none d-lg-flex gap-4">
+            <nav class="top-navigation d-none d-lg-flex gap-4" aria-label="Điều hướng chính">
                 <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Trang Chủ</a>
                 <a class="@(IsActive("Home", "XoSoMienBac") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac">XS Miền Bắc</a>
                 <a class="@(IsActive("Home", "XoSoMienTrung") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienTrung">XS Miền Trung</a>
                 <a class="@(IsActive("Home", "XoSoMienNam") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienNam">XS Miền Nam</a>
                 <a class="@(IsActive("Home", "Vietlott") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott">Vietlott</a>
-                <a class="@(IsActive("Home", "Statistics") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Statistics">Thống Kê</a>
+                <div class="top-navigation-dropdown">
+                    <a class="top-navigation-dropdown-trigger @(isStatisticsPage ? "is-active" : "")" href="/thong-ke">
+                        <span>Thống kê</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </a>
+                    <div class="top-navigation-submenu">
+                        <a class="@(IsActive("Home", "Statistics") ? "is-active" : "")" asp-controller="Home" asp-action="Statistics">Giải đặc biệt ba miền</a>
+                        <a class="@(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">Tần suất lô tô trong tuần</a>
+                        <a class="@(isVietlottStatisticsPage ? "is-active" : "")" href="/thong-ke/vietlott">Thống kê Vietlott</a>
+                    </div>
+                </div>
+                <div class="top-navigation-dropdown">
+                    <a class="top-navigation-dropdown-trigger @(isReferencePage ? "is-active" : "")" href="/lich-quay">
+                        <span>Thông tin</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </a>
+                    <div class="top-navigation-submenu">
+                        <a class="@(Context.Request.Path.StartsWithSegments("/lich-quay") ? "is-active" : "")" href="/lich-quay">Lịch quay</a>
+                        <a class="@(Context.Request.Path.StartsWithSegments("/co-cau-giai-thuong") ? "is-active" : "")" href="/co-cau-giai-thuong">Cơ cấu giải thưởng</a>
+                    </div>
+                </div>
+                <div class="top-navigation-dropdown">
+                    <a class="top-navigation-dropdown-trigger @(Context.Request.Path.StartsWithSegments("/tin-tuc") ? "is-active" : "")" href="/tin-tuc">
+                        <span>Tin tức</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </a>
+                    <div class="top-navigation-submenu">
+                        <a href="/tin-tuc">Tất cả bài viết</a>
+                        <a href="/tin-tuc/vietlott">Tin Vietlott</a>
+                        <a href="/tin-tuc/trung-thuong-vietlott">Tin trúng thưởng</a>
+                        <a href="/tin-tuc/huong-dan">Hướng dẫn</a>
+                    </div>
+                </div>
             </nav>
             <button class="btn btn-primary rounded-pill font-label-sm px-4 py-2">
                 Đăng nhập
@@ -87,6 +126,18 @@
                 </a>
                 <a class="mobile-navigation-link @(IsActive("Home", "Statistics") ? "is-active" : "")" asp-controller="Home" asp-action="Statistics">
                     <i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Thống kê giải đặc biệt</span>
+                </a>
+                <a class="mobile-navigation-link @(Context.Request.Path.StartsWithSegments("/thong-ke/vietlott") ? "is-active" : "")" href="/thong-ke/vietlott">
+                    <i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Thống kê Vietlott</span>
+                </a>
+                <a class="mobile-navigation-link @(Context.Request.Path.StartsWithSegments("/lich-quay") ? "is-active" : "")" href="/lich-quay">
+                    <i class="fa-solid fa-calendar-days" aria-hidden="true"></i><span>Lịch quay</span>
+                </a>
+                <a class="mobile-navigation-link @(Context.Request.Path.StartsWithSegments("/co-cau-giai-thuong") ? "is-active" : "")" href="/co-cau-giai-thuong">
+                    <i class="fa-solid fa-list-ol" aria-hidden="true"></i><span>Cơ cấu giải thưởng</span>
+                </a>
+                <a class="mobile-navigation-link @(Context.Request.Path.StartsWithSegments("/tin-tuc") ? "is-active" : "")" href="/tin-tuc">
+                    <i class="fa-solid fa-newspaper" aria-hidden="true"></i><span>Tin tức</span>
                 </a>
                 <a class="mobile-navigation-link @(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">
                     <i class="fa-solid fa-chart-simple" aria-hidden="true"></i><span>Thống kê tần suất lô tô trong tuần</span>
@@ -149,6 +200,10 @@
                         <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
                         <span>Thống kê tần suất lô tô trong tuần</span>
                     </a>
+                    <a class="sidebar-region-link @(Context.Request.Path.StartsWithSegments("/thong-ke/vietlott") ? "is-active" : "")" href="/thong-ke/vietlott">
+                        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+                        <span>Thống kê Vietlott</span>
+                    </a>
                 </nav>
             </div>
         </aside>
@@ -157,7 +212,23 @@
         <section class="page-main-column flex-grow-1 d-flex flex-column">
             @if (Context.Request.Path != "/")
             {
-                <nav aria-label="Breadcrumb" class="results-breadcrumb"><a href="/">Trang chủ</a> / @if (ViewData["ParentPath"] != null) { <a href="@ViewData["ParentPath"]">@ViewData["ParentLabel"]</a><span> / </span> }<span>@ViewData["Title"]</span></nav>
+                <nav aria-label="Breadcrumb" class="results-breadcrumb">
+                    <a href="/">Trang chủ</a>
+                    @if (ViewData["BreadcrumbAncestors"] is IEnumerable<XoSoWeb.Services.BreadcrumbLink> breadcrumbAncestors)
+                    {
+                        foreach (var ancestor in breadcrumbAncestors)
+                        {
+                            <span aria-hidden="true"> / </span><a href="@ancestor.Path">@ancestor.Label</a>
+                        }
+                    }
+                    else if (ViewData["ParentPath"] is string parentPath
+                        && parentPath != "/"
+                        && !string.Equals(parentPath, Context.Request.Path.Value, StringComparison.OrdinalIgnoreCase))
+                    {
+                        <span aria-hidden="true"> / </span><a href="@parentPath">@ViewData["ParentLabel"]</a>
+                    }
+                    <span aria-hidden="true"> / </span><span aria-current="page">@(ViewData["BreadcrumbCurrentLabel"] ?? ViewData["Title"])</span>
+                </nav>
             }
             @RenderBody()
         </section>

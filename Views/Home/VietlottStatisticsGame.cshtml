@@ -1,0 +1,27 @@
+@model XoSoWeb.Models.VietlottStatisticsGameViewModel
+@{
+    ViewData["Title"] = "Thống kê " + Model.Name;
+    var basePath = "/thong-ke/vietlott/" + Model.Slug;
+}
+@section Styles { <link rel="stylesheet" href="~/css/vietlott-statistics.css" asp-append-version="true" /> }
+
+<section class="vietlott-statistics" aria-labelledby="vietlott-statistics-title">
+    <h1 id="vietlott-statistics-title">Thống kê @Model.Name</h1>
+    <nav class="vietlott-statistics-games" aria-label="Trò chơi thống kê">
+        <a href="/thong-ke/vietlott">Tất cả trò chơi</a>
+        <a class="is-active" href="@basePath" aria-current="page">@Model.Name</a>
+        <a href="/vietlott/@Model.Slug">Lịch sử kết quả @Model.Name</a>
+        <a href="/lich-quay/vietlott?game=@Model.Slug">Lịch quay @Model.Name</a>
+        <a href="/co-cau-giai-thuong/vietlott/@Model.Slug">Cơ cấu giải @Model.Name</a>
+    </nav>
+    <div class="vietlott-statistics-links">
+        @foreach (var tool in Model.Tools)
+        {
+            <a href="@basePath/@tool.Slug">
+                <strong>@tool.Name</strong>
+                <span>@tool.Description</span>
+            </a>
+        }
+    </div>
+    <p class="vietlott-statistics-disclaimer">Thống kê dữ liệu quá khứ, không bảo đảm kết quả kỳ tiếp theo.</p>
+</section>

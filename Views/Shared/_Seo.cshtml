@@ -5,13 +5,25 @@
 <meta name="description" content="@seo.Description" />
 <meta name="robots" content="@(seo.NoIndex ? "noindex,follow" : "index,follow")" />
 <link rel="canonical" href="@seo.Canonical" />
-<meta property="og:type" content="website" />
+<meta property="og:type" content="@(ViewData["OgType"]?.ToString() ?? "website")" />
 <meta property="og:locale" content="vi_VN" />
 <meta property="og:site_name" content="@Site.SiteName" />
 <meta property="og:title" content="@seo.Title" />
 <meta property="og:description" content="@seo.Description" />
 <meta property="og:url" content="@seo.Canonical" />
-<meta property="og:image" content="@Site.Absolute(Site.ShareImagePath)" />
+<meta property="og:image" content="@(string.IsNullOrWhiteSpace(ViewData["OgImage"]?.ToString()) ? Site.Absolute(Site.ShareImagePath) : Site.Absolute(ViewData["OgImage"].ToString()))" />
+@if (ViewData["ArticleAuthor"] is string articleAuthor && !string.IsNullOrWhiteSpace(articleAuthor))
+{
+    <meta property="article:author" content="@articleAuthor" />
+}
+@if (ViewData["ArticlePublishedAt"] is string articlePublishedAt && !string.IsNullOrWhiteSpace(articlePublishedAt))
+{
+    <meta property="article:published_time" content="@articlePublishedAt" />
+}
+@if (ViewData["ArticleModifiedAt"] is string articleModifiedAt && !string.IsNullOrWhiteSpace(articleModifiedAt))
+{
+    <meta property="article:modified_time" content="@articleModifiedAt" />
+}
 @if (!string.IsNullOrWhiteSpace(Site.SearchConsoleVerification)) { <meta name="google-site-verification" content="@Site.SearchConsoleVerification" /> }
 <script type="application/ld+json">@Html.Raw(seo.StructuredJson)</script>
 @if (!string.IsNullOrWhiteSpace(Site.AnalyticsId) && Site.AllowIndexing)

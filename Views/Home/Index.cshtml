@@ -216,3 +216,38 @@
         </div>
     }
 </section>
+
+<section class="home-news-section" aria-labelledby="home-news-title">
+    <header class="results-section-header">
+        <div>
+            <h2 id="home-news-title"><a href="/tin-tuc">Tin tức mới</a></h2>
+            <p>Tối đa 5 bài viết đã xuất bản</p>
+        </div>
+        <a class="results-more" href="/tin-tuc">Tất cả tin &#8594;</a>
+    </header>
+    @if (Model.LatestNews.Count == 0)
+    {
+        <p class="news-empty">Chưa có bài viết đã xuất bản.</p>
+    }
+    else
+    {
+        <div class="news-list news-list-home">
+            @foreach (var article in Model.LatestNews)
+            {
+                <article class="news-list-row">
+                    @if (!string.IsNullOrWhiteSpace(article.FeaturedImageUrl))
+                    {
+                        <a class="news-list-image" href="/tin-tuc/bai-viet/@article.Slug" tabindex="-1" aria-hidden="true">
+                            <img src="@article.FeaturedImageUrl" alt="" loading="lazy" />
+                        </a>
+                    }
+                    <div class="news-list-copy">
+                        <h3><a href="/tin-tuc/bai-viet/@article.Slug">@article.Title</a></h3>
+                        <p class="news-list-meta"><time datetime="@article.PublishedAt.ToString("O")">@XoSoWeb.Services.NewsDateTime.FormatDate(article.PublishedAt)</time></p>
+                        @if (!string.IsNullOrWhiteSpace(article.Summary)) { <p class="news-summary">@article.Summary</p> }
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>

@@ -1,0 +1,16 @@
+@model XoSoWeb.Controllers.NewsLoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập quản trị tin tức";
+    ViewData["NoIndex"] = true;
+}
+<section class="news-admin">
+    <h1>Đăng nhập quản trị tin tức</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.Error)) { <p class="news-admin-error" role="alert">@Model.Error</p> }
+    <form method="post" action="/quan-tri/tin-tuc/dang-nhap">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+        <label>Tài khoản <input name="Username" autocomplete="username" required maxlength="100" /></label>
+        <label>Mật khẩu <input name="Password" type="password" autocomplete="current-password" required maxlength="200" /></label>
+        <button type="submit">Đăng nhập</button>
+    </form>
+</section>

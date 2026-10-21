@@ -1,0 +1,213 @@
+.vietlott-statistics {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    font-size: 13.5px;
+}
+
+.vietlott-statistics h1 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.35;
+}
+
+.vietlott-statistics h2 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.35;
+}
+
+.vietlott-statistics p {
+    margin: 0;
+}
+
+.vietlott-statistics a {
+    color: #9e2834;
+    text-decoration: none;
+}
+
+.vietlott-statistics a:hover,
+.vietlott-statistics a:focus-visible {
+    text-decoration: underline;
+}
+
+.vietlott-statistics-note,
+.vietlott-statistics-description,
+.vietlott-statistics-range,
+.vietlott-statistics-disclaimer,
+.vietlott-statistics-warning {
+    color: #625b58;
+}
+
+.vietlott-statistics-group,
+.vietlott-statistics-calculation {
+    padding: 7px;
+    border: 1px solid #e5ddd9;
+    border-radius: 5px;
+}
+
+.vietlott-statistics-group h2 {
+    margin-bottom: 5px;
+}
+
+.vietlott-statistics-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    gap: 4px;
+}
+
+.vietlott-statistics-links a,
+.vietlott-statistics-games a {
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 6px 8px;
+    border: 1px solid #eee6e2;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.vietlott-statistics-links a span {
+    margin-left: 5px;
+    color: #625b58;
+    font-size: 12px;
+}
+
+.vietlott-statistics-games {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.vietlott-statistics-games .is-active {
+    border-color: #9e2834;
+    background: #fff7f6;
+    font-weight: 700;
+}
+
+.vietlott-statistics-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 6px;
+    padding: 7px;
+    border: 1px solid #e5ddd9;
+    border-radius: 5px;
+}
+
+.vietlott-statistics-filter label {
+    display: grid;
+    gap: 2px;
+    min-width: 115px;
+    margin: 0;
+}
+
+.vietlott-statistics-filter label span {
+    color: #625b58;
+    font-size: 12px;
+}
+
+.vietlott-statistics-filter select,
+.vietlott-statistics-filter input {
+    min-height: 36px;
+    padding: 5px 7px;
+    border: 1px solid #cfc4bf;
+    border-radius: 4px;
+    background: #fff;
+    font: inherit;
+}
+
+.vietlott-statistics-filter .vietlott-statistics-search {
+    flex: 1 1 145px;
+}
+
+.vietlott-statistics-filter button,
+.vietlott-statistics-reset,
+.vietlott-statistics-pagination a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 6px 11px;
+    border: 1px solid #9e2834;
+    border-radius: 4px;
+    background: #9e2834;
+    color: #fff;
+    font: inherit;
+}
+
+.vietlott-statistics-filter .vietlott-statistics-reset {
+    border-color: #cfc4bf;
+    background: #fff;
+    color: #4e4642;
+}
+
+.vietlott-statistics-warning {
+    padding: 6px 8px;
+    border-left: 3px solid #c28a25;
+    background: #fffaf0;
+}
+
+.vietlott-statistics-table-wrap {
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid #e5ddd9;
+    border-radius: 4px;
+}
+
+.vietlott-statistics-table-wrap table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.vietlott-statistics-table-wrap th,
+.vietlott-statistics-table-wrap td {
+    padding: 5px 6px;
+    border: 1px solid #e8e1dd;
+    text-align: left;
+    vertical-align: top;
+}
+
+.vietlott-statistics-table-wrap th {
+    background: #f7f3f1;
+    white-space: nowrap;
+}
+
+.vietlott-statistics-table-wrap td small {
+    display: block;
+    color: #625b58;
+}
+
+.vietlott-statistics-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.vietlott-statistics-calculation summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.vietlott-statistics-calculation p {
+    padding-top: 5px;
+    color: #625b58;
+}
+
+@media (max-width: 575.98px) {
+    .vietlott-statistics-filter > label {
+        flex: 1 1 140px;
+    }
+
+    .vietlott-statistics-filter button,
+    .vietlott-statistics-filter .vietlott-statistics-reset {
+        flex: 1 1 100px;
+    }
+
+    .vietlott-statistics-links {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

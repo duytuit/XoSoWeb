@@ -100,7 +100,7 @@ namespace XoSoWeb.Services
         public static string GameName(string code) => code switch
         {
             "BINGO18" => "Bingo 18", "KENO" => "Keno", "LOTTO535" => "Lotto 5/35",
-            "MAX3D" => "Max 3D", "MAX3D_PLUS" => "Max 3D Plus", "MAX3D_PRO" => "Max 3D Pro",
+            "MAX3D" => "Max 3D", "MAX3D_PLUS" => "Max 3D+", "MAX3D_PRO" => "Max 3D Pro",
             "MEGA645" => "Mega 6/45", "POWER655" => "Power 6/55", _ => code
         };
     }

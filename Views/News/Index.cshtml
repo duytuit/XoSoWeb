@@ -1,0 +1,53 @@
+@model XoSoWeb.Models.NewsArticleListViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    var basePath = Model.Category == XoSoWeb.Models.NewsArticleCategories.Winners ? "/tin-tuc/trung-thuong-vietlott"
+        : Model.Category == XoSoWeb.Models.NewsArticleCategories.Guides ? "/tin-tuc/huong-dan"
+        : Model.Category == XoSoWeb.Models.NewsArticleCategories.Vietlott ? "/tin-tuc/vietlott" : "/tin-tuc";
+}
+@section Styles { <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" /> }
+<section class="news-page" aria-labelledby="news-title">
+    <h1 id="news-title">@Model.Title</h1>
+    <nav class="news-categories" aria-label="Danh mục tin">
+        <a href="/tin-tuc" class="@(Model.Category == null ? "is-active" : "")">Tất cả</a>
+        <a href="/tin-tuc/vietlott" class="@(Model.Category == XoSoWeb.Models.NewsArticleCategories.Vietlott ? "is-active" : "")">Vietlott</a>
+        <a href="/tin-tuc/trung-thuong-vietlott" class="@(Model.Category == XoSoWeb.Models.NewsArticleCategories.Winners ? "is-active" : "")">Tin trúng thưởng</a>
+        <a href="/tin-tuc/huong-dan" class="@(Model.Category == XoSoWeb.Models.NewsArticleCategories.Guides ? "is-active" : "")">Hướng dẫn</a>
+    </nav>
+    @if (Model.Articles.Count == 0)
+    {
+        <p class="news-empty">Chưa có bài viết đã xuất bản trong danh mục này.</p>
+    }
+    else
+    {
+        <div class="news-list">
+            @foreach (var article in Model.Articles)
+            {
+                <article class="news-list-row">
+                    @if (!string.IsNullOrWhiteSpace(article.FeaturedImageUrl))
+                    {
+                        <a class="news-list-image" href="/tin-tuc/bai-viet/@article.Slug" tabindex="-1" aria-hidden="true">
+                            <img src="@article.FeaturedImageUrl" alt="" loading="lazy" />
+                        </a>
+                    }
+                    <div class="news-list-copy">
+                        <h2><a href="/tin-tuc/bai-viet/@article.Slug">@article.Title</a></h2>
+                        <p class="news-list-meta">
+                            <time datetime="@article.PublishedAt.ToString("O")">@XoSoWeb.Services.NewsDateTime.FormatDate(article.PublishedAt)</time>
+                            @if (!string.IsNullOrWhiteSpace(article.Author)) { <span> · @article.Author</span> }
+                        </p>
+                        @if (!string.IsNullOrWhiteSpace(article.Summary)) { <p class="news-summary">@article.Summary</p> }
+                    </div>
+                </article>
+            }
+        </div>
+        @if (Model.PageCount > 1)
+        {
+            <nav class="news-pagination" aria-label="Phân trang tin tức">
+                @if (Model.Page > 1) { <a href="@basePath?page=@(Model.Page - 1)">← Trước</a> }
+                <span>Trang @Model.Page / @Model.PageCount</span>
+                @if (Model.Page < Model.PageCount) { <a href="@basePath?page=@(Model.Page + 1)">Sau →</a> }
+            </nav>
+        }
+    }
+</section>

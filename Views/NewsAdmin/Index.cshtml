@@ -1,0 +1,92 @@
+@model XoSoWeb.Models.NewsAdminListViewModel
+@{
+    ViewData["Title"] = "Quản trị tin tức";
+    ViewData["NoIndex"] = true;
+}
+@section Styles { <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" /> }
+<section class="news-admin">
+    <h1>Quản trị tin tức</h1>
+    <nav class="news-admin-actions">
+        <a href="/quan-tri/tin-tuc/tao-moi">Tạo bài viết</a>
+        <form method="post" action="/quan-tri/tin-tuc/lay-tin-ngay">
+            @Html.AntiForgeryToken()
+            <button type="submit">Lấy tin ngay</button>
+        </form>
+        <form method="post" action="/quan-tri/tin-tuc/dang-xuat">
+            @Html.AntiForgeryToken()
+            <button type="submit">Đăng xuất</button>
+        </form>
+    </nav>
+    @if (!string.IsNullOrWhiteSpace(Model.CollectionStatus)) { <p class="news-admin-notice" role="status">@Model.CollectionStatus</p> }
+    <div class="news-admin-table-wrap">
+        <table>
+            <thead><tr><th>Bài viết</th><th>Danh mục</th><th>Trạng thái</th><th>Người sửa / duyệt</th><th>Cập nhật</th><th>Thao tác</th></tr></thead>
+            <tbody>
+                @foreach (var article in Model.Articles)
+                {
+                    <tr>
+                        <td>@article.Title<br /><small>/tin-tuc/bai-viet/@article.Slug</small></td>
+                        <td>@article.Category</td>
+                        <td>@article.Status</td>
+                        <td>@article.Editor<br />@article.ApprovedBy</td>
+                        <td>@XoSoWeb.Services.NewsDateTime.FormatDateTime(article.UpdatedAt)</td>
+                        <td>
+                            <a href="/quan-tri/tin-tuc/sua/@article.Id">Sửa</a>
+                            <a href="/quan-tri/tin-tuc/lich-su/@article.Id">Lịch sử</a>
+                            <a href="/quan-tri/tin-tuc/xem-truoc/@article.Id">Xem trước</a>
+                            @if (article.Status == XoSoWeb.Models.NewsArticleStatuses.Draft || article.Status == XoSoWeb.Models.NewsArticleStatuses.Withdrawn)
+                            {
+                                <form method="post" action="/quan-tri/tin-tuc/@article.Id/cho-duyet">@Html.AntiForgeryToken()<button type="submit">Gửi duyệt</button></form>
+                            }
+                            @if (article.Status == XoSoWeb.Models.NewsArticleStatuses.PendingReview)
+                            {
+                                <form method="post" action="/quan-tri/tin-tuc/@article.Id/duyet">@Html.AntiForgeryToken()<button type="submit">Duyệt &amp; xuất bản</button></form>
+                            }
+                            @if (article.Status == XoSoWeb.Models.NewsArticleStatuses.Published)
+                            {
+                                <form method="post" action="/quan-tri/tin-tuc/@article.Id/go-bai">@Html.AntiForgeryToken()<button type="submit">Gỡ bài</button></form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <h2>Nguồn cần biên tập lại</h2>
+    <div class="news-admin-table-wrap">
+        <table>
+            <thead><tr><th>Nguồn</th><th>Mã kỳ</th><th>Hash nguồn</th><th>Trạng thái</th><th>Lần phát hiện</th><th>Bài liên quan</th></tr></thead>
+            <tbody>
+                @foreach (var source in Model.SourceReviews)
+                {
+                    <tr>
+                        <td><a href="@source.NormalizedUrl" rel="noopener noreferrer">Mở nguồn</a></td>
+                        <td>@source.GameCode / @source.DrawNo</td>
+                        <td><code>@source.ContentHash</code></td>
+                        <td>@source.ReviewStatus</td>
+                        <td>@(source.ChangeDetectedAt?.ToString("yyyy-MM-dd HH:mm") ?? source.LastSeenAt.ToString("yyyy-MM-dd HH:mm")) UTC</td>
+                        <td>
+                            @(source.ArticleId?.ToString() ?? "Chưa liên kết")
+                            <form method="post" action="/quan-tri/tin-tuc/nguon/@source.Id/da-kiem-tra">
+                                @Html.AntiForgeryToken()
+                                <button type="submit">Đã kiểm tra</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <h2>Lịch sử thu thập</h2>
+    <div class="news-admin-table-wrap">
+        <table>
+            <thead><tr><th>Bắt đầu (UTC)</th><th>Trạng thái</th><th>Tìm thấy</th><th>Mới</th><th>Trùng</th><th>Nguồn đổi</th><th>Lỗi</th><th>Ghi chú</th></tr></thead>
+            <tbody>
+                @foreach (var run in Model.Runs)
+                {
+                    <tr><td>@run.StartedAt.ToString("yyyy-MM-dd HH:mm")</td><td>@run.Status</td><td>@run.FoundCount</td><td>@run.NewDraftCount</td><td>@run.DuplicateCount</td><td>@run.ChangedSourceCount</td><td>@run.ErrorCount</td><td>@run.Message</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

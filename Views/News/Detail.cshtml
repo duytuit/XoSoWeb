@@ -1,0 +1,62 @@
+@model XoSoWeb.Models.NewsArticleDetailViewModel
+@{
+    var article = Model.Article;
+    ViewData["Title"] = string.IsNullOrWhiteSpace(article.SeoTitle) ? article.Title : article.SeoTitle;
+}
+@section Styles { <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" /> }
+<article class="news-article">
+    @if (Model.IsPreview) { <p class="news-preview-notice">Bản xem trước — chưa công khai.</p> }
+    <h1>@article.Title</h1>
+    @if (!string.IsNullOrWhiteSpace(article.Summary)) { <p class="news-article-summary">@article.Summary</p> }
+    <div class="news-article-byline">
+        @if (!string.IsNullOrWhiteSpace(article.Author)) { <span>Tác giả/biên tập: @article.Author</span> }
+        @if (article.PublishedAt.HasValue) { <span>Đăng ngày <time datetime="@article.PublishedAt.Value.ToString("O")">@XoSoWeb.Services.NewsDateTime.FormatDateTime(article.PublishedAt.Value)</time></span> }
+        @if (article.UpdatedAt != default) { <span>Cập nhật <time datetime="@article.UpdatedAt.ToString("O")">@XoSoWeb.Services.NewsDateTime.FormatDateTime(article.UpdatedAt)</time></span> }
+    </div>
+    @if (!string.IsNullOrWhiteSpace(article.FeaturedImageUrl))
+    {
+        <figure class="news-article-figure">
+            <img src="@article.FeaturedImageUrl" alt="@article.FeaturedImageAlt" />
+            @if (!string.IsNullOrWhiteSpace(article.FeaturedImageAlt)) { <figcaption>@article.FeaturedImageAlt</figcaption> }
+        </figure>
+    }
+    @if (article.Category == XoSoWeb.Models.NewsArticleCategories.Winners)
+    {
+        <section class="news-winner-facts" aria-label="Thông tin trao thưởng">
+            <h2>Thông tin được nguồn công bố</h2>
+            <dl>
+                <dt>Trò chơi</dt><dd>@(article.GameCode == null ? "Cần kiểm tra" : XoSoWeb.Services.LotteryUrls.GameName(article.GameCode))</dd>
+                <dt>Mã kỳ / ngày quay</dt><dd>@(article.DrawNo ?? "Cần kiểm tra") / @(article.DrawDate?.ToString("dd/MM/yyyy") ?? "Cần kiểm tra")</dd>
+                <dt>Ngày tin nguồn đăng</dt><dd>@(article.SourcePublishedAt?.ToString("dd/MM/yyyy") ?? "Cần kiểm tra")</dd>
+                <dt>Hạng giải</dt><dd>@(article.PrizeRank ?? "Cần kiểm tra")</dd>
+                <dt>Giá trị giải công bố</dt><dd>@(article.AnnouncedPrizeValue?.ToString("N0") ?? "Cần kiểm tra")</dd>
+                <dt>Số vé trúng / số người trúng</dt><dd>@(article.WinningTicketCount?.ToString() ?? "Cần kiểm tra") / @(article.WinnerCount?.ToString() ?? "Cần kiểm tra")</dd>
+                <dt>Tiền nhận thực tế</dt><dd>@(article.RecipientAmount?.ToString("N0") ?? "Cần kiểm tra") · @(article.TaxTreatment ?? "Tình trạng thuế chưa xác minh")</dd>
+                <dt>Ngày trao thưởng / địa phương</dt><dd>@(article.AwardedAt?.ToString("dd/MM/yyyy") ?? "Cần kiểm tra") / @(article.AwardLocation ?? "Cần kiểm tra")</dd>
+            </dl>
+            <p>Giá trị Jackpot công bố và tiền người nhận thực tế là các thông tin khác nhau; số vé trúng không đồng nghĩa số người trúng.</p>
+        </section>
+    }
+    <div class="news-article-body">@Html.Raw(XoSoWeb.Services.NewsContentSanitizer.ToSafeHtml(article.Content))</div>
+    @if (!string.IsNullOrWhiteSpace(article.SourceUrl))
+    {
+        <p class="news-source">Nguồn: <a href="@article.SourceUrl" rel="noopener noreferrer">@article.SourceName</a>
+            @if (article.SourcePublishedAt.HasValue) { <span> · Tin nguồn đăng @article.SourcePublishedAt.Value.ToString("dd/MM/yyyy")</span> }
+            @if (article.CollectedAt.HasValue) { <span> · Thu thập @article.CollectedAt.Value.ToString("dd/MM/yyyy HH:mm") UTC</span> }
+        </p>
+    }
+    @if (!string.IsNullOrWhiteSpace(article.GameCode))
+    {
+        var gameSlug = XoSoWeb.Services.LotteryUrls.Slug(article.GameCode);
+        <nav class="news-related-links" aria-label="Thông tin Vietlott liên quan">
+            <a href="/vietlott/@gameSlug">Kết quả @XoSoWeb.Services.LotteryUrls.GameName(article.GameCode)</a>
+            <a href="/thong-ke/vietlott/@gameSlug">Thống kê @XoSoWeb.Services.LotteryUrls.GameName(article.GameCode)</a>
+            <a href="/lich-quay/vietlott?game=@gameSlug">Lịch quay</a>
+            <a href="/co-cau-giai-thuong/vietlott/@gameSlug">Cơ cấu giải</a>
+            @if (!string.IsNullOrWhiteSpace(article.DrawNo))
+            {
+                <a href="@XoSoWeb.Services.LotteryUrls.DrawPath(article.GameCode, article.DrawNo)">Kết quả kỳ @article.DrawNo</a>
+            }
+        </nav>
+    }
+</article>

@@ -1,0 +1,33 @@
+@model XoSoWeb.Models.VietlottStatisticsIndexViewModel
+@{
+    ViewData["Title"] = "Thống kê Vietlott";
+    var rootPath = "/thong-ke/vietlott";
+}
+@section Styles { <link rel="stylesheet" href="~/css/vietlott-statistics.css" asp-append-version="true" /> }
+
+<section class="vietlott-statistics" aria-labelledby="vietlott-statistics-title">
+    <h1 id="vietlott-statistics-title">Thống kê Vietlott</h1>
+    <p class="vietlott-statistics-note">Chỉ hiển thị trò chơi và công cụ có dữ liệu kết quả phù hợp.</p>
+    @if (Model.Games.Count == 0)
+    {
+        <p class="alert alert-light border">Chưa có kỳ Vietlott hoàn chỉnh để thống kê.</p>
+    }
+    else
+    {
+        @foreach (var game in Model.Games)
+        {
+            <section class="vietlott-statistics-group" aria-labelledby="stats-game-@game.Slug">
+                <h2 id="stats-game-@game.Slug"><a href="@rootPath/@game.Slug">@game.Name</a></h2>
+                <nav class="vietlott-statistics-links" aria-label="Công cụ thống kê @game.Name">
+                    @foreach (var tool in game.Tools)
+                    {
+                        <a href="@rootPath/@game.Slug/@tool.Slug">@tool.Name</a>
+                    }
+                    <a href="/lich-quay/vietlott?game=@game.Slug">Lịch quay @game.Name</a>
+                    <a href="/co-cau-giai-thuong/vietlott/@game.Slug">Cơ cấu giải @game.Name</a>
+                </nav>
+            </section>
+        }
+    }
+    <p class="vietlott-statistics-disclaimer">Thống kê dữ liệu quá khứ, không bảo đảm kết quả kỳ tiếp theo.</p>
+</section>

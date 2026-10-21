@@ -1,0 +1,20 @@
+@model XoSoWeb.Models.NewsArticleRevisionListViewModel
+@{
+    ViewData["Title"] = "Lịch sử sửa bài";
+    ViewData["NoIndex"] = true;
+}
+@section Styles { <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" /> }
+<section class="news-admin">
+    <h1>Lịch sử sửa: @Model.Article.Title</h1>
+    <p><a href="/quan-tri/tin-tuc/sua/@Model.Article.Id">Quay lại biên tập</a></p>
+    <div class="news-admin-table-wrap">
+        <table><thead><tr><th>Thời điểm UTC</th><th>Người dùng</th><th>Thao tác</th><th>Bản chụp</th></tr></thead>
+            <tbody>
+                @foreach (var revision in Model.Revisions)
+                {
+                    <tr><td>@revision.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td><td>@revision.ChangedBy</td><td>@revision.ChangeType</td><td><details><summary>Xem bản lưu</summary><pre>@revision.SnapshotJson</pre></details></td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

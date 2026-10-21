@@ -54,5 +54,7 @@ namespace XoSoWeb.Models
         public XoSoRegionViewModel MienTrung { get; set; }
         public XoSoRegionViewModel MienNam { get; set; }
         public VietlottPageViewModel Vietlott { get; set; }
+        public System.Collections.Generic.List<NewsArticleListItem> LatestNews { get; set; } =
+            new System.Collections.Generic.List<NewsArticleListItem>();
     }
 }

@@ -1,0 +1,63 @@
+@model XoSoWeb.Models.NewsArticleEditorViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Tạo bài viết" : "Sửa bài viết";
+    ViewData["NoIndex"] = true;
+    var isEdit = Model.Id != 0;
+    var action = isEdit ? $"/quan-tri/tin-tuc/sua/{Model.Id}" : "/quan-tri/tin-tuc/tao-moi";
+}
+@section Styles { <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" /> }
+<section class="news-admin">
+    <h1>@ViewData["Title"]</h1>
+    <div asp-validation-summary="All" class="news-admin-error" role="alert"></div>
+    <form method="post" action="@action" class="news-admin-editor">
+        @Html.AntiForgeryToken()
+        @if (isEdit) { <input type="hidden" name="Id" value="@Model.Id" /> }
+        <label>Tiêu đề <input name="Title" value="@Model.Title" required maxlength="240" /></label>
+        <label>Slug <input name="Slug" value="@Model.Slug" maxlength="180" placeholder="Tự tạo từ tiêu đề nếu để trống" /></label>
+        <label>Tóm tắt <textarea name="Summary" maxlength="500" rows="3">@Model.Summary</textarea></label>
+        <label>Nội dung (văn bản thuần; HTML không được thực thi) <textarea name="Content" maxlength="200000" rows="16">@Model.Content</textarea></label>
+        <label>Danh mục
+            <select name="Category">
+                <option value="vietlott" selected="@(Model.Category == "vietlott")">Vietlott</option>
+                <option value="trung-thuong-vietlott" selected="@(Model.Category == "trung-thuong-vietlott")">Trúng thưởng Vietlott</option>
+                <option value="huong-dan" selected="@(Model.Category == "huong-dan")">Hướng dẫn</option>
+                <option value="tin-tuc" selected="@(Model.Category == "tin-tuc")">Tin tức</option>
+            </select>
+        </label>
+        <label>Ảnh đại diện (đường dẫn local /images/news/; chỉ dùng ảnh có quyền) <input name="FeaturedImageUrl" value="@Model.FeaturedImageUrl" maxlength="500" /></label>
+        <label>Mô tả ảnh <input name="FeaturedImageAlt" value="@Model.FeaturedImageAlt" maxlength="300" /></label>
+        <label>Tác giả / biên tập hiển thị <input name="Author" value="@Model.Author" maxlength="160" /></label>
+        <label>Tên nguồn <input name="SourceName" value="@Model.SourceName" maxlength="240" /></label>
+        <label>URL nguồn HTTPS <input name="SourceUrl" type="url" value="@Model.SourceUrl" maxlength="1000" /></label>
+        <label>Ngày đăng nguồn (UTC) <input name="SourcePublishedAt" type="date" value="@Model.SourcePublishedAt?.ToString("yyyy-MM-dd")" /></label>
+        <label>Ngày thu thập (UTC) <input name="CollectedAt" type="date" value="@Model.CollectedAt?.ToString("yyyy-MM-dd")" /></label>
+        <fieldset>
+            <legend>Thông tin trúng thưởng — chỉ điền khi nguồn ghi rõ</legend>
+            <label>Trò chơi <input name="GameCode" value="@Model.GameCode" maxlength="20" /></label>
+            <label>Mã kỳ <input name="DrawNo" value="@Model.DrawNo" maxlength="40" /></label>
+            <label>Ngày quay <input name="DrawDate" type="date" value="@Model.DrawDate?.ToString("yyyy-MM-dd")" /></label>
+            <label>Hạng giải <input name="PrizeRank" value="@Model.PrizeRank" maxlength="80" /></label>
+            <label>Giá trị giải công bố <input name="AnnouncedPrizeValue" type="number" min="0" step="1" value="@Model.AnnouncedPrizeValue" /></label>
+            <label>Số vé trúng <input name="WinningTicketCount" type="number" min="0" value="@Model.WinningTicketCount" /></label>
+            <label>Số người trúng (nếu nguồn nêu rõ) <input name="WinnerCount" type="number" min="0" value="@Model.WinnerCount" /></label>
+            <label>Tiền người nhận thực tế <input name="RecipientAmount" type="number" min="0" step="1" value="@Model.RecipientAmount" /></label>
+            <label>Thuế
+                <select name="TaxTreatment">
+                    <option value="unknown" selected="@(Model.TaxTreatment == "unknown")">Chưa xác minh</option>
+                    <option value="not-stated" selected="@(Model.TaxTreatment == "not-stated")">Nguồn không nêu</option>
+                    <option value="before-tax" selected="@(Model.TaxTreatment == "before-tax")">Trước thuế</option>
+                    <option value="after-tax" selected="@(Model.TaxTreatment == "after-tax")">Sau thuế</option>
+                </select>
+            </label>
+            <label>Ngày trao thưởng <input name="AwardedAt" type="date" value="@Model.AwardedAt?.ToString("yyyy-MM-dd")" /></label>
+            <label>Địa phương <input name="AwardLocation" value="@Model.AwardLocation" maxlength="160" /></label>
+        </fieldset>
+        <label>SEO title <input name="SeoTitle" value="@Model.SeoTitle" maxlength="240" /></label>
+        <label>Meta description <textarea name="MetaDescription" maxlength="500" rows="2">@Model.MetaDescription</textarea></label>
+        <div class="news-admin-actions">
+            <button type="submit">Lưu nháp</button>
+            <button type="submit" formaction="/quan-tri/tin-tuc/xem-truoc">Xem trước</button>
+            <a href="/quan-tri/tin-tuc">Quay lại</a>
+        </div>
+    </form>
+</section>

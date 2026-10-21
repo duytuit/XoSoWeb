@@ -55,6 +55,35 @@ public sealed class HistoryCommand : DbCommand
             table.Rows.Add("KENO", "00999", new DateTime(2024, 10, 17), "01 02", 0);
             table.Rows.Add("BINGO18", "00998", new DateTime(2024, 10, 17), "[]", 0);
         }
+        else if (CommandText.Contains("WITH Candidate AS"))
+        {
+            if (!CommandText.Contains("TOP (@limit)") || !CommandText.Contains("ORDER BY r.DrawDate DESC, r.Id DESC"))
+                throw new Exception("Statistics query must be bounded and ordered by draw date and id");
+            Columns(typeof(long), typeof(string), typeof(string), typeof(DateTime), typeof(string), typeof(string),
+                typeof(int), typeof(string), typeof(string), typeof(long), typeof(long), typeof(string), typeof(string), typeof(string));
+            if ((string)parameters.Parameters["@game"].Value == "MEGA645")
+            {
+                table.Rows.Add(1004L, "MEGA645", "00004", new DateTime(2024, 10, 19), "01 02", DBNull.Value,
+                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value);
+                table.Rows.Add(1003L, "MEGA645", "00003", new DateTime(2024, 10, 18), "01 02 03 04 05 06", DBNull.Value,
+                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value);
+                table.Rows.Add(1002L, "MEGA645", "00002", new DateTime(2024, 10, 17), "01 07 09 10 11 12", DBNull.Value,
+                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value);
+                table.Rows.Add(1001L, "MEGA645", "00001", new DateTime(2024, 10, 16), "01 02 10 15 18 20", DBNull.Value,
+                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value);
+            }
+            else if ((string)parameters.Parameters["@game"].Value == "MAX3D")
+            {
+                table.Rows.Add(2001L, "MAX3D", "01131", new DateTime(2024, 10, 19), DBNull.Value, DBNull.Value,
+                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, "Giải ba", "005, 123", "100 nghìn");
+                table.Rows.Add(2001L, "MAX3D", "01131", new DateTime(2024, 10, 19), DBNull.Value, DBNull.Value,
+                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, "Giải nhì", "005", "200 nghìn");
+                table.Rows.Add(2001L, "MAX3D", "01131", new DateTime(2024, 10, 19), DBNull.Value, DBNull.Value,
+                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, "Giải Nhất", "742", "300 nghìn");
+                table.Rows.Add(2001L, "MAX3D", "01131", new DateTime(2024, 10, 19), DBNull.Value, DBNull.Value,
+                    DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, DBNull.Value, "Giải Đặc biệt", "2, 9, 1, 8, 1, 4", "1 triệu");
+            }
+        }
         else if (CommandText.Contains("FROM RankedResults"))
         {
             var exact = parameters.Parameters["@exactDate"].Value is DateTime;

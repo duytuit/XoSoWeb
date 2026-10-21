@@ -76,6 +76,31 @@ Check(northernPrizes[3].Numbers.SequenceEqual(new[] { "00123", "00789" }), "nort
 Check(ArchiveCatalog.HasResultNumbers("[{\"PrizeName\":\"Test\",\"Numbers\":[\"00\"]}]"), "catalog JSON validated without SQL JSON functions");
 foreach (var json in new[] { "[]", "null", "{bad", "[null]", "[{\"PrizeName\":\"Test\",\"Numbers\":[]}]" })
     Check(!ArchiveCatalog.HasResultNumbers(json), "invalid or empty catalog data excluded");
+var canonicalSourceUrl = NewsSourcePolicy.NormalizeEditorialUrl("https://example.org/news?id=7&utm_source=mail#top");
+Check(canonicalSourceUrl == NewsSourcePolicy.NormalizeEditorialUrl("https://example.org/news?utm_medium=email&id=7")
+    && NewsSourcePolicy.UrlHash(canonicalSourceUrl).Length == 64, "news source URL drops tracking and hashes canonical URL");
+Check(NewsSourcePolicy.NormalizeEditorialUrl("http://example.org/news") == null
+    && NewsSourcePolicy.NormalizeEditorialUrl("https://127.0.0.1/news") == null
+    && NewsSourcePolicy.NormalizeEditorialUrl("https://user@example.org/news") == null, "news source URL rejects non-HTTPS, loopback, and embedded credentials");
+Check(NewsSourcePolicy.TryNormalizeVietlottUrl("https://www.vietlott.vn/vi/tin-tuc?utm_source=mail", out var allowedVietlottUrl)
+    && allowedVietlottUrl == "https://www.vietlott.vn/vi/tin-tuc"
+    && !NewsSourcePolicy.TryNormalizeVietlottUrl("https://vietlott.vn.example.org/news", out _), "Vietlott source allowlist matches exact hosts only");
+var safeNewsHtml = NewsContentSanitizer.ToSafeHtml("<script>alert(1)</script>\r\n<img src=x onerror=alert(2)>");
+Check(!safeNewsHtml.Contains("<script", StringComparison.OrdinalIgnoreCase)
+    && !safeNewsHtml.Contains("<img", StringComparison.OrdinalIgnoreCase)
+    && safeNewsHtml.Contains("&lt;script&gt;") && safeNewsHtml.Contains("<br />"), "news editor content is encoded before HTML display");
+var newsAdminMethods = typeof(NewsAdminController).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+var protectedNewsActions = newsAdminMethods.Where(method => method.GetCustomAttributes(typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute), true)
+    .Cast<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().Any()).ToList();
+Check(protectedNewsActions.Count >= 8 && protectedNewsActions.All(method =>
+    method.GetCustomAttributes(typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute), true)
+        .Cast<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().Any(attribute => attribute.Roles == "NewsAdmin")),
+    "news admin actions require the server-side NewsAdmin role");
+var newsPostActions = newsAdminMethods.Where(method => method.GetCustomAttributes(typeof(Microsoft.AspNetCore.Mvc.HttpPostAttribute), true).Any()
+    && method.Name != "Login").ToList();
+Check(newsPostActions.Count > 0 && newsPostActions.All(method =>
+    method.GetCustomAttributes(typeof(Microsoft.AspNetCore.Mvc.ValidateAntiForgeryTokenAttribute), true).Any()),
+    "all news admin POST actions require antiforgery validation");
 foreach (var url in new[] { "http://example.org", "https://localhost", "https://example.org/path", "https://user@example.org", "https://example.org/?x=1", "//example.org" }) RejectOrigin(url);
 var site = new SiteSettings { SiteUrl = "https://example.org/", OrganizationName = "Test operator" };
 var accessor = new HttpContextAccessor();
@@ -92,10 +117,60 @@ Check(automaticSite.SiteUrl == "http://localhost:5099", "automatic origin is not
 accessor.HttpContext = null;
 site.Validate(false);
 Check(site.SiteUrl == "https://example.org", "origin normalized");
+var newsSeoController = new NewsController(new EmptyNewsArticleService(), site)
+{
+    ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+};
+newsSeoController.HttpContext.Request.Scheme = "https";
+newsSeoController.HttpContext.Request.Host = new HostString("example.org");
+newsSeoController.HttpContext.Request.Path = "/tin-tuc/bai-viet/fixture-story";
+typeof(NewsController).GetMethod("SetArticleMetadata", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[]
+{
+    newsSeoController,
+    new NewsArticle { Slug = "fixture-story", Title = "Fixture story", Category = NewsArticleCategories.Vietlott, PublishedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+    false,
+    site
+});
+using (var newsSeo = JsonDocument.Parse(SeoMetadata.Create(site, newsSeoController.HttpContext.Request, newsSeoController.ViewData).StructuredJson))
+{
+    var graphNodes = newsSeo.RootElement.GetProperty("@graph").EnumerateArray().ToList();
+    Check(graphNodes.Count(node => node.TryGetProperty("@type", out var type) && type.GetString() == "NewsArticle") == 1,
+        "news SEO graph contains exactly one NewsArticle node");
+    var crumbs = graphNodes.Single(node => node.GetProperty("@type").GetString() == "BreadcrumbList")
+        .GetProperty("itemListElement").EnumerateArray().ToList();
+    Check(crumbs.Select(item => item.GetProperty("name").GetString())
+        .SequenceEqual(new[] { "Trang chủ", "Tin tức", "Tin Vietlott", "Fixture story" })
+        && crumbs.Select(item => item.GetProperty("item").GetString())
+            .SequenceEqual(new[] { "https://example.org/", "https://example.org/tin-tuc", "https://example.org/tin-tuc/vietlott", "https://example.org/tin-tuc/bai-viet/fixture-story" }),
+        "news article breadcrumb schema follows visible category hierarchy and canonical URL");
+}
 Check(LotteryUrls.TryDate("29-02-2024", out _), "valid leap day");
 Check(!LotteryUrls.TryDate("29-02-2025", out _) && !LotteryUrls.TryDate("31-04-2025", out _), "invalid calendar dates");
 Check(!LotteryUrls.TryDate(LotteryUrls.Today.AddDays(1).ToString("dd-MM-yyyy"), out _), "future date rejected in UTC+7");
 Check(!LotteryUrls.TryDate("1-1-2024", out _), "strict date format");
+var referenceGames = new[] { "mega645", "power655", "lotto535", "keno", "max3d", "max3d-plus", "max3d-pro", "bingo18" };
+foreach (var game in referenceGames)
+{
+    Check(LotteryReferenceCatalog.TryBuildSchedule("vietlott", 1, null, game, out var schedule)
+        && schedule.GameFilter == game && schedule.ScheduleRows.Count == 0,
+        "Vietlott schedule slug accepted without invented data: " + game);
+    Check(LotteryReferenceCatalog.TryBuildPrizeStructure("vietlott", game, out var prizes)
+        && prizes.GameFilter == game && prizes.PrizeRows.Count == 0 && prizes.PrizeVersions.Count == 0,
+        "Vietlott prize page preserves unverified-data state: " + game);
+}
+Check(!LotteryReferenceCatalog.TryBuildSchedule("vietlott", 8, null, null, out _), "invalid schedule weekday rejected");
+Check(!LotteryReferenceCatalog.TryBuildSchedule("vietlott", null, null, "unknown", out _), "unknown schedule game rejected");
+Check(LotteryReferenceCatalog.TryBuildSchedule("mien-nam", null, "TP HCM", null, out var regionalSchedule)
+    && regionalSchedule.ScheduleRows.Count == 0 && regionalSchedule.StationFilter == "TP HCM",
+    "regional schedule filter does not infer official schedule from results");
+Check(LotteryReferenceCatalog.TryBuildPrizeStructure("mien-bac", null, out var regionalPrizes)
+    && regionalPrizes.PrizeRows.Count == 0 && regionalPrizes.EffectiveFrom == null,
+    "regional prize page leaves unverified values and effective date empty");
+TimeZoneInfo vietnamTimeZone;
+try { vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh"); }
+catch (TimeZoneNotFoundException) { vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"); }
+var referenceToday = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, vietnamTimeZone).Date;
+Check(LotteryReferenceCatalog.BuildIndex(true).Today == referenceToday, "reference index uses current Vietnam date");
 Check(LotteryUrls.ProvincePath("Long An") == "/xo-so-long-an" && LotteryUrls.ProvincePath("Xổ số Đắk Lắk") == "/xo-so-dak-lak", "province slugs from names");
 Check(LotteryUrls.DrawPath("MAX3D_PRO", "00019") == "/vietlott/max3d-pro/ky/00019", "draw identifiers retain leading zeroes");
 foreach (var alias in new[] { "TPHCM", "TP HCM", "TP.HCM", "Xổ số TPHCM", "tp-hcm" })
@@ -150,6 +225,26 @@ using (var catalogServices = new ServiceCollection().AddMemoryCache()
     Check(!realCatalog.Any(x => x.DrawNo == "00999" || x.DrawNo == "00998"), "incomplete Keno and Bingo excluded from sitemap catalog");
     Check(realCatalog.Any(x => x.Path == "/vietlott/mega645/ky/00019"), "catalog runs through legacy-compatible SQL");
 }
+using (var statisticsDb = new XoSoDBContext(new DbContextOptionsBuilder<XoSoDBContext>().UseSqlServer(new HistoryConnection()).Options))
+{
+    var statistics = new VietlottStatisticsService(statisticsDb, cache);
+    var frequency = await statistics.GetPageAsync("mega645", "tan-suat", 20, null, null, "number", null, 1, CancellationToken.None);
+    var numberOne = frequency.Rows.Single(row => row.Value == "01");
+    Check(numberOne.Count == 3 && numberOne.DrawCount == 3, "manual Mega frequency separates appearances and draw count");
+    Check(numberOne.DrawUrl == "/vietlott/mega645/ky/00003", "frequency row links to the latest matching draw");
+    Check(frequency.UsedPeriods == 3 && frequency.ExcludedPeriods == 1, "incomplete period is reported and excluded");
+    var gaps = await statistics.GetPageAsync("mega645", "chua-xuat-hien", 20, null, null, "number", null, 1, CancellationToken.None);
+    Check(gaps.Rows.Single(row => row.Value == "07").Gap == 1, "absence gap counts completed draws since last appearance");
+    var repeats = await statistics.GetPageAsync("mega645", "trung-ky-truoc", 20, null, null, "number", null, 1, CancellationToken.None);
+    Check(repeats.Rows.Any(row => row.DrawNo == "00002" && row.Value == "2 số trùng"), "previous-draw comparison uses the adjacent draw identifier");
+    var max3dPrize = await statistics.GetPageAsync("max3d", "tan-suat-bo-ba", 20, null, "Giải ba", "number", null, 1, CancellationToken.None);
+    var leadingZeroTriple = max3dPrize.Rows.Single(row => row.Value == "005");
+    Check(leadingZeroTriple.Count == 1 && leadingZeroTriple.DrawCount == 1, "Max 3D retains leading zero and scopes exact prize");
+    var allMax3dPrizes = await statistics.GetPageAsync("max3d", "tan-suat-bo-ba", 20, null, null, "number", null, 1, CancellationToken.None);
+    var repeatedTriple = allMax3dPrizes.Rows.Single(row => row.Value == "005");
+    Check(repeatedTriple.Count == 2 && repeatedTriple.DrawCount == 1, "Max 3D separates number occurrences from unique draws");
+    Check(allMax3dPrizes.Rows.Single(row => row.Value == "291").Count == 0, "separate special digits are not combined into a triple");
+}
 // Synthetic navigation fixtures only; these are never written to a result database.
 var links = new List<ArchiveLink> { new ArchiveLink { Path = "/xo-so-mien-bac/17-10-2024", Region = "MB", Date = new DateTime(2024, 10, 17), Modified = new DateTime(2024, 10, 18) } };
 cache.Set("archive-catalog", links);
@@ -178,7 +273,7 @@ site.AllowIndexing = true;
 Check(((ContentResult)controller.Robots()).Content.Contains(site.Absolute("/sitemap.xml")), "production robots advertises sitemap");
 
 // Run real MVC routing and compiled Razor with isolated configuration. No DB or Redis calls.
-var rootDirectory = new DirectoryInfo(AppContext.BaseDirectory);
+var rootDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
 while (!File.Exists(Path.Combine(rootDirectory.FullName, "XoSoWeb.csproj"))) rootDirectory = rootDirectory.Parent ?? throw new Exception("Repository root missing");
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Production", ContentRootPath = rootDirectory.FullName, WebRootPath = Path.Combine(rootDirectory.FullName, "wwwroot") });
 builder.WebHost.UseUrls("http://127.0.0.1:0");
@@ -186,6 +281,8 @@ builder.Logging.ClearProviders();
 builder.Services.AddSingleton(site);
 builder.Services.AddSingleton<IMemoryCache>(cache);
 builder.Services.AddSingleton(catalog);
+builder.Services.AddSingleton<INewsArticleService, EmptyNewsArticleService>();
+builder.Services.AddScoped<VietlottStatisticsService>();
 var contactHandler = new ContactTestHandler();
 var contactConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string> {
     ["TelegramContact:BotToken"] = "fixture-token", ["TelegramContact:ChatId"] = "fixture-chat"
@@ -202,6 +299,15 @@ app.MapControllers();
 await app.StartAsync();
 var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>().Addresses.Single();
 using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = new Uri(address) };
+using (var response = await client.GetAsync("/tin-tuc/vietlott"))
+{
+    var html = System.Net.WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+    Check((int)response.StatusCode == 200
+        && html.Contains("aria-label=\"Breadcrumb\"")
+        && html.Contains("<a href=\"/tin-tuc\">Tin tức</a>")
+        && html.Contains("<span aria-current=\"page\">Tin Vietlott</span>"),
+        "news category breadcrumb includes parent category and current page");
+}
 using (var response = await client.GetAsync("/xo-so-mien-trung/17-10-2024"))
 {
     Check((int)response.StatusCode == 200, "central results render with mixed prize names");
@@ -217,17 +323,81 @@ using (var response = await client.GetAsync("/xo-so-mien-trung/17-10-2024"))
     Check(rows[3].Contains(">ĐB</th>") && rows[3].Contains(">001234</span>") && rows[3].Contains(">005678</span>"), "special prize last with leading zeroes intact");
 }
 links.Add(new ArchiveLink { Path = "/vietlott/mega645", GameCode = "MEGA645", Label = "Mega 6/45" });
-foreach (var path in new[] { "/", "/xo-so-mien-bac", "/xo-so-mien-trung", "/xo-so-mien-nam", "/xo-so-mien-bac?day=1", "/xo-so-fixture-station", "/xo-so-fixture-station/17-10-2024", "/vietlott", "/vietlott/mega645", "/vietlott/mega645/ky/00019", "/vietlott?gameCode=MEGA645&offset=1", "/thong-ke", "/thong-ke?endDate=2024-10-17", "/thong-ke-tan-suat-loto", "/thong-ke-tan-suat-loto?region=MN&week=2024-10-17" })
+foreach (var path in new[] { "/", "/xo-so-mien-bac", "/xo-so-mien-trung", "/xo-so-mien-nam", "/xo-so-mien-bac?day=1", "/xo-so-fixture-station", "/xo-so-fixture-station/17-10-2024", "/vietlott", "/vietlott/mega645", "/vietlott/mega645/ky/00019", "/vietlott?gameCode=MEGA645&offset=1", "/thong-ke", "/thong-ke?endDate=2024-10-17", "/thong-ke-tan-suat-loto", "/thong-ke-tan-suat-loto?region=MN&week=2024-10-17", "/thong-ke/vietlott", "/thong-ke/vietlott/mega645", "/thong-ke/vietlott/mega645/tan-suat?periods=20", "/lich-quay", "/lich-quay/mien-bac", "/lich-quay/mien-trung", "/lich-quay/mien-nam?weekday=1", "/lich-quay/vietlott?game=mega645&weekday=2", "/lich-quay/mien-nam?station=TP%20HCM", "/co-cau-giai-thuong", "/co-cau-giai-thuong/mien-bac", "/co-cau-giai-thuong/mien-trung", "/co-cau-giai-thuong/mien-nam", "/co-cau-giai-thuong/vietlott/mega645", "/co-cau-giai-thuong/vietlott/max3d-plus" })
 {
     using var response = await client.GetAsync(path);
     Check((int)response.StatusCode == 200, "SEO template returns 200: " + path);
     var html = await response.Content.ReadAsStringAsync();
     ValidateRenderedSeo(html, path, site.SiteUrl);
     Check(System.Net.WebUtility.HtmlDecode(html).Contains("href=\"" + site.Absolute(path) + "\""), "self canonical: " + path);
+    if (path.StartsWith("/thong-ke", StringComparison.Ordinal))
+    {
+        var decodedHtml = System.Net.WebUtility.HtmlDecode(html);
+        Check(decodedHtml.Contains("<div class=\"top-navigation-dropdown\">")
+            && decodedHtml.Contains("<div class=\"top-navigation-submenu\">"),
+            "top statistics navigation renders parent-child menu: " + path);
+        Check(decodedHtml.Contains("href=\"/thong-ke/vietlott\">Thống kê Vietlott</a>"),
+            "statistics submenu links to Vietlott category: " + path);
+    }
+    if (path.StartsWith("/thong-ke/vietlott", StringComparison.Ordinal))
+    {
+        var decodedHtml = System.Net.WebUtility.HtmlDecode(html);
+        Check(System.Text.RegularExpressions.Regex.IsMatch(decodedHtml,
+            "<a class=\"top-navigation-dropdown-trigger is-active\" href=\"/thong-ke\">\\s*<span>Thống kê</span>",
+            System.Text.RegularExpressions.RegexOptions.Singleline),
+            "statistics parent is highlighted in top navigation: " + path);
+        var breadcrumb = System.Text.RegularExpressions.Regex.Match(decodedHtml, "<nav aria-label=\"Breadcrumb\".*?</nav>", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Check(breadcrumb.Success, "visible Vietlott breadcrumb rendered: " + path);
+        Check(System.Text.RegularExpressions.Regex.Matches(breadcrumb.Value, "href=\"/\">Trang chủ</a>").Count == 1,
+            "visible breadcrumb contains one home link: " + path);
+        if (path == "/thong-ke/vietlott/mega645")
+            Check(breadcrumb.Value.Contains("href=\"/thong-ke/vietlott\">Thống kê Vietlott</a>"),
+                "game breadcrumb links to Vietlott statistics index");
+        if (path.StartsWith("/thong-ke/vietlott/mega645/tan-suat", StringComparison.Ordinal))
+            Check(breadcrumb.Value.Contains("href=\"/thong-ke/vietlott/mega645\">Thống kê Mega 6/45</a>"),
+                "tool breadcrumb links to its game index");
+    }
+    if (path.StartsWith("/lich-quay", StringComparison.Ordinal) || path.StartsWith("/co-cau-giai-thuong", StringComparison.Ordinal))
+    {
+        var decodedHtml = System.Net.WebUtility.HtmlDecode(html);
+        if (path.StartsWith("/co-cau-giai-thuong/vietlott/", StringComparison.Ordinal))
+        {
+            Check(System.Text.RegularExpressions.Regex.Matches(decodedHtml, "class=\"lottery-reference-links\"").Count == 1,
+                "Vietlott prize page renders one game-link navigation: " + path);
+            foreach (var gameSlug in new[] { "mega645", "power655", "lotto535", "keno", "max3d", "max3d-plus", "max3d-pro", "bingo18" })
+                Check(System.Text.RegularExpressions.Regex.Matches(decodedHtml, "href=\"/co-cau-giai-thuong/vietlott/" + gameSlug + "\"").Count == 1,
+                    "Vietlott prize page links to each game once: " + gameSlug);
+        }
+        var breadcrumb = System.Text.RegularExpressions.Regex.Match(decodedHtml, "<nav aria-label=\"Breadcrumb\".*?</nav>", System.Text.RegularExpressions.RegexOptions.Singleline);
+        Check(breadcrumb.Success && System.Text.RegularExpressions.Regex.Matches(breadcrumb.Value, "href=\"/\">Trang chủ</a>").Count == 1,
+            "reference breadcrumb has exactly one home link: " + path);
+        if (path == "/lich-quay/mien-trung")
+            Check(breadcrumb.Value.Contains("href=\"/lich-quay\">Lịch quay</a>")
+                && breadcrumb.Value.Contains("<span aria-current=\"page\">Lịch quay Miền Trung</span>")
+                && !breadcrumb.Value.Contains("href=\"/lich-quay\">Trang chủ</a>"),
+                "central schedule breadcrumb names its schedule parent, not home");
+        if (path == "/co-cau-giai-thuong/mien-trung")
+            Check(breadcrumb.Value.Contains("href=\"/co-cau-giai-thuong\">Cơ cấu giải thưởng</a>"),
+                "regional prize breadcrumb names its prize-structure parent");
+        Check(decodedHtml.Contains("Thông tin") && decodedHtml.Contains("Lịch quay")
+            && decodedHtml.Contains("Cơ cấu giải thưởng"), "reference routes render navigation links: " + path);
+        Check(decodedHtml.Contains("Chưa có") || decodedHtml.Contains("Chưa xác minh"),
+            "unverified schedule/prize details are disclosed: " + path);
+        Check(decodedHtml.Contains("noindex,follow"), "unverified reference page excluded from indexing: " + path);
+        if (path.Contains("vietlott", StringComparison.Ordinal))
+            Check(decodedHtml.Contains("Vietlott") && decodedHtml.Contains("Mega 6/45"),
+                "Vietlott page includes game navigation: " + path);
+        if (path.StartsWith("/lich-quay/", StringComparison.Ordinal))
+            Check(decodedHtml.Contains("Hoàn tất kết quả") && decodedHtml.Contains("Cập nhật ngày"),
+                "schedule separates start/completion and shows source review date: " + path);
+        if (path.StartsWith("/co-cau-giai-thuong/", StringComparison.Ordinal))
+            Check(decodedHtml.Contains("Loại giá trị") && decodedHtml.Contains("Số đặc biệt / chia thưởng"),
+                "prize page models fixed/jackpot and special-number distinctions: " + path);
+    }
     if (path.Contains('?')) Check(html.Contains("noindex,follow"), "filters noindex and crawlable: " + path);
     if (path.Contains("/ky/")) Check(html.Contains("00019") && html.Contains("17/10/2024"), "draw metadata retains actual date and identifier");
 }
-foreach (var path in new[] { "/xo-so-mien-bac?day=1&day=2", "/xo-so-mien-bac?offset=3", "/vietlott?offset=01&gameCode=MEGA645", "/vietlott?offset=1&gameCode=KENO", "/thong-ke?endDate=2024-10-17T00:00:00", "/?arbitrary=1", "/xo-so-fixture-station/17-10-2024?day=1" })
+foreach (var path in new[] { "/xo-so-mien-bac?day=1&day=2", "/xo-so-mien-bac?offset=3", "/vietlott?offset=01&gameCode=MEGA645", "/vietlott?offset=1&gameCode=KENO", "/thong-ke?endDate=2024-10-17T00:00:00", "/thong-ke/vietlott/mega645/tan-suat?periods=21", "/?arbitrary=1", "/xo-so-fixture-station/17-10-2024?day=1", "/lich-quay/mien-bac?weekday=8", "/lich-quay/vietlott?game=unknown", "/co-cau-giai-thuong?unexpected=1" })
 {
     using var response = await client.GetAsync(path);
     Check((int)response.StatusCode == 400, "parameter combinations bounded: " + path);
@@ -259,7 +429,11 @@ foreach (var path in new[] { "/robots.txt", "/sitemap.xml", "/gioi-thieu", "/ngu
 using (var response = await client.GetAsync("/sitemap.xml"))
 {
     var sitemap = XDocument.Parse(await response.Content.ReadAsStringAsync());
-    foreach (var loc in sitemap.Descendants(ns + "loc").Select(n => n.Value))
+    var sitemapLocations = sitemap.Descendants(ns + "loc").Select(n => n.Value).ToList();
+    Check(!sitemapLocations.Any(loc => new Uri(loc).AbsolutePath.StartsWith("/lich-quay", StringComparison.Ordinal)
+        || new Uri(loc).AbsolutePath.StartsWith("/co-cau-giai-thuong", StringComparison.Ordinal)),
+        "unverified reference pages excluded from sitemap");
+    foreach (var loc in sitemapLocations)
     {
         var url = new Uri(loc);
         using var pageResponse = await client.GetAsync(url.PathAndQuery);

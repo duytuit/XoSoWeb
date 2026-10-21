@@ -1,0 +1,210 @@
+@model XoSoWeb.Models.VietlottStatisticsPageViewModel
+@using System
+@using System.Collections.Generic
+@{
+    ViewData["Title"] = Model.ToolName + " " + Model.GameName;
+    var pageCount = Math.Max(1, (Model.TotalRows + Model.PageSize - 1) / Model.PageSize);
+    var hasMetrics = !Model.IsDrawHistory && Model.ToolSlug != "jackpot" && Model.ToolSlug != "chua-xuat-hien";
+    var hasGap = Model.ToolSlug == "chua-xuat-hien";
+    var hasPrizeFilter = Model.IsMax3d && (Model.ToolSlug == "tan-suat-bo-ba" || Model.ToolSlug == "hai-so-cuoi"
+        || Model.ToolSlug == "chu-so-theo-vi-tri" || Model.ToolSlug == "chua-xuat-hien");
+    var basePath = "/thong-ke/vietlott/" + Model.GameSlug + "/" + Model.ToolSlug;
+    string PageUrl(int targetPage)
+    {
+        var query = new List<string> { "periods=" + Model.RequestedPeriods, "sort=" + Uri.EscapeDataString(Model.Sort) };
+        if (!string.IsNullOrEmpty(Model.EndDraw)) query.Add("endDraw=" + Uri.EscapeDataString(Model.EndDraw));
+        if (!string.IsNullOrEmpty(Model.PrizeName)) query.Add("prize=" + Uri.EscapeDataString(Model.PrizeName));
+        if (!string.IsNullOrEmpty(Model.Search)) query.Add("q=" + Uri.EscapeDataString(Model.Search));
+        query.Add("page=" + targetPage);
+        return basePath + "?" + string.Join("&", query);
+    }
+}
+@section Styles { <link rel="stylesheet" href="~/css/vietlott-statistics.css" asp-append-version="true" /> }
+
+<section class="vietlott-statistics" aria-labelledby="vietlott-statistics-title">
+    <h1 id="vietlott-statistics-title">@Model.ToolName @Model.GameName</h1>
+    <p class="vietlott-statistics-description">@Model.Description</p>
+    <nav class="vietlott-statistics-games" aria-label="Điều hướng thống kê">
+        <a href="/thong-ke/vietlott">Thống kê Vietlott</a>
+        <a href="/thong-ke/vietlott/@Model.GameSlug">@Model.GameName</a>
+        <a href="/vietlott/@Model.GameSlug">Lịch sử @Model.GameName</a>
+        @foreach (var tool in Model.Tools)
+        {
+            <a class="@(tool.Slug == Model.ToolSlug ? "is-active" : "")"
+               href="/thong-ke/vietlott/@Model.GameSlug/@tool.Slug@(Context.Request.QueryString.Value)"
+               aria-current="@(tool.Slug == Model.ToolSlug ? "page" : null)">@tool.Name</a>
+        }
+    </nav>
+
+    <form method="get" action="@basePath" class="vietlott-statistics-filter">
+        <label>
+            <span>Trò chơi</span>
+            <select aria-label="Trò chơi" onchange="window.location.href='/thong-ke/vietlott/'+this.value">
+                <option value="mega645" selected="@(Model.GameSlug == "mega645")">Mega 6/45</option>
+                <option value="power655" selected="@(Model.GameSlug == "power655")">Power 6/55</option>
+                <option value="lotto535" selected="@(Model.GameSlug == "lotto535")">Lotto 5/35</option>
+                <option value="keno" selected="@(Model.GameSlug == "keno")">Keno</option>
+                <option value="max3d" selected="@(Model.GameSlug == "max3d")">Max 3D</option>
+                <option value="max3d-plus" selected="@(Model.GameSlug == "max3d-plus")">Max 3D+</option>
+                <option value="max3d-pro" selected="@(Model.GameSlug == "max3d-pro")">Max 3D Pro</option>
+                <option value="bingo18" selected="@(Model.GameSlug == "bingo18")">Bingo18</option>
+            </select>
+        </label>
+        <label>
+            <span>Kỳ kết thúc</span>
+            <select name="endDraw">
+                <option value="">Kỳ mới nhất</option>
+                @foreach (var draw in Model.DrawOptions)
+                {
+                    <option value="@draw.DrawNo" selected="@(draw.DrawNo == Model.EndDraw)">@draw.DrawNo · @draw.DrawDate.ToString("dd/MM/yyyy")</option>
+                }
+            </select>
+        </label>
+        @if (hasPrizeFilter)
+        {
+            <label>
+                <span>Giải thưởng</span>
+                <select name="prize">
+                    <option value="">Tất cả giải</option>
+                    @foreach (var prizeOption in Model.PrizeOptions)
+                    {
+                        <option value="@prizeOption" selected="@(string.Equals(prizeOption, Model.PrizeName, StringComparison.OrdinalIgnoreCase))">@prizeOption</option>
+                    }
+                </select>
+            </label>
+        }
+        <label>
+            <span>Số kỳ</span>
+            <select name="periods">
+                @foreach (var preset in new[] { 20, 50, 100, 200 })
+                {
+                    <option value="@preset" selected="@(preset == Model.RequestedPeriods)">@preset kỳ</option>
+                }
+            </select>
+        </label>
+        <label>
+            <span>Sắp xếp</span>
+            <select name="sort">
+                <option value="number" selected="@(Model.Sort == "number")">Theo số</option>
+                <option value="frequency" selected="@(Model.Sort == "frequency")">Theo tần suất</option>
+                <option value="gap" selected="@(Model.Sort == "gap")">Theo kỳ chưa xuất hiện</option>
+            </select>
+        </label>
+        <label class="vietlott-statistics-search">
+            <span>Tìm số/kết quả</span>
+            <input type="search" name="q" maxlength="30" value="@Model.Search" />
+        </label>
+        <button type="submit">Xem</button>
+        <a class="vietlott-statistics-reset" href="@basePath">Đặt lại</a>
+    </form>
+
+    <p class="vietlott-statistics-range">
+        Đang dùng @Model.UsedPeriods kỳ hoàn chỉnh
+        @if (Model.OldestDrawDate.HasValue && Model.NewestDrawDate.HasValue)
+        {
+            <span> · @Model.OldestDrawDate.Value.ToString("dd/MM/yyyy") – @Model.NewestDrawDate.Value.ToString("dd/MM/yyyy")</span>
+        }
+        @if (Model.ExcludedPeriods > 0)
+        {
+            <span> · Loại @Model.ExcludedPeriods kỳ thiếu/không hợp lệ trong vùng dữ liệu đã đọc</span>
+        }
+    </p>
+    @if (Model.IsJackpotEstimate)
+    {
+        <p class="vietlott-statistics-warning">Các giá trị dưới đây là Jackpot ước tính được lưu trong nguồn, không phải số tiền đã trả.</p>
+    }
+    @if (Model.IsMax3d)
+    {
+        <p class="vietlott-statistics-warning">@(string.IsNullOrWhiteSpace(Model.PrizeName) ? "Phạm vi mặc định gồm tất cả giải có bộ ba số đầy đủ." : "Phạm vi đang chọn: " + Model.PrizeName + ".") Chỉ tính các bộ ba chữ số được lưu trọn vẹn; giữ nguyên số 0 đầu và không ghép chữ số rời thành tổ hợp.</p>
+    }
+    @if (Model.GameCode == "POWER655")
+    {
+        <p class="vietlott-statistics-warning">Tần suất bộ số chính loại trừ số đặc biệt; số đặc biệt được thống kê riêng.</p>
+    }
+    @if (Model.GameCode == "BINGO18")
+    {
+        <p class="vietlott-statistics-warning">Bộ kết quả được đếm đúng theo chuỗi lưu trong nguồn; dữ liệu hiện có không xác nhận thứ tự quay.</p>
+    }
+    @if (Model.GameCode == "LOTTO535")
+    {
+        <p class="vietlott-statistics-warning">Miền số chính theo cấu hình trò chơi Lotto 5/35; miền số đặc biệt không được giả định và chỉ thống kê các giá trị thực trong nguồn.</p>
+    }
+
+    <div class="vietlott-statistics-table-wrap" tabindex="0" role="region" aria-label="Bảng thống kê, có thể cuộn ngang">
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">@(Model.IsDrawHistory ? "Kết quả kỳ" : "Số/kết quả")</th>
+                    @if (hasMetrics)
+                    {
+                        <th scope="col">Số lần xuất hiện</th>
+                        <th scope="col">Số kỳ xuất hiện</th>
+                    }
+                    @if (hasGap) { <th scope="col">Số kỳ chưa xuất hiện</th> }
+                    @if (Model.IsDrawHistory || Model.IsJackpotEstimate)
+                    {
+                        <th scope="col">Mã kỳ / ngày</th>
+                    }
+                    else if (Model.HasDrawReferences)
+                    {
+                        <th scope="col">Kỳ tham chiếu</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.PageRows)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(row.DrawUrl))
+                            {
+                                <a href="@row.DrawUrl">@row.Value</a>
+                            }
+                            else
+                            {
+                                @row.Value
+                            }
+                            @if (!string.IsNullOrWhiteSpace(row.Detail)) { <small>@row.Detail</small> }
+                        </td>
+                        @if (hasMetrics)
+                        {
+                            <td>@row.Count</td>
+                            <td>@(row.DrawCount?.ToString() ?? "—")</td>
+                        }
+                        @if (hasGap) { <td>@(row.Gap?.ToString() ?? "—")</td> }
+                        @if (Model.IsDrawHistory || Model.IsJackpotEstimate || Model.HasDrawReferences)
+                        {
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(row.DrawUrl)) { <a href="@row.DrawUrl">#@row.DrawNo</a> }
+                                @if (row.DrawDate.HasValue) { <span> · @row.DrawDate.Value.ToString("dd/MM/yyyy")</span> }
+                            </td>
+                        }
+                    </tr>
+                }
+                @if (Model.PageRows.Count == 0)
+                {
+                    <tr><td colspan="5">Không có dữ liệu phù hợp trong phạm vi đã chọn.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (pageCount > 1)
+    {
+        <nav class="vietlott-statistics-pagination" aria-label="Phân trang">
+            @if (Model.Page > 1)
+            {
+                <a href="@PageUrl(Model.Page - 1)">Trang trước</a>
+            }
+            <span>Trang @Model.Page / @pageCount</span>
+            @if (Model.Page < pageCount)
+            {
+                <a href="@PageUrl(Model.Page + 1)">Trang sau</a>
+            }
+        </nav>
+    }
+    <details class="vietlott-statistics-calculation">
+        <summary>Cách tính và giới hạn dữ liệu</summary>
+        <p>@Model.Description Mẫu số là @Model.UsedPeriods kỳ hoàn chỉnh được sử dụng; “số lần” đếm số lần ghi nhận, “số kỳ” đếm số mã kỳ khác nhau. Kỳ thiếu/không hợp lệ không được tính là kỳ vắng mặt. Mã kỳ liên kết tới kết quả tương ứng.</p>
+    </details>
+    <p class="vietlott-statistics-disclaimer">Thống kê dữ liệu quá khứ, không bảo đảm kết quả kỳ tiếp theo.</p>
+</section>

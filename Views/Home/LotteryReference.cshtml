@@ -1,0 +1,229 @@
+@model XoSoWeb.Models.LotteryReferencePageViewModel
+@using XoSoWeb.Services
+@{
+    ViewData["Title"] = Model.Title;
+    var isSchedule = Model.PageKind == "schedule" || Model.PageKind == "schedule-index";
+    var isIndex = Model.PageKind.EndsWith("-index", StringComparison.Ordinal);
+    var indexPath = isSchedule ? "/lich-quay" : "/co-cau-giai-thuong";
+    var selectedWeekday = Model.WeekdayFilter ?? (((int)Model.Today.DayOfWeek + 6) % 7 + 1);
+    var todayLabel = Model.Today.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"));
+}
+@section Styles { <link rel="stylesheet" href="~/css/lottery-reference.css" asp-append-version="true" /> }
+
+<section class="lottery-reference" aria-labelledby="lottery-reference-title">
+    <h1 id="lottery-reference-title">@Model.Title</h1>
+    <p class="lottery-reference-description">@Model.Description</p>
+
+    @if (isIndex)
+    {
+        <nav class="lottery-reference-links" aria-label="Chọn phạm vi">
+            @foreach (var item in Model.GameLinks)
+            {
+                var href = indexPath + "/" + item.Slug;
+                <a href="@href">@((item.Slug == "vietlott") ? item.Name : (isSchedule ? "Lịch quay Miền " + item.Name.Substring(6) : "Cơ cấu Miền " + item.Name.Substring(6)))</a>
+            }
+            @if (!isSchedule)
+            {
+                @foreach (var game in new[] { ("Mega 6/45", "mega645"), ("Power 6/55", "power655"), ("Lotto 5/35", "lotto535"), ("Keno", "keno"), ("Max 3D", "max3d"), ("Max 3D+", "max3d-plus"), ("Max 3D Pro", "max3d-pro"), ("Bingo18", "bingo18") })
+                {
+                    <a href="/co-cau-giai-thuong/vietlott/@game.Item2">@game.Item1</a>
+                }
+            }
+        </nav>
+        <p class="lottery-reference-notice">@Model.MissingInformation</p>
+        <p class="lottery-reference-source-line">Nguồn chi tiết chưa xác minh được · Kiểm tra ngày @Model.LastChecked.ToString("dd/MM/yyyy").</p>
+    }
+    else
+    {
+        <nav class="lottery-reference-links" aria-label="Chuyển phạm vi">
+            <a href="@indexPath">Tất cả @((isSchedule) ? "lịch quay" : "cơ cấu giải")</a>
+            @if (Model.GameLinks.Count > 0)
+            {
+                @foreach (var game in Model.GameLinks)
+                {
+                    <a class="@(game.Slug == Model.GameFilter ? "is-active" : "")"
+                       href="@(isSchedule ? "/lich-quay/vietlott?game=" + game.Slug : "/co-cau-giai-thuong/vietlott/" + game.Slug)">@game.Name</a>
+                }
+            }
+            @if (isSchedule)
+            {
+                <a href="@(Model.ScopePath.EndsWith("/vietlott", StringComparison.Ordinal)
+                    ? (string.IsNullOrWhiteSpace(Model.GameFilter) ? "/co-cau-giai-thuong" : "/co-cau-giai-thuong/vietlott/" + Model.GameFilter)
+                    : "/co-cau-giai-thuong/" + Model.ScopePath.Substring("/lich-quay/".Length))">Cơ cấu giải liên quan</a>
+            }
+        </nav>
+    }
+
+    @if (isSchedule)
+    {
+        <form method="get" action="@Model.ScopePath" class="lottery-reference-filters">
+            @if (Model.ScopePath.EndsWith("/vietlott", StringComparison.Ordinal))
+            {
+                <label>
+                    <span>Trò chơi</span>
+                    <select name="game">
+                        <option value="">Tất cả trò chơi</option>
+                        @foreach (var game in new[] { ("Mega 6/45", "mega645"), ("Power 6/55", "power655"), ("Lotto 5/35", "lotto535"), ("Keno", "keno"), ("Max 3D", "max3d"), ("Max 3D+", "max3d-plus"), ("Max 3D Pro", "max3d-pro"), ("Bingo18", "bingo18") })
+                        {
+                            <option value="@game.Item2" selected="@(Model.GameFilter == game.Item2)">@game.Item1</option>
+                        }
+                    </select>
+                </label>
+            }
+            else
+            {
+                <label>
+                    <span>Tỉnh/đài</span>
+                    <input name="station" value="@Model.StationFilter" maxlength="100" placeholder="Tên tỉnh/đài" />
+                </label>
+            }
+            <label>
+                <span>Thứ trong tuần</span>
+                <select name="weekday">
+                    <option value="">Tất cả các thứ</option>
+                    @for (var day = 1; day <= 7; day++)
+                    {
+                        <option value="@day" selected="@(Model.WeekdayFilter == day)">@LotteryReferenceCatalog.WeekdayName(day)</option>
+                    }
+                </select>
+            </label>
+            <button type="submit">Lọc</button>
+            <a href="@Model.ScopePath">Đặt lại</a>
+        </form>
+
+        <section class="lottery-reference-today" aria-labelledby="schedule-today-title">
+            <h2 id="schedule-today-title">Lịch quay hôm nay · @todayLabel</h2>
+            @if (selectedWeekday == (((int)Model.Today.DayOfWeek + 6) % 7 + 1) && Model.ScheduleRows.Count > 0)
+            {
+                <p>Ngày hiện tại theo múi giờ Asia/Ho_Chi_Minh.</p>
+            }
+            else
+            {
+                <p>Chưa có lịch quay hôm nay được xác minh. Không suy ra lịch từ ngày lưu kết quả.</p>
+            }
+        </section>
+
+        <div class="lottery-reference-table-wrap" tabindex="0" role="region" aria-label="Lịch quay, cuộn ngang nếu cần">
+            <table>
+                <thead>
+                    <tr><th>Miền/trò chơi</th><th>Tỉnh/đài</th><th>Thứ quay</th><th>Giờ bắt đầu</th><th>Hoàn tất kết quả</th><th>Tần suất / ghi chú</th></tr>
+                </thead>
+                <tbody>
+                    @if (Model.ScheduleRows.Count == 0)
+                    {
+                        <tr><td colspan="6">@Model.MissingInformation</td></tr>
+                    }
+                    @foreach (var row in Model.ScheduleRows)
+                    {
+                        <tr>
+                            <td>
+                                @row.RegionOrGame
+                                @if (!string.IsNullOrWhiteSpace(row.ResultPath))
+                                {
+                                    <a href="@row.ResultPath">Kết quả</a>
+                                }
+                            </td>
+                            <td>@row.Station</td>
+                            <td>@(row.Weekday.HasValue ? LotteryReferenceCatalog.WeekdayName(row.Weekday.Value) : "—")</td>
+                            <td>@(row.StartTime.HasValue ? row.StartTime.Value.ToString(@"hh\:mm") : "Chưa xác minh")</td>
+                            <td>@(row.CompletionTime.HasValue ? row.CompletionTime.Value.ToString(@"hh\:mm") : "Chưa xác minh")</td>
+                            <td>@row.Frequency @row.Note <small>Giờ bắt đầu quay và giờ hoàn tất kết quả là hai mốc riêng.</small></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="lottery-reference-source-line">
+            Nguồn:
+            @if (Model.Sources.Count == 0)
+            {
+                <span>chưa xác minh được nguồn công bố phù hợp.</span>
+            }
+            else
+            {
+                @foreach (var source in Model.Sources)
+                {
+                    <span><a href="@source.Url" rel="noopener noreferrer">@source.Label</a> — @source.Status </span>
+                }
+            }
+            · Cập nhật ngày @Model.LastChecked.ToString("dd/MM/yyyy")
+        </p>
+        <p class="lottery-reference-notice">Lịch có thể được điều chỉnh hoặc có ngoại lệ theo ngày. Hiện chưa có thông tin hoãn/đổi giờ/ngừng phát hành được xác minh.</p>
+        @if (Model.ScheduleExceptions.Count > 0)
+        {
+            <ul class="lottery-reference-exceptions">
+                @foreach (var exception in Model.ScheduleExceptions.OrderBy(item => item.Date))
+                {
+                    <li>@exception.Date.ToString("dd/MM/yyyy") · @exception.ChangeType: @exception.Note
+                        @if (!string.IsNullOrWhiteSpace(exception.SourceUrl)) { <a href="@exception.SourceUrl" rel="noopener noreferrer">Nguồn</a> }
+                    </li>
+                }
+            </ul>
+        }
+    }
+    else if (!isIndex)
+    {
+        <p class="lottery-reference-notice">@Model.MissingInformation</p>
+        @if (Model.TicketPrice != null)
+        {
+            <p>Giá vé: @Model.TicketPrice · Đơn vị: @Model.TicketUnit</p>
+        }
+        <p>Ngày hiệu lực: @(Model.EffectiveFrom?.ToString("dd/MM/yyyy") ?? "Chưa xác minh") – @(Model.EffectiveTo?.ToString("dd/MM/yyyy") ?? "hiện tại/chưa xác minh")</p>
+        <div class="lottery-reference-table-wrap" tabindex="0" role="region" aria-label="Cơ cấu giải thưởng, cuộn ngang nếu cần">
+            <table>
+                <thead><tr><th>Hạng giải</th><th>Số lượng</th><th>Số chữ số cần khớp</th><th>Giá trị mỗi giải</th><th>Loại giá trị</th><th>Điều kiện trúng</th><th>Số đặc biệt / chia thưởng</th></tr></thead>
+                <tbody>
+                    @if (Model.PrizeRows.Count == 0)
+                    {
+                        <tr><td colspan="7">Chưa có cơ cấu giải thưởng được xác minh để hiển thị.</td></tr>
+                    }
+                    @foreach (var row in Model.PrizeRows)
+                    {
+                        <tr>
+                            <td>@row.PrizeName</td><td>@row.Quantity</td><td>@row.MatchDigits</td><td>@row.Value</td>
+                            <td>@(row.ValueKind ?? "Chưa xác minh")@(row.JackpotType == null ? "" : " · " + row.JackpotType)</td>
+                            <td>@row.Condition</td>
+                            <td>@(row.SpecialNumberRole ?? "Chưa xác minh")@(row.SharingRule == null ? "" : " · " + row.SharingRule)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.PrizeVersions.Count > 0)
+        {
+            <details class="lottery-reference-history">
+                <summary>Lịch sử phiên bản cơ cấu giải thưởng</summary>
+                @foreach (var version in Model.PrizeVersions.OrderByDescending(item => item.EffectiveFrom))
+                {
+                    <h2>@version.Version · hiệu lực @(version.EffectiveFrom?.ToString("dd/MM/yyyy") ?? "chưa xác minh") – @(version.EffectiveTo?.ToString("dd/MM/yyyy") ?? "hiện tại/chưa xác minh")</h2>
+                    <p>Kiểm tra ngày @version.CheckedOn.ToString("dd/MM/yyyy")
+                        @if (!string.IsNullOrWhiteSpace(version.SourceUrl)) { <span> · <a href="@version.SourceUrl" rel="noopener noreferrer">Nguồn</a></span> }
+                    </p>
+                    <div class="lottery-reference-table-wrap" tabindex="0" role="region" aria-label="Cơ cấu giải phiên bản @version.Version">
+                        <table>
+                            <thead><tr><th>Hạng giải</th><th>Giá trị</th><th>Loại giá trị</th><th>Điều kiện trúng</th><th>Số đặc biệt / chia thưởng</th></tr></thead>
+                            <tbody>
+                                @foreach (var prize in version.Prizes)
+                                {
+                                    <tr>
+                                        <td>@prize.PrizeName</td><td>@prize.Value</td><td>@(prize.ValueKind ?? "Chưa xác minh")@(prize.JackpotType == null ? "" : " · " + prize.JackpotType)</td>
+                                        <td>@prize.Condition</td><td>@(prize.SpecialNumberRole ?? "Chưa xác minh")@(prize.SharingRule == null ? "" : " · " + prize.SharingRule)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </details>
+        }
+    }
+
+    <details class="lottery-reference-sources">
+        <summary>Giới hạn xác minh</summary>
+        <p>Kiểm tra nguồn lần gần nhất: @Model.LastChecked.ToString("dd/MM/yyyy"). Thông tin có thể thay đổi; cần đối chiếu văn bản chính thức trước khi công bố dữ liệu.</p>
+    </details>
+    @if (!isIndex && !isSchedule)
+    {
+        <p class="lottery-reference-disclaimer">Tham khảo thông tin đã xác minh; không thay thế thể lệ chính thức của đơn vị phát hành.</p>
+    }
+</section>
