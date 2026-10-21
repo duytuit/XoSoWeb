@@ -20,7 +20,7 @@
             @foreach (var item in Model.GameLinks)
             {
                 var href = indexPath + "/" + item.Slug;
-                <a href="@href">@((item.Slug == "vietlott") ? item.Name : (isSchedule ? "Lịch quay Miền " + item.Name.Substring(6) : "Cơ cấu Miền " + item.Name.Substring(6)))</a>
+                <a href="@href">@((item.Slug == "vietlott") ? item.Name : (isSchedule ? "Lịch quay Miền " + item.Name.Substring("Miền ".Length) : "Cơ cấu Miền " + item.Name.Substring("Miền ".Length)))</a>
             }
             @if (!isSchedule)
             {

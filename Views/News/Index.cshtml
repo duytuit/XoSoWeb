@@ -27,7 +27,7 @@
                     @if (!string.IsNullOrWhiteSpace(article.FeaturedImageUrl))
                     {
                         <a class="news-list-image" href="/tin-tuc/bai-viet/@article.Slug" tabindex="-1" aria-hidden="true">
-                            <img src="@article.FeaturedImageUrl" alt="" loading="lazy" />
+                            <img src="@(article.ThumbnailImageUrl ?? article.FeaturedImageUrl)" alt="" loading="lazy" />
                         </a>
                     }
                     <div class="news-list-copy">

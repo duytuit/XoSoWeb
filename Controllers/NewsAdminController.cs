@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -130,11 +131,20 @@ namespace XoSoWeb.Controllers
         }
 
         [Authorize(Roles = "NewsAdmin"), HttpGet("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
+            if (page < 1 || page > 10000) return BadRequest();
+            const int pageSize = 20;
+            var articleCount = await db.NewsArticles.CountAsync(HttpContext.RequestAborted);
+            var pageCount = Math.Max(1, (articleCount + pageSize - 1) / pageSize);
+            if (page > pageCount) return NotFound();
             var model = new NewsAdminListViewModel
             {
-                Articles = await db.NewsArticles.AsNoTracking().OrderByDescending(article => article.UpdatedAt).Take(200).ToListAsync(HttpContext.RequestAborted),
+                Articles = await db.NewsArticles.AsNoTracking()
+                    .OrderByDescending(article => article.UpdatedAt).ThenByDescending(article => article.Id)
+                    .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(HttpContext.RequestAborted),
+                ArticlesPage = page,
+                ArticlesPageCount = pageCount,
                 Runs = await db.NewsCollectionRuns.AsNoTracking().OrderByDescending(run => run.StartedAt).Take(20).ToListAsync(HttpContext.RequestAborted),
                 SourceReviews = await db.NewsSourceRecords.AsNoTracking()
                     .Where(record => record.ReviewStatus != null && record.ReviewStatus != "Reviewed")
@@ -143,6 +153,29 @@ namespace XoSoWeb.Controllers
                 CollectionStatus = TempData["CollectionStatus"]?.ToString()
             };
             return View("~/Views/NewsAdmin/Index.cshtml", model);
+        }
+
+        [Authorize(Roles = "NewsAdmin"), HttpPost("tai-anh"), ValidateAntiForgeryToken, RequestSizeLimit(11 * 1024 * 1024)]
+        public async Task<IActionResult> UploadEditorImage([FromForm] Microsoft.AspNetCore.Http.IFormFile file)
+        {
+            var error = await ValidateImageUpload(file, HttpContext.RequestAborted);
+            if (error != null) return BadRequest(new { error });
+            var image = await SaveUploadedImage(file, null, HttpContext.RequestAborted);
+            return Json(new { location = image.ImageUrl });
+        }
+
+        [Authorize(Roles = "NewsAdmin"), HttpPost("tai-anh-dai-dien"), ValidateAntiForgeryToken, RequestSizeLimit(21 * 1024 * 1024)]
+        [Microsoft.AspNetCore.Mvc.RequestFormLimits(MultipartBodyLengthLimit = 21 * 1024 * 1024)]
+        public async Task<IActionResult> UploadFeaturedImage(
+            [FromForm] Microsoft.AspNetCore.Http.IFormFile file,
+            [FromForm] Microsoft.AspNetCore.Http.IFormFile thumbnail)
+        {
+            var error = await ValidateImageUpload(file, HttpContext.RequestAborted);
+            if (error != null) return BadRequest(new { error });
+            error = await ValidateImageUpload(thumbnail, HttpContext.RequestAborted, 640, 360);
+            if (error != null) return BadRequest(new { error });
+            var image = await SaveUploadedImage(file, thumbnail, HttpContext.RequestAborted);
+            return Json(new { imageUrl = image.ImageUrl, thumbnailUrl = image.ThumbnailUrl });
         }
 
         [Authorize(Roles = "NewsAdmin"), HttpGet("tao-moi")]
@@ -263,6 +296,17 @@ namespace XoSoWeb.Controllers
         public Task<IActionResult> Withdraw(long id) =>
             ChangeStatus(id, new[] { NewsArticleStatuses.Published }, NewsArticleStatuses.Withdrawn);
 
+        [Authorize(Roles = "NewsAdmin"), HttpPost("{id:long}/xoa"), ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(long id)
+        {
+            var article = await db.NewsArticles.FirstOrDefaultAsync(item => item.Id == id, HttpContext.RequestAborted);
+            if (article == null) return NotFound();
+            db.NewsArticles.Remove(article);
+            await db.SaveChangesAsync(HttpContext.RequestAborted);
+            TempData["CollectionStatus"] = $"Đã xóa bài viết “{article.Title}”.";
+            return RedirectToAction(nameof(Index));
+        }
+
         [Authorize(Roles = "NewsAdmin"), HttpPost("lay-tin-ngay"), ValidateAntiForgeryToken]
         public async Task<IActionResult> CollectNow()
         {
@@ -317,9 +361,14 @@ namespace XoSoWeb.Controllers
             input.Summary = (input.Summary ?? string.Empty).Trim();
             input.Slug = LotteryUrls.Slug(string.IsNullOrWhiteSpace(input.Slug) ? input.Title : input.Slug);
             input.Author = (input.Author ?? string.Empty).Trim();
+            input.FeaturedImageUrl = (input.FeaturedImageUrl ?? string.Empty).Trim();
+            input.ThumbnailImageUrl = (input.ThumbnailImageUrl ?? string.Empty).Trim();
             input.SourceName = (input.SourceName ?? string.Empty).Trim();
             input.SourceUrl = (input.SourceUrl ?? string.Empty).Trim();
-            input.Content ??= string.Empty;
+            input.Content = NewsContentSanitizer.SanitizeHtml(input.Content);
+            if (Uri.TryCreate(input.FeaturedImageUrl, UriKind.Absolute, out var externalImage)
+                && externalImage.Scheme == Uri.UriSchemeHttps)
+                input.ThumbnailImageUrl = null;
             if (input.Title.Length is < 3 or > 240) ModelState.AddModelError(nameof(input.Title), "Tiêu đề cần từ 3 đến 240 ký tự.");
             if (input.Slug.Length is < 2 or > 180 || !Regex.IsMatch(input.Slug, @"\A[a-z0-9]+(?:-[a-z0-9]+)*\z"))
                 ModelState.AddModelError(nameof(input.Slug), "Slug chỉ gồm chữ thường, số và dấu gạch ngang.");
@@ -340,7 +389,9 @@ namespace XoSoWeb.Controllers
             if (!string.IsNullOrWhiteSpace(input.SourceUrl) && NormalizeSourceUrl(input.SourceUrl) == null)
                 ModelState.AddModelError(nameof(input.SourceUrl), "URL nguồn phải là HTTPS công khai hợp lệ.");
             if (!ValidateImagePath(input.FeaturedImageUrl))
-                ModelState.AddModelError(nameof(input.FeaturedImageUrl), "Ảnh chỉ được dùng từ wwwroot/images/news và phải là tệp JPG, PNG hoặc WebP có sẵn.");
+                ModelState.AddModelError(nameof(input.FeaturedImageUrl), "Ảnh phải là URL HTTPS hoặc ảnh JPG, PNG, WebP đã tải lên.");
+            if (!ValidateLocalImagePath(input.ThumbnailImageUrl))
+                ModelState.AddModelError(nameof(input.ThumbnailImageUrl), "Thumbnail phải là ảnh đã tải lên trong wwwroot/images/news.");
             if (input.GameCode != null && !Games.Contains(input.GameCode))
                 ModelState.AddModelError(nameof(input.GameCode), "Trò chơi Vietlott không hợp lệ.");
             if (!string.IsNullOrWhiteSpace(input.DrawNo) && !LotteryUrls.ValidDrawNo(input.DrawNo))
@@ -361,6 +412,17 @@ namespace XoSoWeb.Controllers
         private bool ValidateImagePath(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) return true;
+            if (path.StartsWith("/images/news/", StringComparison.Ordinal))
+                return ValidateLocalImagePath(path);
+            if (Uri.TryCreate(path, UriKind.Absolute, out var externalUri))
+                return externalUri.Scheme == Uri.UriSchemeHttps && externalUri.Port == 443
+                    && string.IsNullOrEmpty(externalUri.UserInfo);
+            return ValidateLocalImagePath(path);
+        }
+
+        private bool ValidateLocalImagePath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return true;
             if (!path.StartsWith("/images/news/", StringComparison.Ordinal)
                 || path.Contains('\\') || path.Contains('?') || path.Contains('#')
                 || path.Split('/').Any(part => part == "." || part == "..")) return false;
@@ -369,6 +431,105 @@ namespace XoSoWeb.Controllers
             var root = Path.GetFullPath(environment.WebRootPath);
             var fullPath = Path.GetFullPath(Path.Combine(root, path.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)));
             return fullPath.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(fullPath);
+        }
+
+        private static async Task<string> ValidateImageUpload(
+            Microsoft.AspNetCore.Http.IFormFile file,
+            CancellationToken cancellationToken,
+            int? expectedWidth = null,
+            int? expectedHeight = null)
+        {
+            if (file == null || file.Length == 0)
+                return "Chưa chọn tệp ảnh.";
+            if (file.Length > 10 * 1024 * 1024)
+                return "Ảnh sau khi chuyển đổi vượt quá giới hạn 10 MB.";
+
+            var header = new byte[30];
+            using var stream = file.OpenReadStream();
+            var read = 0;
+            while (read < header.Length)
+            {
+                var count = await stream.ReadAsync(header, read, header.Length - read, cancellationToken);
+                if (count == 0) break;
+                read += count;
+            }
+            if (read < 20 || header[0] != (byte)'R' || header[1] != (byte)'I'
+                || header[2] != (byte)'F' || header[3] != (byte)'F'
+                || header[8] != (byte)'W' || header[9] != (byte)'E'
+                || header[10] != (byte)'B' || header[11] != (byte)'P')
+                return "Tệp không phải WebP hợp lệ. Hãy tải ảnh lên bằng trình biên tập.";
+
+            var riffSize = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(4, 4));
+            var chunkSize = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(16, 4));
+            if (riffSize > file.Length - 8 || riffSize < 12 || chunkSize > riffSize - 12)
+                return "Cấu trúc ảnh WebP không hợp lệ.";
+
+            uint width;
+            uint height;
+            if (header[12] == (byte)'V' && header[13] == (byte)'P' && header[14] == (byte)'8' && header[15] == (byte)' ')
+            {
+                if (read < 30 || chunkSize < 10 || header[23] != 0x9d || header[24] != 0x01 || header[25] != 0x2a)
+                    return "Khung ảnh WebP không hợp lệ.";
+                width = (uint)(BinaryPrimitives.ReadUInt16LittleEndian(header.AsSpan(26, 2)) & 0x3fff);
+                height = (uint)(BinaryPrimitives.ReadUInt16LittleEndian(header.AsSpan(28, 2)) & 0x3fff);
+            }
+            else if (header[12] == (byte)'V' && header[13] == (byte)'P' && header[14] == (byte)'8' && header[15] == 'L')
+            {
+                if (read < 25 || chunkSize < 5 || header[20] != 0x2f)
+                    return "Khung ảnh WebP không hợp lệ.";
+                width = 1u + header[21] + ((uint)(header[22] & 0x3f) << 8);
+                height = 1u + ((uint)(header[22] & 0xc0) >> 6) + ((uint)header[23] << 2) + ((uint)(header[24] & 0x0f) << 10);
+            }
+            else if (header[12] == (byte)'V' && header[13] == (byte)'P' && header[14] == (byte)'8' && header[15] == 'X')
+            {
+                if (read < 30 || chunkSize < 10)
+                    return "Khung ảnh WebP không hợp lệ.";
+                width = 1u + (uint)(header[24] | header[25] << 8 | header[26] << 16);
+                height = 1u + (uint)(header[27] | header[28] << 8 | header[29] << 16);
+            }
+            else
+            {
+                return "Chỉ chấp nhận ảnh WebP tĩnh.";
+            }
+
+            if (width == 0 || height == 0 || (long)width * height > 40000000)
+                return "Ảnh vượt quá giới hạn 40 megapixel.";
+            if ((expectedWidth.HasValue && width != expectedWidth.Value)
+                || (expectedHeight.HasValue && height != expectedHeight.Value))
+                return "Kích thước thumbnail phải là 640 × 360.";
+            return null;
+        }
+
+        private async Task<(string ImageUrl, string ThumbnailUrl)> SaveUploadedImage(
+            Microsoft.AspNetCore.Http.IFormFile file,
+            Microsoft.AspNetCore.Http.IFormFile thumbnail,
+            CancellationToken cancellationToken)
+        {
+            var folder = Path.Combine(environment.WebRootPath, "images", "news");
+            Directory.CreateDirectory(folder);
+            var name = Guid.NewGuid().ToString("N");
+            var imagePath = Path.Combine(folder, name + ".webp");
+            var thumbnailPath = Path.Combine(folder, name + "-thumb.webp");
+            try
+            {
+                await SaveFile(file, imagePath, cancellationToken);
+                if (thumbnail == null) return ("/images/news/" + name + ".webp", null);
+                await SaveFile(thumbnail, thumbnailPath, cancellationToken);
+                return ("/images/news/" + name + ".webp", "/images/news/" + name + "-thumb.webp");
+            }
+            catch
+            {
+                if (System.IO.File.Exists(imagePath)) System.IO.File.Delete(imagePath);
+                if (System.IO.File.Exists(thumbnailPath)) System.IO.File.Delete(thumbnailPath);
+                throw;
+            }
+        }
+
+        private static async Task SaveFile(
+            Microsoft.AspNetCore.Http.IFormFile file, string path, CancellationToken cancellationToken)
+        {
+            await using var destination = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, true);
+            await file.CopyToAsync(destination, cancellationToken);
         }
 
         private async Task<bool> ValidateUniqueSlug(string slug, long? currentId)
@@ -408,6 +569,7 @@ namespace XoSoWeb.Controllers
             Content = input.Content,
             Category = input.Category,
             FeaturedImageUrl = input.FeaturedImageUrl,
+            ThumbnailImageUrl = input.ThumbnailImageUrl,
             FeaturedImageAlt = input.FeaturedImageAlt,
             Author = input.Author,
             SourceName = input.SourceName,
@@ -438,6 +600,7 @@ namespace XoSoWeb.Controllers
             Content = article.Content,
             Category = article.Category,
             FeaturedImageUrl = article.FeaturedImageUrl,
+            ThumbnailImageUrl = article.ThumbnailImageUrl,
             FeaturedImageAlt = article.FeaturedImageAlt,
             Author = article.Author,
             SourceName = article.SourceName,
@@ -467,6 +630,7 @@ namespace XoSoWeb.Controllers
             target.Content = source.Content;
             target.Category = source.Category;
             target.FeaturedImageUrl = source.FeaturedImageUrl;
+            target.ThumbnailImageUrl = source.ThumbnailImageUrl;
             target.FeaturedImageAlt = source.FeaturedImageAlt;
             target.Author = source.Author;
             target.SourceName = source.SourceName;

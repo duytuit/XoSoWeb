@@ -85,10 +85,37 @@ Check(NewsSourcePolicy.NormalizeEditorialUrl("http://example.org/news") == null
 Check(NewsSourcePolicy.TryNormalizeVietlottUrl("https://www.vietlott.vn/vi/tin-tuc?utm_source=mail", out var allowedVietlottUrl)
     && allowedVietlottUrl == "https://www.vietlott.vn/vi/tin-tuc"
     && !NewsSourcePolicy.TryNormalizeVietlottUrl("https://vietlott.vn.example.org/news", out _), "Vietlott source allowlist matches exact hosts only");
-var safeNewsHtml = NewsContentSanitizer.ToSafeHtml("<script>alert(1)</script>\r\n<img src=x onerror=alert(2)>");
-Check(!safeNewsHtml.Contains("<script", StringComparison.OrdinalIgnoreCase)
-    && !safeNewsHtml.Contains("<img", StringComparison.OrdinalIgnoreCase)
-    && safeNewsHtml.Contains("&lt;script&gt;") && safeNewsHtml.Contains("<br />"), "news editor content is encoded before HTML display");
+var vietlottListingHtml = @"<div><a href=""/vi/tin-tuc/tin-trung-thuong/old"">Tin cũ</a><time>01/01/2026 08:00</time></div>
+    <div><a href=""/vi/tin-tuc/tin-trung-thuong/new"">Tin mới nhất</a><time>22/08/2026 10:44</time></div>
+    <div><a href=""https://example.org/vi/tin-tuc/tin-trung-thuong/fake"">Không thuộc Vietlott</a><time>23/08/2026 10:44</time></div>";
+var vietlottAdapter = new VietlottNewsSourceAdapter(new HttpClient(new StaticHttpMessageHandler(request =>
+    new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK)
+    {
+        RequestMessage = request,
+        Content = new StringContent(vietlottListingHtml, System.Text.Encoding.UTF8, "text/html")
+    })));
+var latestVietlottItem = await vietlottAdapter.CheckAsync(CancellationToken.None);
+Check(latestVietlottItem.CanCollect && latestVietlottItem.Title == "Tin mới nhất"
+    && latestVietlottItem.SourceUrl == "https://vietlott.vn/vi/tin-tuc/tin-trung-thuong/new"
+    && latestVietlottItem.PublishedAt == new DateTime(2026, 8, 22, 3, 44, 0),
+    "Vietlott collector selects the newest allowed listing headline and parses Vietnam publication time");
+var safeNewsHtml = NewsContentSanitizer.SanitizeHtml(
+    "<h2>Tiêu đề</h2><p>Nội dung <strong>đậm</strong></p><img src=\"https://example.org/image.jpg\" onerror=\"alert(1)\"><script>alert(2)</script>");
+var safeNewsDecoded = System.Net.WebUtility.HtmlDecode(safeNewsHtml);
+Check(safeNewsDecoded.Contains("<h2>Tiêu đề</h2>") && safeNewsDecoded.Contains("<strong>đậm</strong>")
+    && safeNewsHtml.Contains("https://example.org/image.jpg")
+    && !safeNewsHtml.Contains("<script", StringComparison.OrdinalIgnoreCase)
+    && !safeNewsHtml.Contains("onerror", StringComparison.OrdinalIgnoreCase),
+    "news rich text keeps allowed formatting and images but strips executable markup");
+var unsafeNewsImage = NewsContentSanitizer.SanitizeHtml("<img src=\"http://example.org/image.jpg\"><a href=\"javascript:alert(1)\">link</a>");
+Check(!unsafeNewsImage.Contains("http://example.org/image.jpg")
+    && !unsafeNewsImage.Contains("javascript:", StringComparison.OrdinalIgnoreCase),
+    "news content rejects non-HTTPS images and unsafe links");
+var localNewsImage = NewsContentSanitizer.SanitizeHtml(
+    "<img src=\"/images/news/cover.webp\"><img src=\"/images/news/%2e%2e/private.png\">");
+Check(localNewsImage.Contains("/images/news/cover.webp")
+    && !localNewsImage.Contains("private.png"),
+    "news content allows local uploads and rejects encoded traversal paths");
 var newsAdminMethods = typeof(NewsAdminController).GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 var protectedNewsActions = newsAdminMethods.Where(method => method.GetCustomAttributes(typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute), true)
     .Cast<Microsoft.AspNetCore.Authorization.AuthorizeAttribute>().Any()).ToList();
@@ -520,3 +547,13 @@ called = false;
 await new StagingAccessMiddleware(_ => { called = true; return Task.CompletedTask; }).InvokeAsync(context, site, stagingEnvironment);
 Check(called, "staging valid credentials allowed");
 Console.WriteLine($"Completed {checks} checks.");
+
+sealed class StaticHttpMessageHandler : HttpMessageHandler
+{
+    private readonly Func<HttpRequestMessage, HttpResponseMessage> respond;
+
+    public StaticHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> respond) => this.respond = respond;
+
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
+        Task.FromResult(respond(request));
+}

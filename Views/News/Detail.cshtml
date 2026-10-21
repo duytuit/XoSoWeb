@@ -37,7 +37,7 @@
             <p>Giá trị Jackpot công bố và tiền người nhận thực tế là các thông tin khác nhau; số vé trúng không đồng nghĩa số người trúng.</p>
         </section>
     }
-    <div class="news-article-body">@Html.Raw(XoSoWeb.Services.NewsContentSanitizer.ToSafeHtml(article.Content))</div>
+    <div class="news-article-body">@Html.Raw(XoSoWeb.Services.NewsContentSanitizer.SanitizeHtml(article.Content))</div>
     @if (!string.IsNullOrWhiteSpace(article.SourceUrl))
     {
         <p class="news-source">Nguồn: <a href="@article.SourceUrl" rel="noopener noreferrer">@article.SourceName</a>

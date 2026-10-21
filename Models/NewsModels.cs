@@ -33,6 +33,8 @@ namespace XoSoWeb.Models
         public string Category { get; set; }
         [StringLength(500)]
         public string FeaturedImageUrl { get; set; }
+        [StringLength(500)]
+        public string ThumbnailImageUrl { get; set; }
         [StringLength(300)]
         public string FeaturedImageAlt { get; set; }
         [StringLength(160)]
@@ -158,6 +160,7 @@ namespace XoSoWeb.Models
         public string Slug { get; set; }
         public string Summary { get; set; }
         public string FeaturedImageUrl { get; set; }
+        public string ThumbnailImageUrl { get; set; }
         public string FeaturedImageAlt { get; set; }
         public string Category { get; set; }
         public string Author { get; set; }
@@ -184,6 +187,7 @@ namespace XoSoWeb.Models
         public string Content { get; set; }
         public string Category { get; set; }
         public string FeaturedImageUrl { get; set; }
+        public string ThumbnailImageUrl { get; set; }
         public string FeaturedImageAlt { get; set; }
         public string Author { get; set; }
         public string SourceName { get; set; }
@@ -215,6 +219,8 @@ namespace XoSoWeb.Models
     {
         public System.Collections.Generic.List<NewsArticle> Articles { get; set; } =
             new System.Collections.Generic.List<NewsArticle>();
+        public int ArticlesPage { get; set; }
+        public int ArticlesPageCount { get; set; }
         public System.Collections.Generic.List<NewsCollectionRun> Runs { get; set; } =
             new System.Collections.Generic.List<NewsCollectionRun>();
         public System.Collections.Generic.List<NewsSourceRecord> SourceReviews { get; set; } =

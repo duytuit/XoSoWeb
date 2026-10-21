@@ -7,6 +7,7 @@ CREATE TABLE dbo.NewsArticles
     Content nvarchar(max) NULL,
     Category nvarchar(40) NOT NULL,
     FeaturedImageUrl nvarchar(500) NULL,
+    ThumbnailImageUrl nvarchar(500) NULL,
     FeaturedImageAlt nvarchar(300) NULL,
     Author nvarchar(160) NULL,
     Editor nvarchar(160) NULL,

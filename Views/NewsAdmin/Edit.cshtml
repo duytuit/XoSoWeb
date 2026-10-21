@@ -15,7 +15,8 @@
         <label>Tiêu đề <input name="Title" value="@Model.Title" required maxlength="240" /></label>
         <label>Slug <input name="Slug" value="@Model.Slug" maxlength="180" placeholder="Tự tạo từ tiêu đề nếu để trống" /></label>
         <label>Tóm tắt <textarea name="Summary" maxlength="500" rows="3">@Model.Summary</textarea></label>
-        <label>Nội dung (văn bản thuần; HTML không được thực thi) <textarea name="Content" maxlength="200000" rows="16">@Model.Content</textarea></label>
+        <label>Nội dung bài viết <textarea id="news-content" name="Content" maxlength="200000" rows="16">@Model.Content</textarea></label>
+        <p class="news-admin-help">Có thể định dạng nội dung, chèn ảnh bằng URL HTTPS hoặc tải ảnh lên. HTML nguy hiểm sẽ bị loại bỏ khi lưu.</p>
         <label>Danh mục
             <select name="Category">
                 <option value="vietlott" selected="@(Model.Category == "vietlott")">Vietlott</option>
@@ -24,7 +25,19 @@
                 <option value="tin-tuc" selected="@(Model.Category == "tin-tuc")">Tin tức</option>
             </select>
         </label>
-        <label>Ảnh đại diện (đường dẫn local /images/news/; chỉ dùng ảnh có quyền) <input name="FeaturedImageUrl" value="@Model.FeaturedImageUrl" maxlength="500" /></label>
+        <label>Ảnh đại diện (URL HTTPS hoặc tải ảnh JPG, PNG, WebP; tối đa 10 MB)
+            <input id="featured-image-url" name="FeaturedImageUrl" value="@Model.FeaturedImageUrl" maxlength="500" />
+        </label>
+        <input id="thumbnail-image-url" type="hidden" name="ThumbnailImageUrl" value="@Model.ThumbnailImageUrl" />
+        <div class="news-admin-actions">
+            <input id="featured-image-file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+            <button id="upload-featured-image" type="button">Tải ảnh đại diện và tạo thumbnail</button>
+            <span id="featured-image-status" role="status"></span>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.FeaturedImageUrl))
+        {
+            <img class="news-admin-image-preview" src="@Model.FeaturedImageUrl" alt="Xem trước ảnh đại diện" />
+        }
         <label>Mô tả ảnh <input name="FeaturedImageAlt" value="@Model.FeaturedImageAlt" maxlength="300" /></label>
         <label>Tác giả / biên tập hiển thị <input name="Author" value="@Model.Author" maxlength="160" /></label>
         <label>Tên nguồn <input name="SourceName" value="@Model.SourceName" maxlength="240" /></label>
@@ -61,3 +74,7 @@
         </div>
     </form>
 </section>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.5/tinymce.min.js"></script>
+    <script src="~/js/news-editor.js" asp-append-version="true"></script>
+}

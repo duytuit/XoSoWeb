@@ -10,7 +10,7 @@
         <a href="/quan-tri/tin-tuc/tao-moi">Tạo bài viết</a>
         <form method="post" action="/quan-tri/tin-tuc/lay-tin-ngay">
             @Html.AntiForgeryToken()
-            <button type="submit">Lấy tin ngay</button>
+            <button type="submit">Lấy bài mới nhất ngay</button>
         </form>
         <form method="post" action="/quan-tri/tin-tuc/dang-xuat">
             @Html.AntiForgeryToken()
@@ -46,12 +46,25 @@
                             {
                                 <form method="post" action="/quan-tri/tin-tuc/@article.Id/go-bai">@Html.AntiForgeryToken()<button type="submit">Gỡ bài</button></form>
                             }
+                            <form method="post" action="/quan-tri/tin-tuc/@article.Id/xoa"
+                                  onsubmit="return confirm('Xóa vĩnh viễn bài viết này và lịch sử phiên bản?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="news-admin-delete">Xóa</button>
+                            </form>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+    @if (Model.ArticlesPageCount > 1)
+    {
+        <nav class="news-pagination" aria-label="Phân trang bài viết quản trị">
+            @if (Model.ArticlesPage > 1) { <a href="/quan-tri/tin-tuc?page=@(Model.ArticlesPage - 1)">← Trước</a> }
+            <span>Trang @Model.ArticlesPage / @Model.ArticlesPageCount</span>
+            @if (Model.ArticlesPage < Model.ArticlesPageCount) { <a href="/quan-tri/tin-tuc?page=@(Model.ArticlesPage + 1)">Sau →</a> }
+        </nav>
+    }
     <h2>Nguồn cần biên tập lại</h2>
     <div class="news-admin-table-wrap">
         <table>
