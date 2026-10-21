@@ -434,7 +434,6 @@ body.mobile-menu-open {
     justify-content: space-between;
     align-items: flex-end;
     gap: 1rem;
-    padding-bottom: 1rem;
     border-bottom: 1px solid var(--border-neutral);
 }
 
