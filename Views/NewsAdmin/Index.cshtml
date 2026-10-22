@@ -8,10 +8,6 @@
     <h1>Quản trị tin tức</h1>
     <nav class="news-admin-actions">
         <a href="/quan-tri/tin-tuc/tao-moi">Tạo bài viết</a>
-        <form method="post" action="/quan-tri/tin-tuc/lay-tin-ngay">
-            @Html.AntiForgeryToken()
-            <button type="submit">Lấy bài mới nhất ngay</button>
-        </form>
         <form method="post" action="/quan-tri/tin-tuc/dang-xuat">
             @Html.AntiForgeryToken()
             <button type="submit">Đăng xuất</button>

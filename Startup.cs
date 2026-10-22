@@ -72,20 +72,7 @@ namespace XoSoWeb
             services.AddSingleton<ArchiveCatalog>();
             services.AddScoped<VietlottStatisticsService>();
             services.AddScoped<INewsArticleService, NewsArticleService>();
-            services.AddScoped<NewsCollectionService>();
             services.AddScoped<NewsSourceChangeTracker>();
-            services.AddHttpClient<IVietlottNewsSourceAdapter, VietlottNewsSourceAdapter>(client =>
-                {
-                    client.Timeout = TimeSpan.FromSeconds(20);
-                    client.DefaultRequestHeaders.Accept.ParseAdd("text/html");
-                    client.DefaultRequestHeaders.AcceptLanguage.ParseAdd("vi-VN,vi;q=0.9");
-                })
-                .ConfigurePrimaryHttpMessageHandler(() => new System.Net.Http.HttpClientHandler
-                {
-                    AllowAutoRedirect = false,
-                    AutomaticDecompression = System.Net.DecompressionMethods.All
-                });
-            services.Configure<NewsCollectionOptions>(Configuration.GetSection("NewsCollection"));
             services.Configure<NewsAdminOptions>(Configuration.GetSection("NewsAdmin"));
             var newsAdminUsername = Configuration["NewsAdmin:Username"];
             var newsAdminPasswordHash = Configuration["NewsAdmin:PasswordHash"];
@@ -112,7 +99,6 @@ namespace XoSoWeb
                     options.AccessDeniedPath = "/quan-tri/tin-tuc/dang-nhap";
                 });
             services.AddAuthorization();
-            services.AddHostedService<NewsCollectionWorker>();
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddHttpsRedirection(options =>
             {

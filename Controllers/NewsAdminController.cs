@@ -56,7 +56,6 @@ namespace XoSoWeb.Controllers
         private readonly NewsAdminOptions admin;
         private readonly IMemoryCache cache;
         private readonly IWebHostEnvironment environment;
-        private readonly NewsCollectionService collection;
         private readonly NewsSourceChangeTracker sourceTracker;
         private readonly ILogger<NewsAdminController> logger;
         private readonly SiteSettings site;
@@ -66,7 +65,6 @@ namespace XoSoWeb.Controllers
             IOptions<NewsAdminOptions> admin,
             IMemoryCache cache,
             IWebHostEnvironment environment,
-            NewsCollectionService collection,
             NewsSourceChangeTracker sourceTracker,
             SiteSettings site,
             ILogger<NewsAdminController> logger)
@@ -75,7 +73,6 @@ namespace XoSoWeb.Controllers
             this.admin = admin.Value;
             this.cache = cache;
             this.environment = environment;
-            this.collection = collection;
             this.sourceTracker = sourceTracker;
             this.site = site;
             this.logger = logger;
@@ -304,14 +301,6 @@ namespace XoSoWeb.Controllers
             db.NewsArticles.Remove(article);
             await db.SaveChangesAsync(HttpContext.RequestAborted);
             TempData["CollectionStatus"] = $"Đã xóa bài viết “{article.Title}”.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        [Authorize(Roles = "NewsAdmin"), HttpPost("lay-tin-ngay"), ValidateAntiForgeryToken]
-        public async Task<IActionResult> CollectNow()
-        {
-            var run = await collection.RunAsync(User.Identity.Name, HttpContext.RequestAborted);
-            TempData["CollectionStatus"] = $"{run.Status}: {run.Message}";
             return RedirectToAction(nameof(Index));
         }
 
