@@ -1,0 +1,50 @@
+@inject XoSoWeb.Services.SiteSettings Site
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="description" content="Trang bạn tìm kiếm không tồn tại. Trở về trang chủ để xem kết quả xổ số ba miền và Vietlott." />
+    <title>404 — Không tìm thấy trang | @Site.SiteName</title>
+    <link rel="stylesheet" href="~/css/not-found.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="header">
+        <a class="brand" href="/" aria-label="@Site.SiteName — Trang chủ"><span class="brand-mark" aria-hidden="true">✳</span>@Site.SiteName<span class="brand-dot">.</span></a>
+        <a class="header-link" href="/">Trang chủ <span aria-hidden="true">↗</span></a>
+    </header>
+    <main id="main-content">
+        <div class="eyebrow"><span></span> CÓ VẺ BẠN ĐÃ ĐI LẠC</div>
+        <div class="ticket-scene" aria-hidden="true">
+            <span class="spark spark-one">✦</span><span class="spark spark-two">✧</span>
+            <div class="ticket-shadow"></div>
+            <div class="ticket">
+                <div class="ticket-top"><span>VÉ TÌM ĐƯỜNG</span><span>NO. 000404</span></div>
+                <div class="ticket-number">4<span>0</span>4</div>
+                <div class="ticket-bottom"><span>CHƯA TÌM THẤY ĐIỂM ĐẾN</span><span class="barcode"></span></div>
+            </div>
+            <span class="little-ball">?</span>
+        </div>
+        <h1>Trang này chưa trúng số!</h1>
+        <p class="description">Đường dẫn có thể đã thay đổi hoặc không còn tồn tại.<br />Đừng lo, kết quả hôm nay vẫn đang chờ bạn.</p>
+        <div class="actions">
+            <a class="button button-primary" href="/"><span aria-hidden="true">⌂</span> Về trang chủ <span aria-hidden="true">→</span></a>
+            <a class="button button-secondary" href="/lich-quay">Xem lịch quay</a>
+        </div>
+        <section class="suggestions" aria-labelledby="suggestions-title">
+            <h2 id="suggestions-title">Hoặc tìm nhanh kết quả bạn cần</h2>
+            <div class="quick-links">
+                <a href="/xo-so-mien-bac"><span class="region-icon" aria-hidden="true">B</span><span>Xổ số miền Bắc<small>Kết quả mới nhất</small></span><span class="arrow" aria-hidden="true">↗</span></a>
+                <a href="/xo-so-mien-trung"><span class="region-icon" aria-hidden="true">T</span><span>Xổ số miền Trung<small>Kết quả mới nhất</small></span><span class="arrow" aria-hidden="true">↗</span></a>
+                <a href="/xo-so-mien-nam"><span class="region-icon" aria-hidden="true">N</span><span>Xổ số miền Nam<small>Kết quả mới nhất</small></span><span class="arrow" aria-hidden="true">↗</span></a>
+                <a href="/vietlott"><span class="region-icon" aria-hidden="true">✳</span><span>Vietlott<small>Khám phá kết quả</small></span><span class="arrow" aria-hidden="true">↗</span></a>
+            </div>
+        </section>
+    </main>
+    <footer><span>© @DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).Year @Site.SiteName</span><span>Cần trợ giúp? <a href="/support">Liên hệ hỗ trợ <span aria-hidden="true">↗</span></a></span></footer>
+</body>
+</html>

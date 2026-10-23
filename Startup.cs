@@ -159,6 +159,28 @@ namespace XoSoWeb
                 && origin.Scheme == Uri.UriSchemeHttps)
                 app.UseHttpsRedirection();
             app.UseMiddleware<StagingAccessMiddleware>();
+            app.UseWhen(context =>
+                (HttpMethods.IsGet(context.Request.Method) || HttpMethods.IsHead(context.Request.Method))
+                && context.Request.Headers["Accept"].ToString().Contains("text/html", StringComparison.OrdinalIgnoreCase),
+                branch => branch.UseStatusCodePages(async statusContext =>
+                {
+                    var context = statusContext.HttpContext;
+                    if (context.Response.StatusCode != StatusCodes.Status404NotFound) return;
+                    context.Response.Headers["X-Robots-Tag"] = "noindex, follow";
+                    context.Response.Headers["Cache-Control"] = "no-store";
+                    var actionContext = new ActionContext(context,
+                        new Microsoft.AspNetCore.Routing.RouteData(),
+                        new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
+                    var result = new ViewResult
+                    {
+                        ViewName = "~/Views/Error/PageNotFound.cshtml",
+                        StatusCode = StatusCodes.Status404NotFound,
+                        ViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(
+                            new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                            new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                    };
+                    await result.ExecuteResultAsync(actionContext);
+                }));
             app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = context =>
             {
                 context.Context.Response.Headers["Cache-Control"] = context.Context.Request.Query.ContainsKey("v")
