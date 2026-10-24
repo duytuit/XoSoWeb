@@ -27,7 +27,7 @@ namespace XoSoWeb.Services
         }
         public string SiteName { get; set; } = "Xem Nhanh";
         public string Slogan { get; set; } = "Kết quả rõ ràng — tra cứu dễ dàng";
-        public string LogoUrl { get; set; } = "/images/logo.png";
+        public string LogoUrl { get; set; } = "/images/logo.webp";
         public string FaviconUrl { get; set; } = "/images/favicon.ico";
         public string DefaultShareImage { get; set; } = "/images/Biểu tượng mắt xanh lưới cam.png";
         public string OrganizationName { get; set; }

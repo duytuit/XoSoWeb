@@ -14,7 +14,7 @@ AllowedHosts=xemnhanh.vn
 CHƯA bật chuyển domain. Không cấu hình origin mới trên production cũ lúc này.
 
 Tài sản thương hiệu đã cung cấp và kiểm tra trong wwwroot:
-Site__LogoUrl=/images/logo.png
+Site__LogoUrl=/images/logo.webp
 Site__FaviconUrl=/images/favicon.ico
 Site__DefaultShareImage=/images/Biểu tượng mắt xanh lưới cam.png
 ShareImagePath vẫn là alias tương thích của DefaultShareImage; không cấu hình hai giá trị khác nhau.

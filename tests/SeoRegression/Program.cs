@@ -207,7 +207,7 @@ context.Request.Host = new HostString("attacker.invalid");
 var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()) { ["Title"] = "History" };
 var seo = SeoMetadata.Create(site, context.Request, viewData);
 Check(seo.Canonical == "https://example.org/xo-so-mien-bac/17-10-2024", "historical canonical ignores hostile Host");
-Check(new SiteSettings().SiteName == "Xem Nhanh" && new SiteSettings().LogoUrl == "/images/logo.png" && new SiteSettings().FaviconUrl == "/images/favicon.ico", "brand defaults use the supplied Xem Nhanh logo and favicon");
+Check(new SiteSettings().SiteName == "Xem Nhanh" && new SiteSettings().LogoUrl == "/images/logo.webp" && new SiteSettings().FaviconUrl == "/images/favicon.ico", "brand defaults use the supplied Xem Nhanh logo and favicon");
 var brandRequest = new DefaultHttpContext(); brandRequest.Request.Path = "/";
 var homeMetadata = SeoMetadata.Create(new SiteSettings { SiteUrl = "https://example.org" }, brandRequest.Request, viewData);
 Check(homeMetadata.Title == "Xem Nhanh - Kết quả xổ số hôm nay, XSMB, XSMT, XSMN, Vietlott", "home metadata uses requested brand and title");
