@@ -71,6 +71,7 @@ namespace XoSoWeb
             });
             services.AddSingleton<ArchiveCatalog>();
             services.AddScoped<VietlottStatisticsService>();
+            services.AddScoped<NorthernQuickStatisticsService>();
             services.AddScoped<INewsArticleService, NewsArticleService>();
             services.AddScoped<NewsSourceChangeTracker>();
             services.Configure<NewsAdminOptions>(Configuration.GetSection("NewsAdmin"));

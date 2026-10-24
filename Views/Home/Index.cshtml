@@ -9,7 +9,10 @@
     var latestMienNamProvinceCount = Model.MienNam.Results.Select(r => r.ProvinceCode).Distinct().Count();
 }
 
-@section Styles { <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" /> }
+@section Styles {
+    <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/quick-statistics.css" asp-append-version="true" />
+}
 
 <div class="results-home-intro">
     <div>
@@ -162,6 +165,8 @@
         }
     </section>
 </div>
+
+<partial name="~/Views/Home/_NorthernQuickStatistics.cshtml" model="Model.NorthernQuickStatistics" />
 
 <section class="results-section home-vietlott-summary">
     <header class="results-section-header">

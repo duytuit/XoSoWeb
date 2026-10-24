@@ -22,7 +22,7 @@
 
     bool IsStatisticsRoute(string path)
     {
-        return path == "/thong-ke" || path == "/thong-ke-tan-suat-loto";
+        return path == "/thong-ke/nhip-so-mien-bac" || path == "/thong-ke/soi-cau" || path == "/thong-ke" || path == "/thong-ke-tan-suat-loto";
     }
 }
 <!DOCTYPE html>
@@ -68,6 +68,8 @@
                     </a>
                     <div class="top-navigation-submenu">
                         <a class="@(IsActive("Home", "Statistics") ? "is-active" : "")" asp-controller="Home" asp-action="Statistics">Giải đặc biệt ba miền</a>
+                        <a class="@(IsActive("Home", "NumberRhythm") ? "is-active" : "")" href="/thong-ke/nhip-so-mien-bac">Nhịp số miền Bắc</a>
+                        <a class="@(IsActive("Home", "SoiCau") ? "is-active" : "")" href="/thong-ke/soi-cau">Soi cầu miền Bắc</a>
                         <a class="@(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">Tần suất lô tô trong tuần</a>
                         <a class="@(isVietlottStatisticsPage ? "is-active" : "")" href="/thong-ke/vietlott">Thống kê Vietlott</a>
                     </div>
@@ -139,6 +141,8 @@
                 <a class="mobile-navigation-link @(Context.Request.Path.StartsWithSegments("/tin-tuc") ? "is-active" : "")" href="/tin-tuc">
                     <i class="fa-solid fa-newspaper" aria-hidden="true"></i><span>Tin tức</span>
                 </a>
+                <a class="mobile-navigation-link @(IsActive("Home", "NumberRhythm") ? "is-active" : "")" href="/thong-ke/nhip-so-mien-bac"><i class="fa-solid fa-table-cells" aria-hidden="true"></i><span>Nhịp số miền Bắc</span></a>
+                <a class="mobile-navigation-link @(IsActive("Home", "SoiCau") ? "is-active" : "")" href="/thong-ke/soi-cau"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Soi cầu miền Bắc</span></a>
                 <a class="mobile-navigation-link @(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">
                     <i class="fa-solid fa-chart-simple" aria-hidden="true"></i><span>Thống kê tần suất lô tô trong tuần</span>
                 </a>
@@ -196,7 +200,9 @@
                         <i class="fa-solid fa-trophy" aria-hidden="true"></i>
                         <span>Thống kê giải đặc biệt</span>
                     </a>
-                    <a class="sidebar-region-link @(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">
+                    <a class="sidebar-region-link @(IsActive("Home", "NumberRhythm") ? "is-active" : "")" href="/thong-ke/nhip-so-mien-bac"><i class="fa-solid fa-table-cells" aria-hidden="true"></i><span>Nhịp số miền Bắc</span></a>
+                <a class="sidebar-region-link @(IsActive("Home", "SoiCau") ? "is-active" : "")" href="/thong-ke/soi-cau"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Soi cầu miền Bắc</span></a>
+                <a class="sidebar-region-link @(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">
                         <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
                         <span>Thống kê tần suất lô tô trong tuần</span>
                     </a>

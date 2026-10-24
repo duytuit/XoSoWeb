@@ -50,6 +50,7 @@ namespace XoSoWeb.Models
 
     public class HomePageViewModel
     {
+        public NorthernQuickStatisticsViewModel NorthernQuickStatistics { get; set; } = new();
         public XoSoRegionViewModel MienBac { get; set; }
         public XoSoRegionViewModel MienTrung { get; set; }
         public XoSoRegionViewModel MienNam { get; set; }

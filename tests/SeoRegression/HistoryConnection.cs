@@ -39,7 +39,13 @@ public sealed class HistoryCommand : DbCommand
     {
         var table = new DataTable();
         void Columns(params Type[] types) { foreach (var type in types) table.Columns.Add("c" + table.Columns.Count, type); }
-        if (CommandText.StartsWith("SELECT Region, ProvinceCode"))
+        if (CommandText.Contains("@quickStart"))
+        {
+            if ((DateTime)parameters.Parameters["@quickEnd"].Value - (DateTime)parameters.Parameters["@quickStart"].Value != TimeSpan.FromDays(XoSoWeb.Services.NorthernQuickStatisticsCalculator.HistoryDays))
+                throw new Exception("Quick statistics history must be bounded");
+            Columns(typeof(DateTime), typeof(string));
+        }
+        else if (CommandText.StartsWith("SELECT Region, ProvinceCode"))
         {
             if (CommandText.Contains("ISJSON") || CommandText.Contains("OPENJSON")) throw new Exception("Catalog requires unsupported SQL JSON functions");
             Columns(typeof(string), typeof(string), typeof(string), typeof(DateTime), typeof(DateTime), typeof(string));

@@ -12,6 +12,8 @@ namespace XoSoWeb.Services
             string[] allowed = path switch {
                 "/xo-so-mien-bac" or "/xo-so-mien-trung" or "/xo-so-mien-nam" => new[] { "day" },
                 "/vietlott" => new[] { "gameCode", "offset" },
+                "/thong-ke/nhip-so-mien-bac" => new[] { "endDate", "days", "target", "sort", "q" },
+                "/thong-ke/soi-cau" => new[] { "date", "length", "target", "reverse", "q" },
                 "/thong-ke" => new[] { "endDate" },
                 "/thong-ke-tan-suat-loto" => new[] { "region", "week" },
                 _ when path.StartsWith("/thong-ke/vietlott/", StringComparison.Ordinal) => new[] { "periods", "endDraw", "prize", "sort", "q", "page" },
@@ -53,14 +55,14 @@ namespace XoSoWeb.Services
                     && value.Length > 0
                     && !new[] { "mega645", "power655", "lotto535", "keno", "max3d", "max3d-plus", "max3d-pro", "bingo18" }.Contains(value, StringComparer.Ordinal)) return false;
                 if (item.Key.Equals("station", StringComparison.OrdinalIgnoreCase) && value.Length > 100) return false;
-                if ((item.Key.Equals("endDate", StringComparison.OrdinalIgnoreCase) || item.Key.Equals("week", StringComparison.OrdinalIgnoreCase))
+                if ((item.Key.Equals("date", StringComparison.OrdinalIgnoreCase) || item.Key.Equals("endDate", StringComparison.OrdinalIgnoreCase) || item.Key.Equals("week", StringComparison.OrdinalIgnoreCase))
                     && !DateTime.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)) return false;
             }
             return query.Count <= allowed.Length + 8;
         }
         public static bool Applies(string path) => path == "/" || path.StartsWith("/xo-so-", StringComparison.Ordinal)
             || path == "/vietlott" || path.StartsWith("/vietlott/", StringComparison.Ordinal)
-            || path == "/thong-ke" || path == "/thong-ke-tan-suat-loto"
+            || path == "/thong-ke/nhip-so-mien-bac" || path == "/thong-ke/soi-cau" || path == "/thong-ke" || path == "/thong-ke-tan-suat-loto"
             || path == "/thong-ke/vietlott" || path.StartsWith("/thong-ke/vietlott/", StringComparison.Ordinal)
             || path == "/lich-quay" || path.StartsWith("/lich-quay/", StringComparison.Ordinal)
             || path == "/co-cau-giai-thuong" || path.StartsWith("/co-cau-giai-thuong/", StringComparison.Ordinal)

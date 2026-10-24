@@ -37,7 +37,7 @@ namespace XoSoWeb.Services
         ["/support"] = "Liên hệ hỗ trợ, báo lỗi hoặc gửi yêu cầu sửa thông tin kết quả xổ số.",
         ["/lien-he-quang-cao"] = "Thông tin các hình thức hợp tác và liên hệ quảng cáo trên website." };
     var description = viewData["Description"]?.ToString() ?? (descriptions.TryGetValue(path, out var desc) ? desc : "Tra cứu " + viewData["Title"] + " và các kết quả liên quan.");
-    var filterKeys = new[] { "day", "gameCode", "offset", "endDate", "region", "week", "periods", "endDraw", "prize", "sort", "q", "page", "station", "weekday", "game" };
+    var filterKeys = new[] { "days", "date", "length", "target", "reverse", "day", "gameCode", "offset", "endDate", "region", "week", "periods", "endDraw", "prize", "sort", "q", "page", "station", "weekday", "game" };
     var filters = request.Query.Where(x => filterKeys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)).OrderBy(x => x.Key, StringComparer.Ordinal).ToList();
     var canonicalPath = path + (filters.Count == 0 ? "" : "?" + string.Join("&", filters.Select(x => Uri.EscapeDataString(filterKeys.First(k => k.Equals(x.Key, StringComparison.OrdinalIgnoreCase))) + "=" + Uri.EscapeDataString(x.Value.ToString()))));
     var canonical = Site.Absolute(canonicalPath);

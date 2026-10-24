@@ -1,0 +1,92 @@
+@model XoSoWeb.Models.NorthernQuickStatisticsViewModel
+@using System.Linq
+@{
+    string Detail(int number, string target = "loto", int days = 120) => Url.Action("NumberRhythm", "Home", new { endDate = Model.EndDate.ToString("yyyy-MM-dd"), days, target, q = number.ToString("D2") });
+}
+<section class="quick-statistics" aria-labelledby="quick-statistics-title">
+    <header class="quick-statistics-header">
+        <div><span>Miền Bắc</span><h2 id="quick-statistics-title">Thống kê nhanh cho ngày @Model.ForDate.ToString("dd/MM/yyyy")</h2></div>
+        <a href="@Url.Action("NumberRhythm", "Home", new { endDate = Model.EndDate.ToString("yyyy-MM-dd"), days = 30 })">Xem Nhịp số →</a>
+    </header>
+    @if (Model.DrawCount == 0)
+    {
+        <p class="quick-statistics-empty">Chưa có kết quả miền Bắc đầy đủ để thống kê.</p>
+    }
+    else
+    {
+        <p class="quick-statistics-note">Dữ liệu từ @Model.DataStart.Value.ToString("dd/MM/yyyy") đến @Model.DataEnd.Value.ToString("dd/MM/yyyy") · @Model.DrawCount ngày có kết quả đầy đủ. Chốt trước ngày @Model.ForDate.ToString("dd/MM/yyyy").</p>
+        @if (Model.DataEnd != Model.EndDate)
+        {
+            <p class="quick-statistics-empty">Chưa có kết quả đầy đủ ngày @Model.EndDate.ToString("dd/MM/yyyy") nên chưa xác định được chuỗi gan hiện tại. Bảng tần suất vẫn hiển thị các ngày có dữ liệu.</p>
+        }
+        <div class="quick-statistics-block">
+            <h3>Lô tô lâu chưa về <small>30 cặp dẫn đầu</small></h3>
+            @if (Model.LotoGaps.Count == 0) { <p class="quick-statistics-note">Chưa có chuỗi ngày chưa về để hiển thị.</p> }
+            <div class="quick-statistics-tables">
+                @foreach (var chunk in Model.LotoGaps.Chunk(5))
+                {
+                    <table><caption class="visually-hidden">Lô tô gan</caption><tbody>@foreach (var item in chunk) { <tr><th scope="row"><a href="@Detail(item.Number)">@item.Label</a></th><td>@item.Display <span>ngày</span></td></tr> }</tbody></table>
+                }
+            </div>
+        </div>
+        <div class="quick-statistics-block">
+            <h3>Lô tô xuất hiện nhiều trong 30 ngày <small>@Model.MonthDrawCount/30 ngày có dữ liệu</small></h3>
+            @if (Model.Frequent.Count == 0) { <p class="quick-statistics-note">Chưa có kết quả đầy đủ trong 30 ngày gần nhất.</p> }
+            <div class="quick-statistics-tables">
+                @foreach (var chunk in Model.Frequent.Chunk(5))
+                {
+                    <table><caption class="visually-hidden">Tần suất lô tô 30 ngày</caption><tbody>@foreach (var item in chunk) { <tr><th scope="row"><a href="@Detail(item.Number, "loto", 30)">@item.Label</a></th><td>@item.Count <span>lần</span></td></tr> }</tbody></table>
+                }
+            </div>
+        </div>
+        @if (Model.Leaders.Count > 0)
+        {
+            <div class="quick-statistics-block quick-statistics-leaders"><h3>Các cặp dẫn đầu bảng gan lô tô</h3><ul>
+                @foreach (var item in Model.Leaders)
+                {
+                    <li>Cặp <a href="@Detail(item.Number)"><strong>@item.Label</strong></a> chưa về <strong>@item.Display ngày</strong>.
+                        @if (item.MaxStart.HasValue) { <span>Chuỗi dài nhất quan sát được: <b>@(item.MaxExact ? "" : "≥")@item.MaxDays ngày</b> (@item.MaxStart.Value.ToString("dd/MM/yyyy") – @item.MaxEnd.Value.ToString("dd/MM/yyyy")).</span> }
+                        <a href="@Detail(item.Number)" class="quick-statistics-detail">Xem 120 ngày gần nhất</a>
+                    </li>
+                }
+            </ul></div>
+        }
+        <div class="quick-statistics-block">
+            <h3>Cặp lô tô đảo cùng gan <small>Xếp theo số ngày cả hai cùng chưa về</small></h3>
+            @if (Model.ReversePairs.Count == 0) { <p class="quick-statistics-note">Chưa có cặp số đảo cùng chưa về trong chuỗi dữ liệu gần nhất.</p> }
+            <div class="quick-reverse-pairs">@foreach (var pair in Model.ReversePairs) {
+                <div class="quick-reverse-pair"><a href="@Detail(pair.First.Number)"><strong>@pair.First.Label</strong><span>@pair.First.Display ngày</span></a><span class="quick-reverse-arrow" aria-hidden="true">↔</span><a href="@Detail(pair.Second.Number)"><strong>@pair.Second.Label</strong><span>@pair.Second.Display ngày</span></a></div>
+            }</div>
+        </div>
+        <div class="quick-statistics-block quick-statistics-special">
+            <h3>Đặc biệt lâu chưa về <small>Hai số cuối · 30 cặp dẫn đầu</small></h3>
+            @if (Model.SpecialGaps.Count == 0) { <p class="quick-statistics-note">Chưa có chuỗi ngày chưa về để hiển thị.</p> }
+            <div class="quick-statistics-tables">
+                @foreach (var chunk in Model.SpecialGaps.Chunk(5))
+                {
+                    <table><caption class="visually-hidden">Hai số cuối đặc biệt gan</caption><tbody>@foreach (var item in chunk) { <tr><th scope="row"><a href="@Detail(item.Number, "special")">@item.Label</a></th><td>@item.Display <span>ngày</span></td></tr> }</tbody></table>
+                }
+            </div>
+        </div>
+        @if (Model.DataEnd == Model.EndDate)
+        {
+            <div class="quick-statistics-charts">
+            @foreach (var group in new[] { (Title: "Gan đặc biệt theo tổng", Items: Model.Sums, Sum: true), (Title: "Gan đặc biệt theo chạm", Items: Model.Touches, Sum: false) })
+            {
+                var max = Math.Max(1, group.Items.Max(g => g.Days));
+                var leader = group.Items.First();
+                var members = Enumerable.Range(0, 100).Where(n => group.Sum ? (n / 10 + n % 10) % 10 == leader.Number : n / 10 == leader.Number || n % 10 == leader.Number).Select(n => n.ToString("D2")).ToArray();
+                <div class="quick-statistics-block quick-statistics-chart"><h3>@group.Title</h3>
+                    <div class="quick-bars" role="list" aria-label="@group.Title">@foreach (var item in group.Items) {
+                        var height = Math.Max(2, item.Days * 100 / max);
+                        <div class="quick-bar-item" role="listitem" aria-label="@(group.Sum ? "Tổng" : "Chạm") @item.Number: @item.Display ngày chưa về"><span class="quick-bar-value">@item.Display</span><div class="quick-bar-track"><i style="--bar-height: @height%"></i></div><strong>@item.Number</strong></div>
+                    }</div>
+                    <p>@(group.Sum ? "Tổng" : "Chạm") <strong>@leader.Number</strong> chưa về <strong>@leader.Display ngày</strong>, gồm @members.Length cặp số: <span class="quick-members">@string.Join(", ", members)</span>.</p>
+                    <p class="quick-statistics-note">@(group.Sum ? "Tổng là chữ số hàng đơn vị của tổng hai số cuối đặc biệt." : "Chạm là chữ số xuất hiện ở hàng chục hoặc hàng đơn vị của hai số cuối đặc biệt.")</p>
+                </div>
+            }
+            </div>
+        }
+        <p class="quick-statistics-note quick-statistics-footer">Dấu ≥ là cận dưới khi chưa tìm thấy lần về trước, chuỗi chưa khép kín hoặc dữ liệu bị thiếu. Chỉ tính các ngày có kết quả đầy đủ; ngày thiếu dữ liệu ngắt chuỗi gan. Bảng dùng tối đa 10 năm dữ liệu đã lưu, không phải kỷ lục toàn bộ lịch sử.</p>
+    }
+</section>

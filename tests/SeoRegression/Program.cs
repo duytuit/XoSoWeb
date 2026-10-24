@@ -310,6 +310,7 @@ builder.Services.AddSingleton<IMemoryCache>(cache);
 builder.Services.AddSingleton(catalog);
 builder.Services.AddSingleton<INewsArticleService, EmptyNewsArticleService>();
 builder.Services.AddScoped<VietlottStatisticsService>();
+builder.Services.AddScoped<NorthernQuickStatisticsService>();
 var contactHandler = new ContactTestHandler();
 var contactConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string> {
     ["TelegramContact:BotToken"] = "fixture-token", ["TelegramContact:ChatId"] = "fixture-chat"

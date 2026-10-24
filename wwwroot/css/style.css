@@ -795,7 +795,6 @@ body.mobile-menu-open {
 }
 
 .results-section {
-    margin-top: 1.25rem;
     background: var(--surface-container-lowest);
     border: 1px solid var(--border-neutral);
     border-radius: 0;

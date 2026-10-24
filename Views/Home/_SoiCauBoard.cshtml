@@ -1,0 +1,42 @@
+@model XoSoWeb.Models.SoiCauBoardViewModel
+@using System.Globalization
+@{
+    var counts = new[] { 1, 1, 2, 6, 4, 6, 3, 4 };
+    var widths = new[] { 5, 5, 5, 5, 4, 4, 3, 2 };
+    var offset = 0;
+}
+<table class="sc-prize-board">
+    <caption>Mở thưởng @Model.Draw.Date.ToString("dddd 'ngày' dd/MM/yyyy", CultureInfo.GetCultureInfo("vi-VN"))</caption>
+    <tbody>
+    @for (var prize = 0; prize < counts.Length; prize++)
+    {
+        var perRow = counts[prize] == 6 ? 3 : counts[prize];
+        var rows = counts[prize] / perRow;
+        @for (var row = 0; row < rows; row++)
+        {
+            <tr>
+                @if (row == 0) { <th scope="rowgroup" rowspan="@rows">@(prize == 0 ? "ĐB" : "G" + prize)</th> }
+                @for (var number = 0; number < perRow; number++)
+                {
+                    var start = offset;
+                    var value = Model.Draw.Digits.Substring(start, widths[prize]);
+                    <td colspan="@(12 / perRow)" class="sc-prize-number" data-tail="@value.Substring(value.Length - 2)" data-prize="@prize">
+                        @for (var digit = 0; digit < widths[prize]; digit++)
+                        {
+                            var position = offset++;
+                            if (Model.Interactive)
+                            {
+                                <button type="button" class="sc-board-digit @(Model.Positions.Contains(position) ? "has-pattern" : "")" data-position="@position" data-digit-position="@position" title="@Model.Draw.Labels[position] · vị trí @(position + 1)" aria-label="@Model.Draw.Labels[position]: @Model.Draw.Digits[position]" aria-pressed="false" disabled="@(!Model.Positions.Contains(position))">@Model.Draw.Digits[position]</button>
+                            }
+                            else
+                            {
+                                <span class="sc-board-digit" data-digit-position="@position" title="@Model.Draw.Labels[position] · vị trí @(position + 1)">@Model.Draw.Digits[position]</span>
+                            }
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    }
+    </tbody>
+</table>

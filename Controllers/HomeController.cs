@@ -41,7 +41,7 @@ namespace XoSoWeb.Controllers
         //return value.Result ?? "No value found in Redis";
         //}
         [HttpGet("/")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromServices] NorthernQuickStatisticsService quickStatistics)
         {
             ViewData["Message"] = "Chào mừng đến Web API + View1";
             var model = new HomePageViewModel
@@ -50,7 +50,8 @@ namespace XoSoWeb.Controllers
                 MienTrung = await GetRegionResultsAsync("MT", "Miền Trung"),
                 MienNam = await GetRegionResultsAsync("MN", "Miền Nam"),
                 Vietlott = await GetVietlottResultsAsync(),
-                LatestNews = await _news.GetLatestAsync(5, HttpContext.RequestAborted)
+                LatestNews = await _news.GetLatestAsync(5, HttpContext.RequestAborted),
+                NorthernQuickStatistics = await quickStatistics.GetAsync(LotteryUrls.Today, HttpContext.RequestAborted)
             };
             return View(model);
         }
