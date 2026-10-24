@@ -10,8 +10,12 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/quick-statistics.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" media="print" onload="this.onload=null;this.media='all'" />
+    <link rel="stylesheet" href="~/css/quick-statistics.css" asp-append-version="true" media="print" onload="this.onload=null;this.media='all'" />
+    <noscript>
+        <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/quick-statistics.css" asp-append-version="true" />
+    </noscript>
 }
 
 <div class="results-home-intro">

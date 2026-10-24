@@ -1,8 +1,10 @@
 @inject XoSoWeb.Services.SiteSettings Site
+@inject Microsoft.AspNetCore.Mvc.ViewFeatures.IFileVersionProvider AssetVersions
 @{
     Layout = null;
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var responsiveLogo = Site.LogoUrl == "/images/logo.webp";
     var isVietlottStatisticsPage = Context.Request.Path.StartsWithSegments("/thong-ke/vietlott");
     var isReferencePage = Context.Request.Path.StartsWithSegments("/lich-quay")
         || Context.Request.Path.StartsWithSegments("/co-cau-giai-thuong");
@@ -34,7 +36,8 @@
 
     <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.onload=null;this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" /></noscript>
 
     <!-- Site CSS -->
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
@@ -52,7 +55,7 @@
             </button>
             <div class="d-flex align-items-center gap-2">
                 <a class="d-flex align-items-center gap-2 text-decoration-none" asp-controller="Home" asp-action="Index" aria-label="Về trang chủ">
-                    @if (!string.IsNullOrWhiteSpace(Site.LogoUrl)) { <img src="@Site.LogoUrl" alt="@Site.SiteName" width="168" height="56" class="brand-logo" asp-append-version="true" /> }
+                    @if (!string.IsNullOrWhiteSpace(Site.LogoUrl)) { <img src="@Site.LogoUrl" srcset="@(responsiveLogo ? AssetVersions.AddFileVersionToPath(Context.Request.PathBase, Url.Content("~/images/logo-168.webp")) + " 168w, " + AssetVersions.AddFileVersionToPath(Context.Request.PathBase, Url.Content("~/images/logo-336.webp")) + " 336w, " + AssetVersions.AddFileVersionToPath(Context.Request.PathBase, Url.Content("~/images/logo.webp")) + " 384w" : null)" sizes="@(responsiveLogo ? "(max-width: 575.98px) 132px, 168px" : null)" alt="@Site.SiteName" width="168" height="56" class="brand-logo" fetchpriority="high" asp-append-version="true" /> }
                     else { <span class="h5 mb-0 fw-bold text-primary font-headline-md">@Site.SiteName</span> }
                 </a>
             </div>
@@ -257,7 +260,7 @@
         <div class="container-xl d-flex flex-column flex-md-row justify-content-between align-items-start gap-4 pb-4 border-bottom border-light border-opacity-10">
             <div class="mb-4 mb-md-0" style="max-width: 350px;">
                 <h2 class="h5 fw-bold mb-3"><a class="text-white text-decoration-none @(string.IsNullOrWhiteSpace(Site.LogoUrl) ? "" : "footer-brand")" asp-controller="Home" asp-action="Index">
-                    @if (!string.IsNullOrWhiteSpace(Site.LogoUrl)) { <img src="@Site.LogoUrl" alt="@Site.SiteName" width="192" height="64" class="footer-brand-logo" loading="lazy" asp-append-version="true" /> }
+                    @if (!string.IsNullOrWhiteSpace(Site.LogoUrl)) { <img src="@Site.LogoUrl" alt="@Site.SiteName" width="192" height="64" class="footer-brand-logo" loading="lazy" decoding="async" asp-append-version="true" /> }
                     else { @Site.SiteName }
                 </a></h2>
                 <p class="text-white-50 mb-3 fs-7">Tra cứu kết quả xổ số ba miền và Vietlott trên giao diện rõ ràng, dễ sử dụng. Chúng tôi liên tục cải thiện tốc độ cập nhật và độ ổn định để bạn thuận tiện theo dõi kết quả mới nhất và tìm lại các kỳ quay trước.</p>
