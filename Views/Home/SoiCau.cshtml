@@ -8,23 +8,32 @@
     ViewData["ParentLabel"] = "Thống kê";
     if (Model.Draws.Count < 2) ViewData["NoIndex"] = true;
     var latest = Model.Draws.FirstOrDefault(d => d.Date == Model.Date.AddDays(-1));
+    var historyDates = Model.Patterns.SelectMany(p => p.Steps.Select(step => step.SourceDate)).ToHashSet();
+    if (latest != null && Model.Patterns.Count > 0) historyDates.Add(latest.Date);
     var positions = Model.Patterns.SelectMany(p => new[] { p.First, p.Second }).ToHashSet();
     var groups = Model.Patterns.GroupBy(p => Model.Reverse && string.CompareOrdinal(p.Number, new string(p.Number.Reverse().ToArray())) > 0 ? new string(p.Number.Reverse().ToArray()) : p.Number).OrderByDescending(g => g.Count()).ThenBy(g => g.Key).ToList();
 }
 @section Styles {
     <link rel="stylesheet" href="~/css/soi-cau.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/statistics-filters.css" asp-append-version="true" />
 }
 <div class="regional-page-title"><div><h1 class="detail-page-heading">Soi cầu miền Bắc</h1><p class="detail-page-description">Phân tích các cặp vị trí chữ số từ kết quả đã lưu.</p></div></div>
+<nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Dữ liệu kết quả nguồn"><a href="/xo-so-mien-bac">Kết quả miền Bắc</a><a href="/thong-ke">Giải đặc biệt</a></nav>
 <div class="soicau-page" data-target="@Model.Target">
-<form method="get" action="/thong-ke/soi-cau" class="sc-filter">
-    <label>Ngày soi cầu<input class="form-control" type="date" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" min="1753-02-01" max="@LotteryUrls.Today.ToString("yyyy-MM-dd")" required /></label>
-    <label>Độ dài tối thiểu<select class="form-select" name="length">@for (var i = 1; i <= 10; i++) { <option value="@i" selected="@(Model.Length == i)">@i ngày</option> }</select></label>
-    <label>Loại cầu<select class="form-select" name="target"><option value="loto" selected="@(Model.Target == "loto")">Lô tô (tất cả giải)</option><option value="special" selected="@(Model.Target == "special")">Hai số cuối đặc biệt</option></select></label>
-    <label>Số đảo<select class="form-select" name="reverse"><option value="true" selected="@Model.Reverse">Có tính số đảo</option><option value="false" selected="@(!Model.Reverse)">Không tính số đảo</option></select></label>
-    <label>Tìm cặp số<input class="form-control" type="text" name="q" value="@Model.Q" inputmode="numeric" pattern="[0-9]{2}" maxlength="2" placeholder="00–99" /></label>
-    <button class="btn btn-primary" type="submit">Soi cầu</button>
+<form method="get" action="/thong-ke/soi-cau" class="sc-filter statistics-filter-bar">
+    <label><span>Ngày soi cầu</span><input class="form-control" type="date" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" min="1753-02-01" max="@LotteryUrls.Today.ToString("yyyy-MM-dd")" required /></label>
+    <label><span>Độ dài cầu</span><select class="form-select" name="length">@for (var i = 1; i <= 10; i++) { <option value="@i" selected="@(Model.Length == i)">@i ngày</option> }</select></label>
+    <label><span>Loại cầu</span><select class="form-select" name="target"><option value="loto" selected="@(Model.Target == "loto")">Lô tô</option><option value="special" selected="@(Model.Target == "special")">ĐB (2 số cuối)</option></select></label>
+    <label><span>Số đảo</span><select class="form-select" name="reverse"><option value="true" selected="@Model.Reverse">Có đảo</option><option value="false" selected="@(!Model.Reverse)">Không đảo</option></select></label>
+    <label><span>Cặp số</span><input class="form-control" type="text" name="q" value="@Model.Q" inputmode="numeric" pattern="[0-9]{2}" maxlength="2" placeholder="00–99" /></label>
+    <div class="statistics-filter-actions">
+        <button class="btn btn-primary" type="submit">Soi cầu</button>
+        <details class="statistics-filter-help"><summary aria-label="Hướng dẫn bộ lọc và cách tính cầu" title="Hướng dẫn">?</summary>
+            <div class="statistics-filter-help-content"><p>Chọn độ dài cầu tối thiểu từ 1 đến 10 ngày. Để trống cặp số để tìm tất cả. “Có đảo” tính cả cặp số đảo; ĐB chỉ đối chiếu hai số cuối giải đặc biệt.</p>
+            <p>Mỗi cầu ghép hai vị trí khác nhau trong bảng giải ngày trước rồi đối chiếu ngày kế tiếp. Chỉ dùng dữ liệu trước @Model.Date.ToString("dd/MM/yyyy"), tối đa 30 ngày liên tiếp; dừng khi thiếu dữ liệu hoặc không khớp. Kết quả lịch sử không bảo đảm kết quả tương lai.</p></div>
+        </details>
+    </div>
 </form>
-<p class="sc-note">Mỗi cầu ghép hai vị trí khác nhau trong bảng giải ngày trước, rồi đối chiếu hai số cuối ở ngày kế tiếp. Chỉ dùng dữ liệu trước @Model.Date.ToString("dd/MM/yyyy"), tối đa 30 ngày đối chiếu liên tiếp; dừng khi thiếu dữ liệu hoặc cầu không khớp. Kết quả lịch sử không bảo đảm kết quả tương lai.</p>
 @if (latest == null) {
     <div class="sc-card"><p>Chưa có bảng kết quả miền Bắc đầy đủ ngày @Model.Date.AddDays(-1).ToString("dd/MM/yyyy") để soi cầu. Vui lòng chọn ngày khác.</p></div>
 } else {
@@ -41,7 +50,7 @@
     <button type="button" id="sc-reset" class="btn btn-outline-secondary btn-sm">Hiện tất cả cầu</button>
     @if (Model.Patterns.Count == 0) { <p>Không tìm thấy cầu đạt điều kiện. Có thể giảm độ dài hoặc chọn ngày khác. Cần ít nhất @(Model.Length + 1) bảng kết quả đầy đủ, liên tiếp.</p> }
     <div class="sc-patterns">@foreach (var pattern in Model.Patterns) {
-        <details class="sc-pattern" data-first="@pattern.First" data-second="@pattern.Second" data-value="@pattern.Number" data-reversed="@(new string(pattern.Number.Reverse().ToArray()))">
+        <details class="sc-pattern" name="soicau-patterns" data-first="@pattern.First" data-second="@pattern.Second" data-value="@pattern.Number" data-reversed="@(new string(pattern.Number.Reverse().ToArray()))">
             <summary><strong>@pattern.Number</strong><span>@pattern.Steps.Count ngày</span><span>Vị trí @(pattern.First + 1) + @(pattern.Second + 1)</span></summary>
             <p>@latest.Labels[pattern.First] + @latest.Labels[pattern.Second]</p>
             <p>Ghép ngày @latest.Date.ToString("dd/MM/yyyy"): <strong>@pattern.Number</strong> → ngày @Model.Date.ToString("dd/MM/yyyy") (chưa đối chiếu).</p>
@@ -51,7 +60,7 @@
         </details>
     }</div><p id="sc-empty" hidden>Không có cầu phù hợp với bộ lọc đang chọn.</p></section>
 }
-@foreach (var draw in Model.Draws) {
+@foreach (var draw in Model.Draws.Where(draw => historyDates.Contains(draw.Date))) {
     <template id="sc-draw-@draw.Date.ToString("yyyy-MM-dd")"><partial name="_SoiCauBoard" model="@(new XoSoWeb.Models.SoiCauBoardViewModel { Draw = draw })" /></template>
 }
 </div>

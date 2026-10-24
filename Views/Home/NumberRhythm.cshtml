@@ -8,6 +8,7 @@
     ViewData["ParentPath"] = "/thong-ke";
     ViewData["ParentLabel"] = "Thống kê";
     if (Model.DrawCount == 0) ViewData["NoIndex"] = true;
+    var maxFrequency = Math.Max(1, Model.Columns.Select(c => c.Total).DefaultIfEmpty(0).Max());
     var cycleData = Model.Columns.Select(c => new {
         number = c.Label, total = c.Total, hitDays = c.HitDays, gap = c.Gap, exact = c.GapExact,
         lastSeen = c.LastSeen?.ToString("dd/MM/yyyy"),
@@ -16,52 +17,68 @@
 }
 @section Styles {
     <link rel="stylesheet" href="~/css/number-rhythm.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/statistics-filters.css" asp-append-version="true" />
 }
 <div class="regional-page-title"><div>
     <h1 class="detail-page-heading">Nhịp số miền Bắc</h1>
     <p class="detail-page-description">Bảng theo dõi 00–99 theo ngày, tần suất và chu kỳ xuất hiện.</p>
 </div></div>
-<div class="rhythm-page">
-    <form method="get" action="/thong-ke/nhip-so-mien-bac" class="rhythm-filter">
-        <label>Số ngày<input class="form-control" type="number" name="days" min="1" max="120" value="@Model.Days" required /></label>
-        <label>Ngày cuối<input class="form-control" type="date" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" min="1753-05-01" max="@LotteryUrls.Today.ToString("yyyy-MM-dd")" required /></label>
-        <label>Cặp số<input class="form-control" type="text" name="q" value="@Model.Q" placeholder="00,12,34 (trống: tất cả)" maxlength="30" aria-describedby="rhythm-pairs-help" /></label>
-        <label>Loại thống kê<select class="form-select" name="target"><option value="loto" selected="@(Model.Target == "loto")">Lô tô tất cả giải</option><option value="special" selected="@(Model.Target == "special")">Hai số cuối đặc biệt</option></select></label>
-        <label>Xếp theo<select class="form-select" name="sort"><option value="number" selected="@(Model.Sort == "number")">Cặp số tăng dần</option><option value="frequency" selected="@(Model.Sort == "frequency")">Số lần về giảm dần</option><option value="gap" selected="@(Model.Sort == "gap")">Ngày chưa về giảm dần</option></select></label>
-        <button class="btn btn-primary" type="submit">Xem thống kê</button>
-        <span id="rhythm-pairs-help" class="rhythm-filter-help">Nhập các cặp số từ 00 đến 99, cách nhau bằng dấu phẩy hoặc khoảng trắng. Tối đa 120 ngày.</span>
+<nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Dữ liệu kết quả nguồn"><a href="/xo-so-mien-bac">Kết quả miền Bắc</a><a href="/thong-ke">Giải đặc biệt</a></nav>
+<div class="rhythm-page" id="rhythm-workspace">
+    <form method="get" action="/thong-ke/nhip-so-mien-bac" class="rhythm-filter statistics-filter-bar">
+        <label><span>Số ngày</span><input class="form-control" type="number" name="days" min="1" max="120" value="@Model.Days" required /></label>
+        <label><span>Ngày cuối</span><input class="form-control" type="date" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" min="1753-05-01" max="@LotteryUrls.Today.ToString("yyyy-MM-dd")" required /></label>
+        <label><span>Cặp số</span><input class="form-control" type="text" name="q" value="@Model.Q" placeholder="00,12,34…" maxlength="30" aria-describedby="rhythm-pairs-help" /></label>
+        <label><span>Loại số</span><select class="form-select" name="target"><option value="loto" selected="@(Model.Target == "loto")">Lô tô</option><option value="special" selected="@(Model.Target == "special")">ĐB (2 số cuối)</option></select></label>
+        <label><span>Xếp theo</span><select class="form-select" name="sort"><option value="number" selected="@(Model.Sort == "number")">Cặp số 00–99</option><option value="frequency" selected="@(Model.Sort == "frequency")">Về nhiều nhất</option><option value="gap" selected="@(Model.Sort == "gap")">Gan lâu nhất</option></select></label>
+        <div class="statistics-filter-actions">
+            <button class="btn btn-primary" type="submit">Xem kết quả</button>
+            <details class="statistics-filter-help"><summary aria-label="Hướng dẫn bộ lọc và bảng nhịp số" title="Hướng dẫn">?</summary>
+                <div class="statistics-filter-help-content"><p id="rhythm-pairs-help">Nhập cặp số 00–99, cách nhau bằng dấu phẩy hoặc khoảng trắng; để trống để xem tất cả. Số ngày: 1–120. Lô tô tính tất cả giải; ĐB chỉ tính hai số cuối giải đặc biệt.</p>
+                <p>Bấm tổng số lần về để đánh dấu cột; bấm cặp số để xem chu kỳ. Có thể nhấp đúp ô để đánh dấu. Dấu được lưu trên trình duyệt này.</p>
+                <p>“Chưa về” tính ngược từ ngày cuối; ≥ là cận dưới khi thiếu dữ liệu hoặc chưa tìm thấy lần về trước. Chu kỳ chỉ tính giữa hai lần về có đủ dữ liệu xen giữa, trong khoảng đang xem.</p></div>
+            </details>
+        </div>
     </form>
     <section class="rhythm-card">
         <div class="rhythm-overview">
-            <div><span class="rhythm-eyebrow">@(Model.Target == "special" ? "Giải đặc biệt" : "Lô tô miền Bắc")</span><h2>@Model.StartDate.ToString("dd/MM/yyyy") – @Model.EndDate.ToString("dd/MM/yyyy")</h2><p>@Model.DrawCount/@Model.Days ngày có kết quả đầy đủ · @Model.Columns.Count cặp số</p></div>
-            <div class="rhythm-date-nav"><button class="btn btn-outline-secondary btn-sm" type="button" data-shift="-1" disabled="@(Model.EndDate <= new DateTime(1753, 5, 1))" aria-label="Lùi ngày cuối một ngày">← Ngày trước</button><button class="btn btn-outline-secondary btn-sm" type="button" data-shift="1" disabled="@(Model.EndDate >= LotteryUrls.Today)" aria-label="Tiến ngày cuối một ngày">Ngày sau →</button></div>
+            <div class="rhythm-overview-copy"><h2><span class="rhythm-eyebrow">@(Model.Target == "special" ? "ĐB" : "Lô tô")</span> @Model.StartDate.ToString("dd/MM/yyyy") – @Model.EndDate.ToString("dd/MM/yyyy")</h2><p>@Model.DrawCount/@Model.Days ngày đầy đủ · @Model.Columns.Count cặp số</p></div>
+            <div class="rhythm-date-nav"><button class="btn btn-outline-secondary btn-sm" type="button" data-shift="-1" disabled="@(Model.EndDate <= new DateTime(1753, 5, 1))" aria-label="Lùi ngày cuối một ngày" title="Lùi một ngày">←</button><button class="btn btn-outline-secondary btn-sm" type="button" data-shift="1" disabled="@(Model.EndDate >= LotteryUrls.Today)" aria-label="Tiến ngày cuối một ngày" title="Tiến một ngày">→</button></div>
         </div>
         <div class="rhythm-legend" aria-label="Chú thích bảng"><span><i class="rhythm-swatch hit-1">1</i> Một lần</span><span><i class="rhythm-swatch hit-2">2</i> Hai lần</span><span><i class="rhythm-swatch hit-3">3</i> Ba lần</span><span><i class="rhythm-swatch hit-4">4+</i> Bốn lần trở lên</span><span><i class="rhythm-swatch is-special">ĐB</i> Về đặc biệt</span><span>Ô trống: không về</span><span>—: thiếu kết quả</span></div>
         <div class="rhythm-mark-toolbar">
-            <strong>Đánh dấu: <span id="rhythm-mark-count">0</span></strong>
-            <label><input type="checkbox" id="rhythm-only-marked" /> Chỉ hiện số đánh dấu</label>
-            <button type="button" id="rhythm-clear-marks" class="btn btn-outline-secondary btn-sm">Bỏ tất cả đánh dấu</button>
+            <strong>Đã chọn: <span id="rhythm-mark-count">0</span></strong>
+            <label><input type="checkbox" id="rhythm-only-marked" /> Chỉ xem đã chọn</label>
+            <button type="button" id="rhythm-clear-marks" class="btn btn-outline-secondary btn-sm">Bỏ chọn</button>
             <span id="rhythm-mark-status" role="status"></span>
+            <div class="rhythm-view-toolbar" role="group" aria-label="Cỡ hiển thị bảng nhịp số">
+                <div class="rhythm-view-actions">
+                    <button type="button" id="rhythm-zoom-out" class="rhythm-view-button" aria-label="Thu nhỏ cỡ ô bảng">−</button>
+                    <output id="rhythm-zoom-value" aria-live="polite">100%</output>
+                    <button type="button" id="rhythm-zoom-in" class="rhythm-view-button" aria-label="Phóng to cỡ ô bảng">+</button>
+                    <button type="button" id="rhythm-zoom-reset" class="rhythm-view-button">Đặt lại</button>
+                    <button type="button" id="rhythm-expand" class="rhythm-view-button rhythm-expand-button" aria-controls="rhythm-workspace" aria-pressed="false">⛶ Phóng to bảng</button>
+                </div>
+            </div>
         </div>
-        <p class="rhythm-hint">Bấm tổng số lần về để đánh dấu cột; bấm cặp số để xem chu kỳ. Có thể nhấp đúp vào ô trong cột để đánh dấu. Dấu được lưu trên trình duyệt này.</p>
         @if (Model.DrawCount == 0) { <p class="rhythm-empty" role="status">Chưa có kết quả miền Bắc đầy đủ trong khoảng đã chọn. Hãy đổi ngày cuối hoặc tăng số ngày.</p> }
         <p class="rhythm-empty" id="rhythm-no-marks" hidden>Không có số đánh dấu trong các cặp đang xem. Bỏ chọn “Chỉ hiện số đánh dấu” để xem lại bảng.</p>
         <div class="rhythm-table-wrap" tabindex="0" role="region" aria-label="Bảng nhịp số 00 đến 99, cuộn ngang và dọc để xem">
             <table class="rhythm-table">
                 <caption class="visually-hidden">Số lần xuất hiện từng cặp theo ngày. Ngày thiếu kết quả được ký hiệu bằng dấu gạch ngang.</caption>
                 <thead>
-                    <tr class="rhythm-total-row"><th scope="row">Số lần về</th>@foreach (var column in Model.Columns) { <td data-column="@column.Label"><button type="button" class="rhythm-mark-button" data-mark="@column.Label" aria-label="Đánh dấu cặp @column.Label, @column.Total lần" aria-pressed="false">@column.Total</button></td> }</tr>
+                    <tr class="rhythm-total-row"><th scope="row">Số lần về<small class="rhythm-frequency-max">Max = @Model.Columns.Select(c => c.Total).DefaultIfEmpty(0).Max()</small></th>@foreach (var column in Model.Columns) { <td data-column="@column.Label"><button type="button" class="rhythm-mark-button" data-mark="@column.Label" aria-label="Đánh dấu cặp @column.Label, @column.Total lần" aria-pressed="false"><span class="rhythm-frequency-value">@column.Total</span><span class="rhythm-frequency-track" aria-hidden="true"><i style="--frequency-height: @(column.Total * 100 / maxFrequency)%"></i></span></button></td> }</tr>
                     <tr class="rhythm-number-row"><th scope="col">Ngày / Cặp số</th>@foreach (var column in Model.Columns) { <th scope="col" data-column="@column.Label"><button type="button" class="rhythm-number-button" data-cycle="@column.Label" aria-label="Xem chu kỳ cặp @column.Label">@column.Label</button></th> }</tr>
                 </thead>
                 <tbody>
                     @foreach (var day in Model.Rows)
                     {
-                        <tr class="@(!day.HasData ? "rhythm-missing-row" : "")"><th scope="row">@day.Date.ToString("dd/MM/yyyy")</th>
+                        <tr class="@(!day.HasData ? "rhythm-missing-row" : "")"><th scope="row">@if (day.HasData) { <a href="/xo-so-mien-bac/@day.Date.ToString("dd-MM-yyyy")">@day.Date.ToString("dd/MM/yyyy")</a> } else { @day.Date.ToString("dd/MM/yyyy") }</th>
                         @foreach (var column in Model.Columns)
                         {
                             var count = NumberRhythmCalculator.Count(Model, day, column.Number);
                             var special = day.HasData && day.Special == column.Number;
-                            <td data-column="@column.Label" class="rhythm-cell @(day.HasData && count > 0 ? "hit-" + Math.Min(count, 4) : "") @(special ? "is-special" : "")" title="@column.Label · @day.Date.ToString("dd/MM/yyyy") · @(!day.HasData ? "Chưa có kết quả đầy đủ" : count + " lần" + (special ? ", có giải đặc biệt" : ""))">@(!day.HasData ? "—" : count > 0 ? count.ToString() : "")</td>
+                            <td data-column="@column.Label" class="rhythm-cell @(day.HasData && count > 0 ? "hit-" + Math.Min(count, 4) : "") @(special ? "is-special" : "")">@(!day.HasData ? "—" : count > 0 ? count.ToString() : "")@if (special) { <span class="visually-hidden"> (ĐB)</span> }</td>
                         }
                         </tr>
                     }
@@ -69,7 +86,6 @@
                 <tfoot><tr><th scope="row">Chưa về</th>@foreach (var column in Model.Columns) { <td data-column="@column.Label" title="@(column.GapExact ? "Số ngày liên tiếp kể từ lần về gần nhất" : "Chỉ xác nhận được chuỗi ngày đầy đủ gần nhất, bị giới hạn bởi khoảng chọn hoặc ngày thiếu dữ liệu")">@(column.GapExact ? "" : "≥")@column.Gap</td> }</tr></tfoot>
             </table>
         </div>
-        <p class="rhythm-hint">“Chưa về” tính ngược từ ngày cuối. Dấu ≥ là cận dưới khi chưa gặp lần về trước hoặc bị ngắt bởi ngày thiếu dữ liệu. Chu kỳ chỉ tính giữa hai lần về có đủ dữ liệu ở các ngày xen giữa, trong khoảng đang xem.</p>
     </section>
 </div>
 <dialog id="rhythm-cycle-dialog" class="rhythm-dialog" aria-labelledby="rhythm-cycle-title">

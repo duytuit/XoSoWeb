@@ -1,7 +1,7 @@
 @model XoSoWeb.Models.XoSoRegionViewModel
 @{
-    if (Model.Results.Count == 0) ViewData["NoIndex"] = true;
-    ViewData["Title"] = "Kết Quả Xổ Số Miền Bắc";
+    if (!Model.Results.Any(r => XoSoWeb.Services.LotteryDataQuality.IsComplete(r.Prizes, Model.Region))) ViewData["NoIndex"] = true;
+    ViewData["Title"] = "XSMB - Kết quả xổ số miền Bắc mới nhất";
     if (Model.SelectedDay.HasValue)
     {
         var weekday = Model.SelectedDay == 7 ? "Chủ nhật" : "Thứ " + (Model.SelectedDay + 1);

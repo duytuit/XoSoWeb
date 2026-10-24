@@ -8,6 +8,8 @@ namespace XoSoWeb.Models
         public DateTime WeekStart { get; set; }
         public string Region { get; set; }
         public int DrawCount { get; set; }
+        public int ExcludedDrawCount { get; set; }
+        public int[] DrawsPerDay { get; } = new int[7];
         public int[,] Counts { get; } = new int[100, 7];
 
         public int Total(int number)
@@ -21,8 +23,11 @@ namespace XoSoWeb.Models
         {
             var day = (date.Date - WeekStart.Date).Days;
             if (day < 0 || day > 6) return;
+            var list = new List<XoSoPrize>(prizes);
+            if (!XoSoWeb.Services.LotteryDataQuality.IsComplete(list, Region)) { ExcludedDrawCount++; return; }
             DrawCount++;
-            foreach (var prize in prizes)
+            DrawsPerDay[day]++;
+            foreach (var prize in list)
             {
                 foreach (var number in prize?.Numbers ?? new List<string>())
                 {

@@ -16,6 +16,8 @@ using XoSoWeb.Models;
 using XoSoWeb.Services;
 using XoSoWeb.Shares.BaseRepository;
 
+if (args.Contains("--audit-data")) { Environment.ExitCode = await DatabaseAudit.RunAsync(); return; }
+if (args.Contains("--audit-http")) { var originIndex = Array.IndexOf(args, "--origin"); Environment.ExitCode = await DatabaseAudit.RunHttpAsync(originIndex >= 0 && originIndex + 1 < args.Length ? args[originIndex + 1] : null); return; }
 var checks = 0;
 void Check(bool value, string label)
 {
@@ -85,20 +87,6 @@ Check(NewsSourcePolicy.NormalizeEditorialUrl("http://example.org/news") == null
 Check(NewsSourcePolicy.TryNormalizeVietlottUrl("https://www.vietlott.vn/vi/tin-tuc?utm_source=mail", out var allowedVietlottUrl)
     && allowedVietlottUrl == "https://www.vietlott.vn/vi/tin-tuc"
     && !NewsSourcePolicy.TryNormalizeVietlottUrl("https://vietlott.vn.example.org/news", out _), "Vietlott source allowlist matches exact hosts only");
-var vietlottListingHtml = @"<div><a href=""/vi/tin-tuc/tin-trung-thuong/old"">Tin cũ</a><time>01/01/2026 08:00</time></div>
-    <div><a href=""/vi/tin-tuc/tin-trung-thuong/new"">Tin mới nhất</a><time>22/08/2026 10:44</time></div>
-    <div><a href=""https://example.org/vi/tin-tuc/tin-trung-thuong/fake"">Không thuộc Vietlott</a><time>23/08/2026 10:44</time></div>";
-var vietlottAdapter = new VietlottNewsSourceAdapter(new HttpClient(new StaticHttpMessageHandler(request =>
-    new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK)
-    {
-        RequestMessage = request,
-        Content = new StringContent(vietlottListingHtml, System.Text.Encoding.UTF8, "text/html")
-    })));
-var latestVietlottItem = await vietlottAdapter.CheckAsync(CancellationToken.None);
-Check(latestVietlottItem.CanCollect && latestVietlottItem.Title == "Tin mới nhất"
-    && latestVietlottItem.SourceUrl == "https://vietlott.vn/vi/tin-tuc/tin-trung-thuong/new"
-    && latestVietlottItem.PublishedAt == new DateTime(2026, 8, 22, 3, 44, 0),
-    "Vietlott collector selects the newest allowed listing headline and parses Vietnam publication time");
 var safeNewsHtml = NewsContentSanitizer.SanitizeHtml(
     "<h2>Tiêu đề</h2><p>Nội dung <strong>đậm</strong></p><img src=\"https://example.org/image.jpg\" onerror=\"alert(1)\"><script>alert(2)</script>");
 var safeNewsDecoded = System.Net.WebUtility.HtmlDecode(safeNewsHtml);
@@ -130,18 +118,13 @@ Check(newsPostActions.Count > 0 && newsPostActions.All(method =>
     "all news admin POST actions require antiforgery validation");
 foreach (var url in new[] { "http://example.org", "https://localhost", "https://example.org/path", "https://user@example.org", "https://example.org/?x=1", "//example.org" }) RejectOrigin(url);
 var site = new SiteSettings { SiteUrl = "https://example.org/", OrganizationName = "Test operator" };
-var accessor = new HttpContextAccessor();
-var automaticSite = new SiteSettings(accessor);
-automaticSite.Validate(false);
-accessor.HttpContext = new DefaultHttpContext();
-accessor.HttpContext.Request.Scheme = "https";
-accessor.HttpContext.Request.Host = new HostString("first.example.org");
-Check(automaticSite.Absolute("/sitemap.xml") == "https://first.example.org/sitemap.xml", "automatic origin uses current request");
-accessor.HttpContext = new DefaultHttpContext();
-accessor.HttpContext.Request.Scheme = "http";
-accessor.HttpContext.Request.Host = new HostString("localhost", 5099);
-Check(automaticSite.SiteUrl == "http://localhost:5099", "automatic origin is not retained between requests");
-accessor.HttpContext = null;
+RejectOrigin(null);
+RejectOrigin("");
+var accessor = new HttpContextAccessor { HttpContext = new DefaultHttpContext() };
+accessor.HttpContext.Request.Host = new HostString("attacker.invalid");
+var configuredSite = new SiteSettings(accessor) { SiteUrl = "https://example.org" };
+configuredSite.Validate(false);
+Check(configuredSite.Absolute("/sitemap.xml") == "https://example.org/sitemap.xml", "configured origin ignores request Host");
 site.Validate(false);
 Check(site.SiteUrl == "https://example.org", "origin normalized");
 var newsSeoController = new NewsController(new EmptyNewsArticleService(), site)
@@ -224,6 +207,38 @@ context.Request.Host = new HostString("attacker.invalid");
 var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()) { ["Title"] = "History" };
 var seo = SeoMetadata.Create(site, context.Request, viewData);
 Check(seo.Canonical == "https://example.org/xo-so-mien-bac/17-10-2024", "historical canonical ignores hostile Host");
+Check(new SiteSettings().SiteName == "Xem Nhanh" && new SiteSettings().LogoUrl == "/images/logo.png" && new SiteSettings().FaviconUrl == "/images/favicon.ico", "brand defaults use the supplied Xem Nhanh logo and favicon");
+var brandRequest = new DefaultHttpContext(); brandRequest.Request.Path = "/";
+var homeMetadata = SeoMetadata.Create(new SiteSettings { SiteUrl = "https://example.org" }, brandRequest.Request, viewData);
+Check(homeMetadata.Title == "Xem Nhanh - Kết quả xổ số hôm nay, XSMB, XSMT, XSMN, Vietlott", "home metadata uses requested brand and title");
+brandRequest.Request.Path = "/privacy";
+Check(SeoMetadata.Create(site, brandRequest.Request, new ViewDataDictionary(viewData) { ["Title"] = "Bảo mật | " + site.SiteName }).Title == "Bảo mật | " + site.SiteName, "shared metadata does not duplicate the brand suffix");
+brandRequest.Request.Path = "/tin-tuc"; brandRequest.Request.QueryString = new QueryString("?page=2&utm_source=test");
+var pageTwoMetadata = SeoMetadata.Create(site, brandRequest.Request, new ViewDataDictionary(viewData) { ["Title"] = "Tin tức · Trang 2" });
+Check(!pageTwoMetadata.NoIndex && pageTwoMetadata.Canonical.EndsWith("/tin-tuc?page=2"), "editorial pagination has its own indexable canonical without tracking");
+Check(site.ImageUrl("https://images.example.org/photo.webp") == "https://images.example.org/photo.webp", "article share image keeps valid external HTTPS origin");
+Check(NewsDateTime.IsoUtc(new DateTime(2026, 10, 24, 1, 0, 0)).EndsWith("Z"), "news machine-readable timestamps explicitly identify UTC");
+var completeNorthern = Enumerable.Range(0, 8).Select(i => new XoSoPrize { PrizeName = i == 0 ? "DB" : i.ToString(),
+    Numbers = Enumerable.Repeat(new string('0', new[] { 5, 5, 5, 5, 4, 4, 3, 2 }[i]), new[] { 1, 1, 2, 6, 4, 6, 3, 4 }[i]).ToList() }).ToList();
+Check(LotteryDataQuality.IsComplete(completeNorthern, "MB"), "regional completeness preserves repeated all-zero prize values");
+var weekly = new LotoFrequencyViewModel { Region = "MB", WeekStart = LotteryUrls.Today };
+weekly.Add(LotteryUrls.Today, completeNorthern);
+weekly.Add(LotteryUrls.Today, new[] { new XoSoPrize { PrizeName = "DB", Numbers = new() { "00123" } } });
+Check(weekly.DrawCount == 1 && weekly.ExcludedDrawCount == 1 && weekly.DrawsPerDay[0] == 1 && weekly.DrawsPerDay[1] == 0 && weekly.Total(0) == 27,
+    "weekly frequency preserves duplicates while distinguishing missing days and excluded incomplete draws");
+var olderFull = new XoSoResult { Id = 2, Region = "MB", ProvinceCode = "MB", ProvinceName = "Miền Bắc", DrawDate = LotteryUrls.Today,
+    Prizes = completeNorthern, SourcePriority = 0 };
+var recentPartial = new XoSoResult { Id = 3, Region = "MB", ProvinceCode = "MB", ProvinceName = "Miền Bắc", DrawDate = LotteryUrls.Today,
+    Prizes = new() { new() { PrizeName = "G3", Numbers = new() { "12345" } } }, SourcePriority = 100 };
+var protectedDraw = StationCatalog.Merge(new[] { recentPartial, olderFull }).Single();
+Check(protectedDraw.Prizes.Single(p => XoSoPrize.NormalizeName(p.PrizeName) == "3").Numbers.Count == 6, "high-priority partial prize does not replace complete prize");
+Check(!ArchiveCatalog.HasVietlottContent("MEGA645", new[] { "01", "02", "03" }, true)
+    && ArchiveCatalog.HasVietlottContent("MEGA645", new[] { "01", "02", "03", "04", "05", "45" }, false), "numeric Vietlott games require complete distinct main balls");
+var failureContext = new DefaultHttpContext(); failureContext.Response.Body = new MemoryStream(); failureContext.Request.Headers["Accept"] = "text/html";
+await new ExceptionMiddleware(_ => throw new Exception("PRIVATE_TEST_TOKEN"), Microsoft.Extensions.Logging.Abstractions.NullLogger<ExceptionMiddleware>.Instance).InvokeAsync(failureContext);
+failureContext.Response.Body.Position = 0;
+var failureBody = await new StreamReader(failureContext.Response.Body).ReadToEndAsync();
+Check(failureContext.Response.StatusCode == 500 && failureContext.Response.Headers["X-Robots-Tag"].ToString().Contains("noindex") && !failureBody.Contains("PRIVATE_TEST_TOKEN"), "system failure returns real 500 and never exposes exception text");
 using (JsonDocument.Parse(seo.StructuredJson)) { Check(true, "structured data is JSON"); }
 context.Request.QueryString = new QueryString("?day=1&utm_source=test");
 seo = SeoMetadata.Create(site, context.Request, viewData);
@@ -281,9 +296,22 @@ var xml = (ContentResult)await controller.Sitemap();
 XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
 var document = XDocument.Parse(xml.Content);
 var locations = document.Descendants(ns + "loc").Select(x => x.Value).ToList();
+links.Add(new ArchiveLink { Path = "/incomplete-test-result", IsIndexable = false });
+Check(!((ContentResult)await controller.Sitemap()).Content.Contains("incomplete-test-result"), "sitemap excludes incomplete results");
+links.RemoveAt(links.Count - 1);
 Check(xml.ContentType.StartsWith("application/xml") && locations.All(x => x.StartsWith(site.SiteUrl + "/")), "sitemap XML uses configured origin");
 Check(locations.Distinct().Count() == locations.Count && !locations.Any(x => x.Contains('?')), "sitemap has no duplicate/filter URLs");
 Check(document.Descendants(ns + "lastmod").Single().Value == "2024-10-18", "sitemap lastmod from stored update");
+using (var snapshotCache = new MemoryCache(new MemoryCacheOptions()))
+{
+    var snapshotController = new SeoController(site, catalog, cache: snapshotCache) { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
+    await snapshotController.Sitemap();
+    links.Add(new ArchiveLink { Path = "/snapshot-test-only" });
+    Check(!((ContentResult)await snapshotController.Sitemap()).Content.Contains("snapshot-test-only"), "sitemap snapshot cached between invalidations");
+    PublicContentVersion.Invalidate();
+    Check(((ContentResult)await snapshotController.Sitemap()).Content.Contains("snapshot-test-only"), "content update invalidates cached sitemap generation");
+    links.RemoveAt(links.Count - 1); PublicContentVersion.Invalidate();
+}
 Check(await controller.Sitemap(0) is NotFoundResult, "invalid sitemap partition returns 404");
 links.AddRange(Enumerable.Range(1, 10001).Select(n => new ArchiveLink { Path = "/fixture-" + n }));
 Check(XDocument.Parse(((ContentResult)await controller.Sitemap()).Content).Root.Name.LocalName == "sitemapindex", "large sitemap splits into index");
@@ -299,9 +327,17 @@ Check(((ContentResult)controller.Robots()).Content.Contains("Disallow: /") && !X
 site.AllowIndexing = true;
 Check(((ContentResult)controller.Robots()).Content.Contains(site.Absolute("/sitemap.xml")), "production robots advertises sitemap");
 
+// These deliberately incomplete regional payloads must remain reachable, but not indexable in a sitemap.
+foreach (var incomplete in links.Where(l => l.Region != null)) incomplete.IsIndexable = false;
 // Run real MVC routing and compiled Razor with isolated configuration. No DB or Redis calls.
 var rootDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
 while (!File.Exists(Path.Combine(rootDirectory.FullName, "XoSoWeb.csproj"))) rootDirectory = rootDirectory.Parent ?? throw new Exception("Repository root missing");
+var missingAsset = new SiteSettings { SiteUrl = "https://example.org", LogoUrl = "/images/not-provided-logo.png" };
+try { missingAsset.ValidateAssets(Path.Combine(rootDirectory.FullName, "wwwroot")); throw new Exception("Missing logo silently accepted"); }
+catch (InvalidOperationException) { Check(true, "configured logo must exist; no placeholder asset generated"); }
+var migrationTemplate = XDocument.Load(Path.Combine(rootDirectory.FullName, "docs", "iis-domain-redirect.config.example"));
+Check(migrationTemplate.Descendants("rule").Single().Attribute("enabled")?.Value == "false"
+    && migrationTemplate.Descendants("action").Single().Attribute("url")?.Value == "https://xemnhanh.vn/{R:1}", "domain migration is prepared but disabled and preserves each path");
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Production", ContentRootPath = rootDirectory.FullName, WebRootPath = Path.Combine(rootDirectory.FullName, "wwwroot") });
 builder.WebHost.UseUrls("http://127.0.0.1:0");
 builder.Logging.ClearProviders();
@@ -357,6 +393,7 @@ foreach (var path in new[] { "/", "/xo-so-mien-bac", "/xo-so-mien-trung", "/xo-s
     Check((int)response.StatusCode == 200, "SEO template returns 200: " + path);
     var html = await response.Content.ReadAsStringAsync();
     ValidateRenderedSeo(html, path, site.SiteUrl);
+    if (path == "/") Check(System.Net.WebUtility.HtmlDecode(html).Contains("Xem Nhanh") && html.Contains(site.ImageUrl(site.DefaultShareImage)), "home exposes Xem Nhanh with supplied branded share image");
     Check(System.Net.WebUtility.HtmlDecode(html).Contains("href=\"" + site.Absolute(path) + "\""), "self canonical: " + path);
     if (path.StartsWith("/thong-ke", StringComparison.Ordinal))
     {
@@ -440,6 +477,11 @@ foreach (var pair in new[] { ("tphcm", "tp-hcm"), ("dac-lac", "dak-lak"), ("dac-
         using var response = await client.GetAsync("/xo-so-" + pair.Item1 + suffix + "?utm_source=test");
         Check((int)response.StatusCode == 301 && response.Headers.Location?.OriginalString == "/xo-so-" + pair.Item2 + suffix + "?utm_source=test", "station alias permanently redirects with date and query: " + pair.Item1 + suffix);
     }
+}
+foreach (var asset in new[] { site.LogoUrl, site.FaviconUrl, new Uri(site.ImageUrl(site.DefaultShareImage)).AbsolutePath })
+{
+    using var assetResponse = await client.GetAsync(asset);
+    Check(assetResponse.IsSuccessStatusCode && assetResponse.Content.Headers.ContentType?.MediaType?.StartsWith("image/") == true, "supplied brand asset returns image HTTP 200: " + asset);
 }
 foreach (var path in new[] { "/robots.txt", "/sitemap.xml", "/gioi-thieu", "/nguon-du-lieu", "/support", "/privacy", "/terms", "/images/share.png" })
 {

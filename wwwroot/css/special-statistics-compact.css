@@ -1,0 +1,34 @@
+.statistics-tool-links { display: flex; flex-wrap: wrap; gap: 3px 10px; margin-bottom: 5px; font-size: 12px; line-height: 1.5; }
+.special-statistics-compact { gap: 5px; min-width: 0; }
+.special-statistics-compact .statistics-toolbar { gap: 4px 10px; padding: 5px; border-radius: 6px; }
+.special-statistics-compact .statistics-eyebrow { margin: 0; font-size: 10px; }
+.special-statistics-compact .statistics-period strong { font-size: 12px; line-height: 1.5; }
+.special-statistics-compact .statistics-filter { width: auto; gap: 4px; margin-left: auto; }
+.special-statistics-compact .statistics-date-field { position: relative; min-width: 145px; }
+.special-statistics-compact .form-label { position: absolute; top: 2px; left: 7px; margin: 0; font-size: 10px; line-height: 12px; pointer-events: none; }
+.special-statistics-compact .form-control { height: 36px; min-height: 36px; padding: 14px 6px 2px; font-size: 13px; line-height: 18px; border-radius: 4px; }
+.special-statistics-compact .statistics-filter .btn { min-height: 36px; padding: 3px 8px; font-size: 12px; border-radius: 4px; }
+.special-statistics-compact .statistics-legend { gap: 3px 8px; font-size: 11px; }
+.special-statistics-compact .statistics-legend i { width: 10px; height: 10px; }
+.special-statistics-compact .special-statistics-region { border-radius: 6px; }
+.special-statistics-compact .special-statistics-header { padding: 4px 6px; gap: 4px; }
+.special-statistics-compact .special-statistics-header h2 { margin: 0; font-size: 13px; }
+.special-statistics-compact .statistics-result-count { padding: 2px 5px; font-size: 10px; }
+.special-statistics-compact .special-statistics-week-table { min-width: 490px; width: 100%; table-layout: fixed; }
+.special-statistics-compact .special-statistics-week-table th { padding: 3px 2px; font-size: 12px; }
+.special-statistics-compact .special-statistics-week-table td { height: 44px; padding: 3px 2px; }
+.special-statistics-compact .special-statistics-numbers > span { font-size: 14px; line-height: 1.2; letter-spacing: 0; }
+.special-statistics-compact .special-statistics-province { font-size: 10px; line-height: 1.2; }
+.special-statistics-compact .special-statistics-date { margin-top: 1px; font-size: 10px; }
+.special-statistics-compact .special-statistics-day-result + .special-statistics-day-result { margin-top: 2px; padding-top: 2px; }
+.special-statistics-compact .special-statistics-empty { padding: 6px; font-size: 12px; }
+@media (max-width: 575.98px) {
+    .special-statistics-compact .statistics-toolbar { gap: 3px 6px; }
+    .special-statistics-compact .statistics-filter { flex: 1 1 190px; }
+    .special-statistics-compact .statistics-date-field { flex: 1; min-width: 135px; }
+    .special-statistics-compact .form-control { height: 42px; min-height: 42px; padding-top: 16px; font-size: 16px; line-height: 22px; }
+    .special-statistics-compact .statistics-filter .btn { min-height: 42px; }
+    .special-statistics-compact .special-statistics-week-table { min-width: 420px; }
+    .special-statistics-compact .special-statistics-week-table td { height: 40px; }
+    .special-statistics-compact .special-statistics-numbers > span { font-size: 13px; }
+}

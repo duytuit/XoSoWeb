@@ -114,7 +114,7 @@ namespace XoSoWeb.Services
                 .Select(item => (long?)item.ArticleId).FirstOrDefaultAsync(cancellationToken);
             if (!redirect.HasValue) return null;
             return await db.NewsArticles.AsNoTracking()
-                .Where(article => article.Id == redirect.Value && article.Status == NewsArticleStatuses.Published)
+                .Where(article => article.Id == redirect.Value && article.Status == NewsArticleStatuses.Published && article.PublishedAt <= DateTime.UtcNow)
                 .Select(article => article.Slug).FirstOrDefaultAsync(cancellationToken);
         }
 

@@ -51,6 +51,7 @@ namespace XoSoWeb
             var site = new SiteSettings(httpContextAccessor);
             Configuration.GetSection("Site").Bind(site);
             site.Validate(Environment.IsDevelopment());
+            site.ValidateAssets(Environment.WebRootPath);
             if (!Environment.IsProduction()) site.AllowIndexing = false;
             if (Environment.IsStaging() && (string.IsNullOrWhiteSpace(site.StagingUsername) || string.IsNullOrWhiteSpace(site.StagingPassword)))
                 throw new InvalidOperationException("Staging requires Site:StagingUsername and Site:StagingPassword.");

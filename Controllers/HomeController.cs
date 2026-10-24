@@ -90,9 +90,9 @@ namespace XoSoWeb.Controllers
             try
             {
                 await using var command = _context.Database.GetDbConnection().CreateCommand();
-                command.CommandText = @"SELECT Region, DrawDate, Prizes FROM dbo.XoSoResults
+                command.CommandText = @"SELECT Region, DrawDate, Prizes, (" + StationCatalog.RegionSql + @") AS NormalizedRegion FROM dbo.XoSoResults
                     WHERE DrawDate >= @start AND DrawDate < @end
-                    AND Region IN (@region, @storedRegion, @unaccentedRegion, @mixedRegion)
+                    AND (" + StationCatalog.RegionSql + @") IN (@region, @storedRegion, @unaccentedRegion, @mixedRegion)
                     ORDER BY DrawDate, ProvinceName;";
                 AddParameter(command, "@start", model.WeekStart);
                 AddParameter(command, "@end", model.WeekStart.AddDays(7) < today.AddDays(1) ? model.WeekStart.AddDays(7) : today.AddDays(1));
@@ -103,7 +103,7 @@ namespace XoSoWeb.Controllers
                 await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
-                    if (GetRegionCode(reader.GetString(0)) != region) continue;
+                    if (GetRegionCode(reader.GetString(reader.FieldCount > 3 ? 3 : 0)) != region) continue;
                     var prizes = JsonSerializer.Deserialize<List<XoSoPrize>>(reader.GetString(2), JsonOptions)
                         ?? new List<XoSoPrize>();
                     model.Add(reader.GetDateTime(1), prizes);
@@ -213,7 +213,7 @@ namespace XoSoWeb.Controllers
             await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                var regionCode = GetRegionCode(reader.GetString(0));
+                var regionCode = StationCatalog.Find(reader.GetString(1))?.Region ?? GetRegionCode(reader.GetString(0));
                 var region = model.Regions.FirstOrDefault(item => item.RegionCode == regionCode);
                 if (region == null)
                 {
@@ -292,7 +292,7 @@ namespace XoSoWeb.Controllers
                     SELECT *,
                         DENSE_RANK() OVER (ORDER BY CAST(DrawDate AS date) DESC) AS DrawDateRank
                     FROM dbo.XoSoResults
-                    WHERE (Region = @region OR Region = @storedRegionName OR Region = @unaccentedRegion OR Region = @mixedRegion)
+                    WHERE (" + StationCatalog.RegionSql + @") IN (@region, @storedRegionName, @unaccentedRegion, @mixedRegion)
                         AND DrawDate < @tomorrow
                         AND (@exactDate IS NULL OR (DrawDate >= @exactDate AND DrawDate < @dateEnd))
                         AND (@provinceName IS NULL OR ProvinceName = @provinceName OR (" + StationCatalog.IdentitySql + @") = @stationId)

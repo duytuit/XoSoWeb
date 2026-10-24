@@ -1,0 +1,886 @@
+PASS: eighth prize alias: Giải 8
+PASS: eighth prize alias: G8
+PASS: eighth prize alias: 8
+PASS: eighth prize alias: giải tám
+PASS: eighth prize alias:  G.8 
+PASS: special prize alias: ĐB
+PASS: special prize alias: DB
+PASS: special prize alias: Giải Đặc Biệt
+PASS: special prize alias: Giai DB
+PASS: special prize alias: G.ĐB
+PASS: unrecognized prize labels preserved
+PASS: consistent numbered prize label: Giải 1
+PASS: consistent numbered prize label: G1
+PASS: consistent numbered prize label: nhất
+PASS: consistent numbered prize label: Giai nhat
+PASS: consistent special and eighth prize labels
+PASS: incomplete northern draw retains all eight rows in order
+PASS: missing northern prizes have no invented numbers
+PASS: northern aliases merge without losing leading zeroes
+PASS: catalog JSON validated without SQL JSON functions
+PASS: invalid or empty catalog data excluded
+PASS: invalid or empty catalog data excluded
+PASS: invalid or empty catalog data excluded
+PASS: invalid or empty catalog data excluded
+PASS: invalid or empty catalog data excluded
+PASS: news source URL drops tracking and hashes canonical URL
+PASS: news source URL rejects non-HTTPS, loopback, and embedded credentials
+PASS: Vietlott source allowlist matches exact hosts only
+PASS: news rich text keeps allowed formatting and images but strips executable markup
+PASS: news content rejects non-HTTPS images and unsafe links
+PASS: news content allows local uploads and rejects encoded traversal paths
+PASS: news admin actions require the server-side NewsAdmin role
+PASS: all news admin POST actions require antiforgery validation
+PASS: configured origin ignores request Host
+PASS: origin normalized
+PASS: news SEO graph contains exactly one NewsArticle node
+PASS: news article breadcrumb schema follows visible category hierarchy and canonical URL
+PASS: valid leap day
+PASS: invalid calendar dates
+PASS: future date rejected in UTC+7
+PASS: strict date format
+PASS: Vietlott schedule slug accepted without invented data: mega645
+PASS: Vietlott prize page preserves unverified-data state: mega645
+PASS: Vietlott schedule slug accepted without invented data: power655
+PASS: Vietlott prize page preserves unverified-data state: power655
+PASS: Vietlott schedule slug accepted without invented data: lotto535
+PASS: Vietlott prize page preserves unverified-data state: lotto535
+PASS: Vietlott schedule slug accepted without invented data: keno
+PASS: Vietlott prize page preserves unverified-data state: keno
+PASS: Vietlott schedule slug accepted without invented data: max3d
+PASS: Vietlott prize page preserves unverified-data state: max3d
+PASS: Vietlott schedule slug accepted without invented data: max3d-plus
+PASS: Vietlott prize page preserves unverified-data state: max3d-plus
+PASS: Vietlott schedule slug accepted without invented data: max3d-pro
+PASS: Vietlott prize page preserves unverified-data state: max3d-pro
+PASS: Vietlott schedule slug accepted without invented data: bingo18
+PASS: Vietlott prize page preserves unverified-data state: bingo18
+PASS: invalid schedule weekday rejected
+PASS: unknown schedule game rejected
+PASS: regional schedule filter does not infer official schedule from results
+PASS: regional prize page leaves unverified values and effective date empty
+PASS: reference index uses current Vietnam date
+PASS: province slugs from names
+PASS: draw identifiers retain leading zeroes
+PASS: HCM canonical: TPHCM
+PASS: HCM canonical: TP HCM
+PASS: HCM canonical: TP.HCM
+PASS: HCM canonical: Xổ số TPHCM
+PASS: HCM canonical: tp-hcm
+PASS: Dak aliases canonicalized
+PASS: station history unified across aliases and dates
+PASS: source priority resolves conflicts and retains missing prizes
+PASS: complete Keno accepted
+PASS: duplicate Keno numbers rejected
+PASS: Bingo dice completeness and range
+PASS: result strings retain leading zeroes
+PASS: historical canonical ignores hostile Host
+PASS: brand defaults use the supplied Xem Nhanh logo and favicon
+PASS: home metadata uses requested brand and title
+PASS: shared metadata does not duplicate the brand suffix
+PASS: editorial pagination has its own indexable canonical without tracking
+PASS: article share image keeps valid external HTTPS origin
+PASS: news machine-readable timestamps explicitly identify UTC
+PASS: regional completeness preserves repeated all-zero prize values
+PASS: weekly frequency preserves duplicates while distinguishing missing days and excluded incomplete draws
+PASS: high-priority partial prize does not replace complete prize
+PASS: numeric Vietlott games require complete distinct main balls
+PASS: system failure returns real 500 and never exposes exception text
+PASS: structured data is JSON
+PASS: filters noindex with self canonical; tracking removed
+PASS: domain change updates canonical and schema
+PASS: legacy alias in a single redirect preserves query
+PASS: normalized route has no redirect loop
+PASS: province landing survives multiple source codes
+PASS: province history deduplicates source codes
+PASS: catalog and sitemap emit only canonical station history
+PASS: incomplete Keno and Bingo excluded from sitemap catalog
+PASS: catalog runs through legacy-compatible SQL
+PASS: manual Mega frequency separates appearances and draw count
+PASS: frequency row links to the latest matching draw
+PASS: incomplete period is reported and excluded
+PASS: absence gap counts completed draws since last appearance
+PASS: previous-draw comparison uses the adjacent draw identifier
+PASS: Max 3D retains leading zero and scopes exact prize
+PASS: Max 3D separates number occurrences from unique draws
+PASS: separate special digits are not combined into a triple
+PASS: sitemap excludes incomplete results
+PASS: sitemap XML uses configured origin
+PASS: sitemap has no duplicate/filter URLs
+PASS: sitemap lastmod from stored update
+PASS: sitemap snapshot cached between invalidations
+PASS: content update invalidates cached sitemap generation
+PASS: invalid sitemap partition returns 404
+PASS: large sitemap splits into index
+PASS: sitemap partition bounded
+PASS: no duplicates within or between sitemap partitions
+PASS: nonproduction robots and sitemap
+PASS: production robots advertises sitemap
+PASS: configured logo must exist; no placeholder asset generated
+PASS: domain migration is prepared but disabled and preserves each path
+PASS: news category breadcrumb includes parent category and current page
+PASS: central results render with mixed prize names
+PASS: mixed prize names produce three prize rows and one header
+PASS: eighth prize aligned across provinces
+PASS: word and numeric prize names share a row
+PASS: special prize last with leading zeroes intact
+PASS: SEO template returns 200: /
+PASS: single content H1: /
+PASS: title and description without keywords: /
+PASS: JSON-LD present: /
+PASS: JSON-LD context: /
+PASS: JSON-LD node type: /
+PASS: JSON-LD node type: /
+PASS: home exposes Xem Nhanh with supplied branded share image
+PASS: self canonical: /
+PASS: SEO template returns 200: /xo-so-mien-bac
+PASS: single content H1: /xo-so-mien-bac
+PASS: title and description without keywords: /xo-so-mien-bac
+PASS: JSON-LD present: /xo-so-mien-bac
+PASS: JSON-LD context: /xo-so-mien-bac
+PASS: JSON-LD node type: /xo-so-mien-bac
+PASS: JSON-LD node type: /xo-so-mien-bac
+PASS: JSON-LD node type: /xo-so-mien-bac
+PASS: breadcrumb current URL equals canonical: /xo-so-mien-bac
+PASS: breadcrumb ListItem and position: /xo-so-mien-bac
+PASS: breadcrumb matches content and origin: /xo-so-mien-bac / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /xo-so-mien-bac
+PASS: breadcrumb matches content and origin: /xo-so-mien-bac / XSMB - Kết quả xổ số miền Bắc mới nhất / https://new.example.org/xo-so-mien-bac
+PASS: self canonical: /xo-so-mien-bac
+PASS: SEO template returns 200: /xo-so-mien-trung
+PASS: single content H1: /xo-so-mien-trung
+PASS: title and description without keywords: /xo-so-mien-trung
+PASS: JSON-LD present: /xo-so-mien-trung
+PASS: JSON-LD context: /xo-so-mien-trung
+PASS: JSON-LD node type: /xo-so-mien-trung
+PASS: JSON-LD node type: /xo-so-mien-trung
+PASS: JSON-LD node type: /xo-so-mien-trung
+PASS: breadcrumb current URL equals canonical: /xo-so-mien-trung
+PASS: breadcrumb ListItem and position: /xo-so-mien-trung
+PASS: breadcrumb matches content and origin: /xo-so-mien-trung / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /xo-so-mien-trung
+PASS: breadcrumb matches content and origin: /xo-so-mien-trung / XSMT - Kết quả xổ số miền Trung mới nhất / https://new.example.org/xo-so-mien-trung
+PASS: self canonical: /xo-so-mien-trung
+PASS: SEO template returns 200: /xo-so-mien-nam
+PASS: single content H1: /xo-so-mien-nam
+PASS: title and description without keywords: /xo-so-mien-nam
+PASS: JSON-LD present: /xo-so-mien-nam
+PASS: JSON-LD context: /xo-so-mien-nam
+PASS: JSON-LD node type: /xo-so-mien-nam
+PASS: JSON-LD node type: /xo-so-mien-nam
+PASS: JSON-LD node type: /xo-so-mien-nam
+PASS: breadcrumb current URL equals canonical: /xo-so-mien-nam
+PASS: breadcrumb ListItem and position: /xo-so-mien-nam
+PASS: breadcrumb matches content and origin: /xo-so-mien-nam / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /xo-so-mien-nam
+PASS: breadcrumb matches content and origin: /xo-so-mien-nam / XSMN - Kết quả xổ số miền Nam mới nhất / https://new.example.org/xo-so-mien-nam
+PASS: self canonical: /xo-so-mien-nam
+PASS: SEO template returns 200: /xo-so-mien-bac?day=1
+PASS: single content H1: /xo-so-mien-bac?day=1
+PASS: title and description without keywords: /xo-so-mien-bac?day=1
+PASS: JSON-LD present: /xo-so-mien-bac?day=1
+PASS: JSON-LD context: /xo-so-mien-bac?day=1
+PASS: JSON-LD node type: /xo-so-mien-bac?day=1
+PASS: JSON-LD node type: /xo-so-mien-bac?day=1
+PASS: JSON-LD node type: /xo-so-mien-bac?day=1
+PASS: breadcrumb current URL equals canonical: /xo-so-mien-bac?day=1
+PASS: breadcrumb ListItem and position: /xo-so-mien-bac?day=1
+PASS: breadcrumb matches content and origin: /xo-so-mien-bac?day=1 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /xo-so-mien-bac?day=1
+PASS: breadcrumb matches content and origin: /xo-so-mien-bac?day=1 / XSMB - Kết quả xổ số miền Bắc mới nhất · Thứ 2 / https://new.example.org/xo-so-mien-bac?day=1
+PASS: self canonical: /xo-so-mien-bac?day=1
+PASS: filters noindex and crawlable: /xo-so-mien-bac?day=1
+PASS: SEO template returns 200: /xo-so-fixture-station
+PASS: single content H1: /xo-so-fixture-station
+PASS: title and description without keywords: /xo-so-fixture-station
+PASS: JSON-LD present: /xo-so-fixture-station
+PASS: JSON-LD context: /xo-so-fixture-station
+PASS: JSON-LD node type: /xo-so-fixture-station
+PASS: JSON-LD node type: /xo-so-fixture-station
+PASS: JSON-LD node type: /xo-so-fixture-station
+PASS: breadcrumb current URL equals canonical: /xo-so-fixture-station
+PASS: breadcrumb ListItem and position: /xo-so-fixture-station
+PASS: breadcrumb matches content and origin: /xo-so-fixture-station / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /xo-so-fixture-station
+PASS: breadcrumb matches content and origin: /xo-so-fixture-station / Xổ số Miền Nam / https://new.example.org/xo-so-mien-nam
+PASS: breadcrumb ListItem and position: /xo-so-fixture-station
+PASS: breadcrumb matches content and origin: /xo-so-fixture-station / Xổ số Fixture station / https://new.example.org/xo-so-fixture-station
+PASS: self canonical: /xo-so-fixture-station
+PASS: SEO template returns 200: /xo-so-fixture-station/17-10-2024
+PASS: single content H1: /xo-so-fixture-station/17-10-2024
+PASS: title and description without keywords: /xo-so-fixture-station/17-10-2024
+PASS: JSON-LD present: /xo-so-fixture-station/17-10-2024
+PASS: JSON-LD context: /xo-so-fixture-station/17-10-2024
+PASS: JSON-LD node type: /xo-so-fixture-station/17-10-2024
+PASS: JSON-LD node type: /xo-so-fixture-station/17-10-2024
+PASS: JSON-LD node type: /xo-so-fixture-station/17-10-2024
+PASS: breadcrumb current URL equals canonical: /xo-so-fixture-station/17-10-2024
+PASS: breadcrumb ListItem and position: /xo-so-fixture-station/17-10-2024
+PASS: breadcrumb matches content and origin: /xo-so-fixture-station/17-10-2024 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /xo-so-fixture-station/17-10-2024
+PASS: breadcrumb matches content and origin: /xo-so-fixture-station/17-10-2024 / Fixture station / https://new.example.org/xo-so-fixture-station
+PASS: breadcrumb ListItem and position: /xo-so-fixture-station/17-10-2024
+PASS: breadcrumb matches content and origin: /xo-so-fixture-station/17-10-2024 / Fixture station · 17/10/2024 / https://new.example.org/xo-so-fixture-station/17-10-2024
+PASS: self canonical: /xo-so-fixture-station/17-10-2024
+PASS: SEO template returns 200: /vietlott
+PASS: single content H1: /vietlott
+PASS: title and description without keywords: /vietlott
+PASS: JSON-LD present: /vietlott
+PASS: JSON-LD context: /vietlott
+PASS: JSON-LD node type: /vietlott
+PASS: JSON-LD node type: /vietlott
+PASS: JSON-LD node type: /vietlott
+PASS: breadcrumb current URL equals canonical: /vietlott
+PASS: breadcrumb ListItem and position: /vietlott
+PASS: breadcrumb matches content and origin: /vietlott / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /vietlott
+PASS: breadcrumb matches content and origin: /vietlott / Kết quả Vietlott / https://new.example.org/vietlott
+PASS: self canonical: /vietlott
+PASS: SEO template returns 200: /vietlott/mega645
+PASS: single content H1: /vietlott/mega645
+PASS: title and description without keywords: /vietlott/mega645
+PASS: JSON-LD present: /vietlott/mega645
+PASS: JSON-LD context: /vietlott/mega645
+PASS: JSON-LD node type: /vietlott/mega645
+PASS: JSON-LD node type: /vietlott/mega645
+PASS: JSON-LD node type: /vietlott/mega645
+PASS: breadcrumb current URL equals canonical: /vietlott/mega645
+PASS: breadcrumb ListItem and position: /vietlott/mega645
+PASS: breadcrumb matches content and origin: /vietlott/mega645 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /vietlott/mega645
+PASS: breadcrumb matches content and origin: /vietlott/mega645 / Vietlott / https://new.example.org/vietlott
+PASS: breadcrumb ListItem and position: /vietlott/mega645
+PASS: breadcrumb matches content and origin: /vietlott/mega645 / Kết quả Mega 6/45 / https://new.example.org/vietlott/mega645
+PASS: self canonical: /vietlott/mega645
+PASS: SEO template returns 200: /vietlott/mega645/ky/00019
+PASS: single content H1: /vietlott/mega645/ky/00019
+PASS: title and description without keywords: /vietlott/mega645/ky/00019
+PASS: JSON-LD present: /vietlott/mega645/ky/00019
+PASS: JSON-LD context: /vietlott/mega645/ky/00019
+PASS: JSON-LD node type: /vietlott/mega645/ky/00019
+PASS: JSON-LD node type: /vietlott/mega645/ky/00019
+PASS: JSON-LD node type: /vietlott/mega645/ky/00019
+PASS: breadcrumb current URL equals canonical: /vietlott/mega645/ky/00019
+PASS: breadcrumb ListItem and position: /vietlott/mega645/ky/00019
+PASS: breadcrumb matches content and origin: /vietlott/mega645/ky/00019 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /vietlott/mega645/ky/00019
+PASS: breadcrumb matches content and origin: /vietlott/mega645/ky/00019 / Mega 6/45 / https://new.example.org/vietlott/mega645
+PASS: breadcrumb ListItem and position: /vietlott/mega645/ky/00019
+PASS: breadcrumb matches content and origin: /vietlott/mega645/ky/00019 / Kết quả Mega 6/45 · kỳ 00019 · 17/10/2024 / https://new.example.org/vietlott/mega645/ky/00019
+PASS: self canonical: /vietlott/mega645/ky/00019
+PASS: draw metadata retains actual date and identifier
+PASS: SEO template returns 200: /vietlott?gameCode=MEGA645&offset=1
+PASS: single content H1: /vietlott?gameCode=MEGA645&offset=1
+PASS: title and description without keywords: /vietlott?gameCode=MEGA645&offset=1
+PASS: JSON-LD present: /vietlott?gameCode=MEGA645&offset=1
+PASS: JSON-LD context: /vietlott?gameCode=MEGA645&offset=1
+PASS: JSON-LD node type: /vietlott?gameCode=MEGA645&offset=1
+PASS: JSON-LD node type: /vietlott?gameCode=MEGA645&offset=1
+PASS: JSON-LD node type: /vietlott?gameCode=MEGA645&offset=1
+PASS: breadcrumb current URL equals canonical: /vietlott?gameCode=MEGA645&offset=1
+PASS: breadcrumb ListItem and position: /vietlott?gameCode=MEGA645&offset=1
+PASS: breadcrumb matches content and origin: /vietlott?gameCode=MEGA645&offset=1 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /vietlott?gameCode=MEGA645&offset=1
+PASS: breadcrumb matches content and origin: /vietlott?gameCode=MEGA645&offset=1 / Kết quả Mega 6/45 · kỳ 00019 / https://new.example.org/vietlott?gameCode=MEGA645&offset=1
+PASS: self canonical: /vietlott?gameCode=MEGA645&offset=1
+PASS: filters noindex and crawlable: /vietlott?gameCode=MEGA645&offset=1
+PASS: SEO template returns 200: /thong-ke
+PASS: single content H1: /thong-ke
+PASS: title and description without keywords: /thong-ke
+PASS: JSON-LD present: /thong-ke
+PASS: JSON-LD context: /thong-ke
+PASS: JSON-LD node type: /thong-ke
+PASS: JSON-LD node type: /thong-ke
+PASS: JSON-LD node type: /thong-ke
+PASS: breadcrumb current URL equals canonical: /thong-ke
+PASS: breadcrumb ListItem and position: /thong-ke
+PASS: breadcrumb matches content and origin: /thong-ke / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /thong-ke
+PASS: breadcrumb matches content and origin: /thong-ke / Thống kê giải đặc biệt ba miền · 25/09/2026 – 24/10/2026 / https://new.example.org/thong-ke
+PASS: self canonical: /thong-ke
+PASS: top statistics navigation renders parent-child menu: /thong-ke
+PASS: statistics submenu links to Vietlott category: /thong-ke
+PASS: SEO template returns 200: /thong-ke?endDate=2024-10-17
+PASS: single content H1: /thong-ke?endDate=2024-10-17
+PASS: title and description without keywords: /thong-ke?endDate=2024-10-17
+PASS: JSON-LD present: /thong-ke?endDate=2024-10-17
+PASS: JSON-LD context: /thong-ke?endDate=2024-10-17
+PASS: JSON-LD node type: /thong-ke?endDate=2024-10-17
+PASS: JSON-LD node type: /thong-ke?endDate=2024-10-17
+PASS: JSON-LD node type: /thong-ke?endDate=2024-10-17
+PASS: breadcrumb current URL equals canonical: /thong-ke?endDate=2024-10-17
+PASS: breadcrumb ListItem and position: /thong-ke?endDate=2024-10-17
+PASS: breadcrumb matches content and origin: /thong-ke?endDate=2024-10-17 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /thong-ke?endDate=2024-10-17
+PASS: breadcrumb matches content and origin: /thong-ke?endDate=2024-10-17 / Thống kê giải đặc biệt ba miền · 18/09/2024 – 17/10/2024 / https://new.example.org/thong-ke?endDate=2024-10-17
+PASS: self canonical: /thong-ke?endDate=2024-10-17
+PASS: top statistics navigation renders parent-child menu: /thong-ke?endDate=2024-10-17
+PASS: statistics submenu links to Vietlott category: /thong-ke?endDate=2024-10-17
+PASS: filters noindex and crawlable: /thong-ke?endDate=2024-10-17
+PASS: SEO template returns 200: /thong-ke-tan-suat-loto
+PASS: single content H1: /thong-ke-tan-suat-loto
+PASS: title and description without keywords: /thong-ke-tan-suat-loto
+PASS: JSON-LD present: /thong-ke-tan-suat-loto
+PASS: JSON-LD context: /thong-ke-tan-suat-loto
+PASS: JSON-LD node type: /thong-ke-tan-suat-loto
+PASS: JSON-LD node type: /thong-ke-tan-suat-loto
+PASS: JSON-LD node type: /thong-ke-tan-suat-loto
+PASS: breadcrumb current URL equals canonical: /thong-ke-tan-suat-loto
+PASS: breadcrumb ListItem and position: /thong-ke-tan-suat-loto
+PASS: breadcrumb matches content and origin: /thong-ke-tan-suat-loto / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /thong-ke-tan-suat-loto
+PASS: breadcrumb matches content and origin: /thong-ke-tan-suat-loto / Tần suất lô tô Miền Bắc · tuần 19/10/2026 / https://new.example.org/thong-ke-tan-suat-loto
+PASS: self canonical: /thong-ke-tan-suat-loto
+PASS: top statistics navigation renders parent-child menu: /thong-ke-tan-suat-loto
+PASS: statistics submenu links to Vietlott category: /thong-ke-tan-suat-loto
+PASS: SEO template returns 200: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: single content H1: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: title and description without keywords: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: JSON-LD present: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: JSON-LD context: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: JSON-LD node type: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: JSON-LD node type: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: JSON-LD node type: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: breadcrumb current URL equals canonical: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: breadcrumb ListItem and position: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: breadcrumb matches content and origin: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: breadcrumb matches content and origin: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17 / Tần suất lô tô Miền Nam · tuần 14/10/2024 / https://new.example.org/thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: self canonical: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: top statistics navigation renders parent-child menu: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: statistics submenu links to Vietlott category: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: filters noindex and crawlable: /thong-ke-tan-suat-loto?region=MN&week=2024-10-17
+PASS: SEO template returns 200: /thong-ke/vietlott
+PASS: single content H1: /thong-ke/vietlott
+PASS: title and description without keywords: /thong-ke/vietlott
+PASS: JSON-LD present: /thong-ke/vietlott
+PASS: JSON-LD context: /thong-ke/vietlott
+PASS: JSON-LD node type: /thong-ke/vietlott
+PASS: JSON-LD node type: /thong-ke/vietlott
+PASS: JSON-LD node type: /thong-ke/vietlott
+PASS: breadcrumb current URL equals canonical: /thong-ke/vietlott
+PASS: breadcrumb ListItem and position: /thong-ke/vietlott
+PASS: breadcrumb matches content and origin: /thong-ke/vietlott / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /thong-ke/vietlott
+PASS: breadcrumb matches content and origin: /thong-ke/vietlott / Thống kê Vietlott / https://new.example.org/thong-ke/vietlott
+PASS: self canonical: /thong-ke/vietlott
+PASS: top statistics navigation renders parent-child menu: /thong-ke/vietlott
+PASS: statistics submenu links to Vietlott category: /thong-ke/vietlott
+PASS: statistics parent is highlighted in top navigation: /thong-ke/vietlott
+PASS: visible Vietlott breadcrumb rendered: /thong-ke/vietlott
+PASS: visible breadcrumb contains one home link: /thong-ke/vietlott
+PASS: SEO template returns 200: /thong-ke/vietlott/mega645
+PASS: single content H1: /thong-ke/vietlott/mega645
+PASS: title and description without keywords: /thong-ke/vietlott/mega645
+PASS: JSON-LD present: /thong-ke/vietlott/mega645
+PASS: JSON-LD context: /thong-ke/vietlott/mega645
+PASS: JSON-LD node type: /thong-ke/vietlott/mega645
+PASS: JSON-LD node type: /thong-ke/vietlott/mega645
+PASS: JSON-LD node type: /thong-ke/vietlott/mega645
+PASS: breadcrumb current URL equals canonical: /thong-ke/vietlott/mega645
+PASS: breadcrumb ListItem and position: /thong-ke/vietlott/mega645
+PASS: breadcrumb matches content and origin: /thong-ke/vietlott/mega645 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /thong-ke/vietlott/mega645
+PASS: breadcrumb matches content and origin: /thong-ke/vietlott/mega645 / Thống kê Vietlott / https://new.example.org/thong-ke/vietlott
+PASS: breadcrumb ListItem and position: /thong-ke/vietlott/mega645
+PASS: breadcrumb matches content and origin: /thong-ke/vietlott/mega645 / Thống kê Mega 6/45 / https://new.example.org/thong-ke/vietlott/mega645
+PASS: self canonical: /thong-ke/vietlott/mega645
+PASS: top statistics navigation renders parent-child menu: /thong-ke/vietlott/mega645
+PASS: statistics submenu links to Vietlott category: /thong-ke/vietlott/mega645
+PASS: statistics parent is highlighted in top navigation: /thong-ke/vietlott/mega645
+PASS: visible Vietlott breadcrumb rendered: /thong-ke/vietlott/mega645
+PASS: visible breadcrumb contains one home link: /thong-ke/vietlott/mega645
+PASS: game breadcrumb links to Vietlott statistics index
+PASS: SEO template returns 200: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: single content H1: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: title and description without keywords: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: JSON-LD present: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: JSON-LD context: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: JSON-LD node type: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: JSON-LD node type: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: JSON-LD node type: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: breadcrumb current URL equals canonical: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: breadcrumb ListItem and position: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: breadcrumb matches content and origin: /thong-ke/vietlott/mega645/tan-suat?periods=20 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: breadcrumb matches content and origin: /thong-ke/vietlott/mega645/tan-suat?periods=20 / Thống kê Mega 6/45 / https://new.example.org/thong-ke/vietlott/mega645
+PASS: breadcrumb ListItem and position: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: breadcrumb matches content and origin: /thong-ke/vietlott/mega645/tan-suat?periods=20 / Tần suất Mega 6/45 / https://new.example.org/thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: self canonical: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: top statistics navigation renders parent-child menu: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: statistics submenu links to Vietlott category: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: statistics parent is highlighted in top navigation: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: visible Vietlott breadcrumb rendered: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: visible breadcrumb contains one home link: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: tool breadcrumb links to its game index
+PASS: filters noindex and crawlable: /thong-ke/vietlott/mega645/tan-suat?periods=20
+PASS: SEO template returns 200: /lich-quay
+PASS: single content H1: /lich-quay
+PASS: title and description without keywords: /lich-quay
+PASS: JSON-LD present: /lich-quay
+PASS: JSON-LD context: /lich-quay
+PASS: JSON-LD node type: /lich-quay
+PASS: JSON-LD node type: /lich-quay
+PASS: JSON-LD node type: /lich-quay
+PASS: breadcrumb current URL equals canonical: /lich-quay
+PASS: breadcrumb ListItem and position: /lich-quay
+PASS: breadcrumb matches content and origin: /lich-quay / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /lich-quay
+PASS: breadcrumb matches content and origin: /lich-quay / Lịch quay xổ số / https://new.example.org/lich-quay
+PASS: self canonical: /lich-quay
+PASS: reference breadcrumb has exactly one home link: /lich-quay
+PASS: reference routes render navigation links: /lich-quay
+PASS: unverified schedule/prize details are disclosed: /lich-quay
+PASS: unverified reference page excluded from indexing: /lich-quay
+PASS: SEO template returns 200: /lich-quay/mien-bac
+PASS: single content H1: /lich-quay/mien-bac
+PASS: title and description without keywords: /lich-quay/mien-bac
+PASS: JSON-LD present: /lich-quay/mien-bac
+PASS: JSON-LD context: /lich-quay/mien-bac
+PASS: JSON-LD node type: /lich-quay/mien-bac
+PASS: JSON-LD node type: /lich-quay/mien-bac
+PASS: JSON-LD node type: /lich-quay/mien-bac
+PASS: breadcrumb current URL equals canonical: /lich-quay/mien-bac
+PASS: breadcrumb ListItem and position: /lich-quay/mien-bac
+PASS: breadcrumb matches content and origin: /lich-quay/mien-bac / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /lich-quay/mien-bac
+PASS: breadcrumb matches content and origin: /lich-quay/mien-bac / Lịch quay / https://new.example.org/lich-quay
+PASS: breadcrumb ListItem and position: /lich-quay/mien-bac
+PASS: breadcrumb matches content and origin: /lich-quay/mien-bac / Lịch quay Miền Bắc / https://new.example.org/lich-quay/mien-bac
+PASS: self canonical: /lich-quay/mien-bac
+PASS: reference breadcrumb has exactly one home link: /lich-quay/mien-bac
+PASS: reference routes render navigation links: /lich-quay/mien-bac
+PASS: unverified schedule/prize details are disclosed: /lich-quay/mien-bac
+PASS: unverified reference page excluded from indexing: /lich-quay/mien-bac
+PASS: schedule separates start/completion and shows source review date: /lich-quay/mien-bac
+PASS: SEO template returns 200: /lich-quay/mien-trung
+PASS: single content H1: /lich-quay/mien-trung
+PASS: title and description without keywords: /lich-quay/mien-trung
+PASS: JSON-LD present: /lich-quay/mien-trung
+PASS: JSON-LD context: /lich-quay/mien-trung
+PASS: JSON-LD node type: /lich-quay/mien-trung
+PASS: JSON-LD node type: /lich-quay/mien-trung
+PASS: JSON-LD node type: /lich-quay/mien-trung
+PASS: breadcrumb current URL equals canonical: /lich-quay/mien-trung
+PASS: breadcrumb ListItem and position: /lich-quay/mien-trung
+PASS: breadcrumb matches content and origin: /lich-quay/mien-trung / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /lich-quay/mien-trung
+PASS: breadcrumb matches content and origin: /lich-quay/mien-trung / Lịch quay / https://new.example.org/lich-quay
+PASS: breadcrumb ListItem and position: /lich-quay/mien-trung
+PASS: breadcrumb matches content and origin: /lich-quay/mien-trung / Lịch quay Miền Trung / https://new.example.org/lich-quay/mien-trung
+PASS: self canonical: /lich-quay/mien-trung
+PASS: reference breadcrumb has exactly one home link: /lich-quay/mien-trung
+PASS: central schedule breadcrumb names its schedule parent, not home
+PASS: reference routes render navigation links: /lich-quay/mien-trung
+PASS: unverified schedule/prize details are disclosed: /lich-quay/mien-trung
+PASS: unverified reference page excluded from indexing: /lich-quay/mien-trung
+PASS: schedule separates start/completion and shows source review date: /lich-quay/mien-trung
+PASS: SEO template returns 200: /lich-quay/mien-nam?weekday=1
+PASS: single content H1: /lich-quay/mien-nam?weekday=1
+PASS: title and description without keywords: /lich-quay/mien-nam?weekday=1
+PASS: JSON-LD present: /lich-quay/mien-nam?weekday=1
+PASS: JSON-LD context: /lich-quay/mien-nam?weekday=1
+PASS: JSON-LD node type: /lich-quay/mien-nam?weekday=1
+PASS: JSON-LD node type: /lich-quay/mien-nam?weekday=1
+PASS: JSON-LD node type: /lich-quay/mien-nam?weekday=1
+PASS: breadcrumb current URL equals canonical: /lich-quay/mien-nam?weekday=1
+PASS: breadcrumb ListItem and position: /lich-quay/mien-nam?weekday=1
+PASS: breadcrumb matches content and origin: /lich-quay/mien-nam?weekday=1 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /lich-quay/mien-nam?weekday=1
+PASS: breadcrumb matches content and origin: /lich-quay/mien-nam?weekday=1 / Lịch quay / https://new.example.org/lich-quay
+PASS: breadcrumb ListItem and position: /lich-quay/mien-nam?weekday=1
+PASS: breadcrumb matches content and origin: /lich-quay/mien-nam?weekday=1 / Lịch quay Miền Nam / https://new.example.org/lich-quay/mien-nam?weekday=1
+PASS: self canonical: /lich-quay/mien-nam?weekday=1
+PASS: reference breadcrumb has exactly one home link: /lich-quay/mien-nam?weekday=1
+PASS: reference routes render navigation links: /lich-quay/mien-nam?weekday=1
+PASS: unverified schedule/prize details are disclosed: /lich-quay/mien-nam?weekday=1
+PASS: unverified reference page excluded from indexing: /lich-quay/mien-nam?weekday=1
+PASS: schedule separates start/completion and shows source review date: /lich-quay/mien-nam?weekday=1
+PASS: filters noindex and crawlable: /lich-quay/mien-nam?weekday=1
+PASS: SEO template returns 200: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: single content H1: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: title and description without keywords: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: JSON-LD present: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: JSON-LD context: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: JSON-LD node type: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: JSON-LD node type: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: JSON-LD node type: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: breadcrumb current URL equals canonical: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: breadcrumb ListItem and position: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: breadcrumb matches content and origin: /lich-quay/vietlott?game=mega645&weekday=2 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: breadcrumb matches content and origin: /lich-quay/vietlott?game=mega645&weekday=2 / Lịch quay / https://new.example.org/lich-quay
+PASS: breadcrumb ListItem and position: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: breadcrumb matches content and origin: /lich-quay/vietlott?game=mega645&weekday=2 / Lịch quay Mega 6/45 / https://new.example.org/lich-quay/vietlott?game=mega645&weekday=2
+PASS: self canonical: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: reference breadcrumb has exactly one home link: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: reference routes render navigation links: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: unverified schedule/prize details are disclosed: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: unverified reference page excluded from indexing: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: Vietlott page includes game navigation: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: schedule separates start/completion and shows source review date: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: filters noindex and crawlable: /lich-quay/vietlott?game=mega645&weekday=2
+PASS: SEO template returns 200: /lich-quay/mien-nam?station=TP%20HCM
+PASS: single content H1: /lich-quay/mien-nam?station=TP%20HCM
+PASS: title and description without keywords: /lich-quay/mien-nam?station=TP%20HCM
+PASS: JSON-LD present: /lich-quay/mien-nam?station=TP%20HCM
+PASS: JSON-LD context: /lich-quay/mien-nam?station=TP%20HCM
+PASS: JSON-LD node type: /lich-quay/mien-nam?station=TP%20HCM
+PASS: JSON-LD node type: /lich-quay/mien-nam?station=TP%20HCM
+PASS: JSON-LD node type: /lich-quay/mien-nam?station=TP%20HCM
+PASS: breadcrumb current URL equals canonical: /lich-quay/mien-nam?station=TP%20HCM
+PASS: breadcrumb ListItem and position: /lich-quay/mien-nam?station=TP%20HCM
+PASS: breadcrumb matches content and origin: /lich-quay/mien-nam?station=TP%20HCM / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /lich-quay/mien-nam?station=TP%20HCM
+PASS: breadcrumb matches content and origin: /lich-quay/mien-nam?station=TP%20HCM / Lịch quay / https://new.example.org/lich-quay
+PASS: breadcrumb ListItem and position: /lich-quay/mien-nam?station=TP%20HCM
+PASS: breadcrumb matches content and origin: /lich-quay/mien-nam?station=TP%20HCM / Lịch quay Miền Nam / https://new.example.org/lich-quay/mien-nam?station=TP%20HCM
+PASS: self canonical: /lich-quay/mien-nam?station=TP%20HCM
+PASS: reference breadcrumb has exactly one home link: /lich-quay/mien-nam?station=TP%20HCM
+PASS: reference routes render navigation links: /lich-quay/mien-nam?station=TP%20HCM
+PASS: unverified schedule/prize details are disclosed: /lich-quay/mien-nam?station=TP%20HCM
+PASS: unverified reference page excluded from indexing: /lich-quay/mien-nam?station=TP%20HCM
+PASS: schedule separates start/completion and shows source review date: /lich-quay/mien-nam?station=TP%20HCM
+PASS: filters noindex and crawlable: /lich-quay/mien-nam?station=TP%20HCM
+PASS: SEO template returns 200: /co-cau-giai-thuong
+PASS: single content H1: /co-cau-giai-thuong
+PASS: title and description without keywords: /co-cau-giai-thuong
+PASS: JSON-LD present: /co-cau-giai-thuong
+PASS: JSON-LD context: /co-cau-giai-thuong
+PASS: JSON-LD node type: /co-cau-giai-thuong
+PASS: JSON-LD node type: /co-cau-giai-thuong
+PASS: JSON-LD node type: /co-cau-giai-thuong
+PASS: breadcrumb current URL equals canonical: /co-cau-giai-thuong
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong / Cơ cấu giải thưởng / https://new.example.org/co-cau-giai-thuong
+PASS: self canonical: /co-cau-giai-thuong
+PASS: reference breadcrumb has exactly one home link: /co-cau-giai-thuong
+PASS: reference routes render navigation links: /co-cau-giai-thuong
+PASS: unverified schedule/prize details are disclosed: /co-cau-giai-thuong
+PASS: unverified reference page excluded from indexing: /co-cau-giai-thuong
+PASS: SEO template returns 200: /co-cau-giai-thuong/mien-bac
+PASS: single content H1: /co-cau-giai-thuong/mien-bac
+PASS: title and description without keywords: /co-cau-giai-thuong/mien-bac
+PASS: JSON-LD present: /co-cau-giai-thuong/mien-bac
+PASS: JSON-LD context: /co-cau-giai-thuong/mien-bac
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-bac
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-bac
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-bac
+PASS: breadcrumb current URL equals canonical: /co-cau-giai-thuong/mien-bac
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-bac
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-bac / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-bac
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-bac / Cơ cấu giải thưởng / https://new.example.org/co-cau-giai-thuong
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-bac
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-bac / Cơ cấu giải thưởng Miền Bắc / https://new.example.org/co-cau-giai-thuong/mien-bac
+PASS: self canonical: /co-cau-giai-thuong/mien-bac
+PASS: reference breadcrumb has exactly one home link: /co-cau-giai-thuong/mien-bac
+PASS: reference routes render navigation links: /co-cau-giai-thuong/mien-bac
+PASS: unverified schedule/prize details are disclosed: /co-cau-giai-thuong/mien-bac
+PASS: unverified reference page excluded from indexing: /co-cau-giai-thuong/mien-bac
+PASS: prize page models fixed/jackpot and special-number distinctions: /co-cau-giai-thuong/mien-bac
+PASS: SEO template returns 200: /co-cau-giai-thuong/mien-trung
+PASS: single content H1: /co-cau-giai-thuong/mien-trung
+PASS: title and description without keywords: /co-cau-giai-thuong/mien-trung
+PASS: JSON-LD present: /co-cau-giai-thuong/mien-trung
+PASS: JSON-LD context: /co-cau-giai-thuong/mien-trung
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-trung
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-trung
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-trung
+PASS: breadcrumb current URL equals canonical: /co-cau-giai-thuong/mien-trung
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-trung
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-trung / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-trung
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-trung / Cơ cấu giải thưởng / https://new.example.org/co-cau-giai-thuong
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-trung
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-trung / Cơ cấu giải thưởng Miền Trung / https://new.example.org/co-cau-giai-thuong/mien-trung
+PASS: self canonical: /co-cau-giai-thuong/mien-trung
+PASS: reference breadcrumb has exactly one home link: /co-cau-giai-thuong/mien-trung
+PASS: regional prize breadcrumb names its prize-structure parent
+PASS: reference routes render navigation links: /co-cau-giai-thuong/mien-trung
+PASS: unverified schedule/prize details are disclosed: /co-cau-giai-thuong/mien-trung
+PASS: unverified reference page excluded from indexing: /co-cau-giai-thuong/mien-trung
+PASS: prize page models fixed/jackpot and special-number distinctions: /co-cau-giai-thuong/mien-trung
+PASS: SEO template returns 200: /co-cau-giai-thuong/mien-nam
+PASS: single content H1: /co-cau-giai-thuong/mien-nam
+PASS: title and description without keywords: /co-cau-giai-thuong/mien-nam
+PASS: JSON-LD present: /co-cau-giai-thuong/mien-nam
+PASS: JSON-LD context: /co-cau-giai-thuong/mien-nam
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-nam
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-nam
+PASS: JSON-LD node type: /co-cau-giai-thuong/mien-nam
+PASS: breadcrumb current URL equals canonical: /co-cau-giai-thuong/mien-nam
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-nam
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-nam / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-nam
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-nam / Cơ cấu giải thưởng / https://new.example.org/co-cau-giai-thuong
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/mien-nam
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/mien-nam / Cơ cấu giải thưởng Miền Nam / https://new.example.org/co-cau-giai-thuong/mien-nam
+PASS: self canonical: /co-cau-giai-thuong/mien-nam
+PASS: reference breadcrumb has exactly one home link: /co-cau-giai-thuong/mien-nam
+PASS: reference routes render navigation links: /co-cau-giai-thuong/mien-nam
+PASS: unverified schedule/prize details are disclosed: /co-cau-giai-thuong/mien-nam
+PASS: unverified reference page excluded from indexing: /co-cau-giai-thuong/mien-nam
+PASS: prize page models fixed/jackpot and special-number distinctions: /co-cau-giai-thuong/mien-nam
+PASS: SEO template returns 200: /co-cau-giai-thuong/vietlott/mega645
+PASS: single content H1: /co-cau-giai-thuong/vietlott/mega645
+PASS: title and description without keywords: /co-cau-giai-thuong/vietlott/mega645
+PASS: JSON-LD present: /co-cau-giai-thuong/vietlott/mega645
+PASS: JSON-LD context: /co-cau-giai-thuong/vietlott/mega645
+PASS: JSON-LD node type: /co-cau-giai-thuong/vietlott/mega645
+PASS: JSON-LD node type: /co-cau-giai-thuong/vietlott/mega645
+PASS: JSON-LD node type: /co-cau-giai-thuong/vietlott/mega645
+PASS: breadcrumb current URL equals canonical: /co-cau-giai-thuong/vietlott/mega645
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/vietlott/mega645
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/vietlott/mega645 / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/vietlott/mega645
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/vietlott/mega645 / Cơ cấu giải thưởng / https://new.example.org/co-cau-giai-thuong
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/vietlott/mega645
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/vietlott/mega645 / Cơ cấu giải thưởng Mega 6/45 / https://new.example.org/co-cau-giai-thuong/vietlott/mega645
+PASS: self canonical: /co-cau-giai-thuong/vietlott/mega645
+PASS: Vietlott prize page renders one game-link navigation: /co-cau-giai-thuong/vietlott/mega645
+PASS: Vietlott prize page links to each game once: mega645
+PASS: Vietlott prize page links to each game once: power655
+PASS: Vietlott prize page links to each game once: lotto535
+PASS: Vietlott prize page links to each game once: keno
+PASS: Vietlott prize page links to each game once: max3d
+PASS: Vietlott prize page links to each game once: max3d-plus
+PASS: Vietlott prize page links to each game once: max3d-pro
+PASS: Vietlott prize page links to each game once: bingo18
+PASS: reference breadcrumb has exactly one home link: /co-cau-giai-thuong/vietlott/mega645
+PASS: reference routes render navigation links: /co-cau-giai-thuong/vietlott/mega645
+PASS: unverified schedule/prize details are disclosed: /co-cau-giai-thuong/vietlott/mega645
+PASS: unverified reference page excluded from indexing: /co-cau-giai-thuong/vietlott/mega645
+PASS: Vietlott page includes game navigation: /co-cau-giai-thuong/vietlott/mega645
+PASS: prize page models fixed/jackpot and special-number distinctions: /co-cau-giai-thuong/vietlott/mega645
+PASS: SEO template returns 200: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: single content H1: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: title and description without keywords: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: JSON-LD present: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: JSON-LD context: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: JSON-LD node type: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: JSON-LD node type: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: JSON-LD node type: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: breadcrumb current URL equals canonical: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/vietlott/max3d-plus / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/vietlott/max3d-plus / Cơ cấu giải thưởng / https://new.example.org/co-cau-giai-thuong
+PASS: breadcrumb ListItem and position: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: breadcrumb matches content and origin: /co-cau-giai-thuong/vietlott/max3d-plus / Cơ cấu giải thưởng Max 3D+ / https://new.example.org/co-cau-giai-thuong/vietlott/max3d-plus
+PASS: self canonical: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: Vietlott prize page renders one game-link navigation: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: Vietlott prize page links to each game once: mega645
+PASS: Vietlott prize page links to each game once: power655
+PASS: Vietlott prize page links to each game once: lotto535
+PASS: Vietlott prize page links to each game once: keno
+PASS: Vietlott prize page links to each game once: max3d
+PASS: Vietlott prize page links to each game once: max3d-plus
+PASS: Vietlott prize page links to each game once: max3d-pro
+PASS: Vietlott prize page links to each game once: bingo18
+PASS: reference breadcrumb has exactly one home link: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: reference routes render navigation links: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: unverified schedule/prize details are disclosed: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: unverified reference page excluded from indexing: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: Vietlott page includes game navigation: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: prize page models fixed/jackpot and special-number distinctions: /co-cau-giai-thuong/vietlott/max3d-plus
+PASS: parameter combinations bounded: /xo-so-mien-bac?day=1&day=2
+PASS: parameter combinations bounded: /xo-so-mien-bac?offset=3
+PASS: parameter combinations bounded: /vietlott?offset=01&gameCode=MEGA645
+PASS: parameter combinations bounded: /vietlott?offset=1&gameCode=KENO
+PASS: parameter combinations bounded: /thong-ke?endDate=2024-10-17T00:00:00
+PASS: parameter combinations bounded: /thong-ke/vietlott/mega645/tan-suat?periods=21
+PASS: parameter combinations bounded: /?arbitrary=1
+PASS: parameter combinations bounded: /xo-so-fixture-station/17-10-2024?day=1
+PASS: parameter combinations bounded: /lich-quay/mien-bac?weekday=8
+PASS: parameter combinations bounded: /lich-quay/vietlott?game=unknown
+PASS: parameter combinations bounded: /co-cau-giai-thuong?unexpected=1
+PASS: malformed draw is 404
+PASS: production robots permits reading noindex filters
+PASS: child sitemap returns 200 and is cached
+PASS: station alias permanently redirects with date and query: tphcm
+PASS: station alias permanently redirects with date and query: tphcm/17-10-2024
+PASS: station alias permanently redirects with date and query: dac-lac
+PASS: station alias permanently redirects with date and query: dac-lac/17-10-2024
+PASS: station alias permanently redirects with date and query: dac-nong
+PASS: station alias permanently redirects with date and query: dac-nong/17-10-2024
+PASS: supplied brand asset returns image HTTP 200: /images/logo.png
+PASS: supplied brand asset returns image HTTP 200: /images/favicon.ico
+PASS: supplied brand asset returns image HTTP 200: /images/Bi%E1%BB%83u%20t%C6%B0%E1%BB%A3ng%20m%E1%BA%AFt%20xanh%20l%C6%B0%E1%BB%9Bi%20cam.png
+PASS: HTTP 200 /robots.txt
+PASS: HTTP 200 /sitemap.xml
+PASS: HTTP 200 /gioi-thieu
+PASS: one H1 /gioi-thieu
+PASS: rendered canonical /gioi-thieu
+PASS: single content H1: /gioi-thieu
+PASS: title and description without keywords: /gioi-thieu
+PASS: JSON-LD present: /gioi-thieu
+PASS: JSON-LD context: /gioi-thieu
+PASS: JSON-LD node type: /gioi-thieu
+PASS: JSON-LD node type: /gioi-thieu
+PASS: JSON-LD node type: /gioi-thieu
+PASS: breadcrumb current URL equals canonical: /gioi-thieu
+PASS: breadcrumb ListItem and position: /gioi-thieu
+PASS: breadcrumb matches content and origin: /gioi-thieu / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /gioi-thieu
+PASS: breadcrumb matches content and origin: /gioi-thieu / Giới thiệu / https://new.example.org/gioi-thieu
+PASS: rendered SEO /gioi-thieu
+PASS: HTTP 200 /nguon-du-lieu
+PASS: one H1 /nguon-du-lieu
+PASS: rendered canonical /nguon-du-lieu
+PASS: single content H1: /nguon-du-lieu
+PASS: title and description without keywords: /nguon-du-lieu
+PASS: JSON-LD present: /nguon-du-lieu
+PASS: JSON-LD context: /nguon-du-lieu
+PASS: JSON-LD node type: /nguon-du-lieu
+PASS: JSON-LD node type: /nguon-du-lieu
+PASS: JSON-LD node type: /nguon-du-lieu
+PASS: breadcrumb current URL equals canonical: /nguon-du-lieu
+PASS: breadcrumb ListItem and position: /nguon-du-lieu
+PASS: breadcrumb matches content and origin: /nguon-du-lieu / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /nguon-du-lieu
+PASS: breadcrumb matches content and origin: /nguon-du-lieu / Nguồn dữ liệu và đối soát / https://new.example.org/nguon-du-lieu
+PASS: rendered SEO /nguon-du-lieu
+PASS: HTTP 200 /support
+PASS: one H1 /support
+PASS: rendered canonical /support
+PASS: single content H1: /support
+PASS: title and description without keywords: /support
+PASS: JSON-LD present: /support
+PASS: JSON-LD context: /support
+PASS: JSON-LD node type: /support
+PASS: JSON-LD node type: /support
+PASS: JSON-LD node type: /support
+PASS: breadcrumb current URL equals canonical: /support
+PASS: breadcrumb ListItem and position: /support
+PASS: breadcrumb matches content and origin: /support / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /support
+PASS: breadcrumb matches content and origin: /support / Liên hệ hỗ trợ / https://new.example.org/support
+PASS: rendered SEO /support
+PASS: HTTP 200 /privacy
+PASS: one H1 /privacy
+PASS: rendered canonical /privacy
+PASS: single content H1: /privacy
+PASS: title and description without keywords: /privacy
+PASS: JSON-LD present: /privacy
+PASS: JSON-LD context: /privacy
+PASS: JSON-LD node type: /privacy
+PASS: JSON-LD node type: /privacy
+PASS: JSON-LD node type: /privacy
+PASS: breadcrumb current URL equals canonical: /privacy
+PASS: breadcrumb ListItem and position: /privacy
+PASS: breadcrumb matches content and origin: /privacy / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /privacy
+PASS: breadcrumb matches content and origin: /privacy / Chính sách bảo mật / https://new.example.org/privacy
+PASS: rendered SEO /privacy
+PASS: HTTP 200 /terms
+PASS: one H1 /terms
+PASS: rendered canonical /terms
+PASS: single content H1: /terms
+PASS: title and description without keywords: /terms
+PASS: JSON-LD present: /terms
+PASS: JSON-LD context: /terms
+PASS: JSON-LD node type: /terms
+PASS: JSON-LD node type: /terms
+PASS: JSON-LD node type: /terms
+PASS: breadcrumb current URL equals canonical: /terms
+PASS: breadcrumb ListItem and position: /terms
+PASS: breadcrumb matches content and origin: /terms / Trang chủ / https://new.example.org/
+PASS: breadcrumb ListItem and position: /terms
+PASS: breadcrumb matches content and origin: /terms / Điều khoản sử dụng / https://new.example.org/terms
+PASS: rendered SEO /terms
+PASS: HTTP 200 /images/share.png
+PASS: unverified reference pages excluded from sitemap
+PASS: sitemap URL returns 200 without redirect: /
+PASS: sitemap URL is indexable and canonical: /
+PASS: sitemap URL returns 200 without redirect: /gioi-thieu
+PASS: sitemap URL is indexable and canonical: /gioi-thieu
+PASS: sitemap URL returns 200 without redirect: /lien-he-quang-cao
+PASS: sitemap URL is indexable and canonical: /lien-he-quang-cao
+PASS: sitemap URL returns 200 without redirect: /nguon-du-lieu
+PASS: sitemap URL is indexable and canonical: /nguon-du-lieu
+PASS: sitemap URL returns 200 without redirect: /privacy
+PASS: sitemap URL is indexable and canonical: /privacy
+PASS: sitemap URL returns 200 without redirect: /support
+PASS: sitemap URL is indexable and canonical: /support
+PASS: sitemap URL returns 200 without redirect: /terms
+PASS: sitemap URL is indexable and canonical: /terms
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/max3d
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/max3d
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/max3d/chu-so-theo-vi-tri
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/max3d/chu-so-theo-vi-tri
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/max3d/chua-xuat-hien
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/max3d/chua-xuat-hien
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/max3d/hai-so-cuoi
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/max3d/hai-so-cuoi
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/max3d/tan-suat-bo-ba
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/max3d/tan-suat-bo-ba
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/max3d/theo-giai
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/max3d/theo-giai
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/max3d/theo-ky
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/max3d/theo-ky
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645/cap-so
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645/cap-so
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645/chan-le
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645/chan-le
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645/chua-xuat-hien
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645/chua-xuat-hien
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645/lien-tiep
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645/lien-tiep
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645/tan-suat
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645/tan-suat
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645/theo-ky
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645/theo-ky
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645/tong-bo-so
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645/tong-bo-so
+PASS: sitemap URL returns 200 without redirect: /thong-ke/vietlott/mega645/trung-ky-truoc
+PASS: sitemap URL is indexable and canonical: /thong-ke/vietlott/mega645/trung-ky-truoc
+PASS: sitemap URL returns 200 without redirect: /vietlott
+PASS: sitemap URL is indexable and canonical: /vietlott
+PASS: sitemap URL returns 200 without redirect: /vietlott/mega645
+PASS: sitemap URL is indexable and canonical: /vietlott/mega645
+PASS: sitemap URL returns 200 without redirect: /vietlott/mega645/ky/00019
+PASS: sitemap URL is indexable and canonical: /vietlott/mega645/ky/00019
+PASS: real HTTP 404 /unknown-page
+PASS: real HTTP 404 /xo-so-mien-bac/31-02-2024
+PASS: real HTTP 404 /xo-so-mien-bac/01-01-2099
+PASS: real HTTP 404 /vietlott/unknown
+PASS: real HTTP 404 /sitemap-999.xml
+PASS: history route renders /xo-so-mien-bac/17-10-2024
+PASS: historical date and canonical survive direct access
+PASS: initial result HTML retains zeroes
+PASS: one historical H1
+PASS: history route renders /vietlott/mega645/ky/00019
+PASS: historical date and canonical survive direct access
+PASS: initial result HTML retains zeroes
+PASS: batched prize rows preserve string numbers and values
+PASS: one historical H1
+PASS: fresh draw bypasses stale navigation catalog /xo-so-mien-bac/16-10-2024
+PASS: fresh draw bypasses stale navigation catalog /vietlott/mega645/ky/00020
+PASS: fresh draw bypasses stale navigation catalog /xo-so-fixture-station/17-10-2024
+PASS: missing stored data remains 404 /xo-so-mien-bac/15-10-2024
+PASS: missing stored data remains 404 /vietlott/mega645/ky/00021
+PASS: invalid weekday bounded
+PASS: legacy game URL redirect
+PASS: legacy home routing
+PASS: support form provides antiforgery token
+PASS: support rejects missing CSRF without delivery
+PASS: support rejects invalid report without delivery
+PASS: valid error report succeeds only after delivery confirmation
+PASS: unconfirmed delivery is never success: {"ok":false}
+PASS: unconfirmed delivery is never success: {"ok":true}
+PASS: unconfirmed delivery is never success: not JSON
+PASS: network failure returns delivery error
+PASS: missing delivery configuration fails without network access
+PASS: organization schema omitted without an operator name
+PASS: footer uses requested copy
+PASS: sources retain aggregation and verification explanation
+PASS: staging access requires authentication and noindex
+PASS: staging valid credentials allowed
+Completed 893 checks.

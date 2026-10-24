@@ -1,0 +1,46 @@
+PASS: all 100 pairs and every calendar day retained
+PASS: missing day distinguished from known zero-hit day
+PASS: multiple hits count separately from hit days
+PASS: current gap counts fully observed days since latest hit
+PASS: cycles do not bridge missing days
+PASS: unseen number gap is lower bound and stops at missing data
+PASS: special mode excludes hits in other prizes
+PASS: frequency sort puts greatest total first
+PASS: gap sort uses confirmed consecutive lower bound
+PASS: pair filter deduplicates and excludes out-of-range results
+PASS: missing end date cannot claim an exact current gap
+PASS: complete draw preserves leading zeroes and repeated hits
+PASS: incomplete northern draw excluded from counts
+PASS: null draw excluded
+PASS: public middleware accepts new page and filters
+PASS: day bounds rejected before database access
+PASS: invalid pair input rejected
+PASS: unsupported modes and sorts rejected
+PASS: future end date rejected
+PASS: quick statistics exclude prediction day and history beyond bound
+PASS: quick frequency counts repeated hits in last 30 calendar days
+PASS: quick current gap ends at actual prior hit
+PASS: special sum uses last digit of sum of final two digits
+PASS: special touch checks either digit
+PASS: quick gap ranking has no zero gaps and is bounded
+PASS: reverse pair ranking excludes doubles and duplicate pairs
+PASS: current-hit number excluded from overdue list
+PASS: longest observed complete run has correct inclusive dates
+PASS: historical maximum does not bridge a missing day
+PASS: missing most recent result does not invent overdue rankings
+PASS: 30-day frequency uses calendar boundaries exactly
+PASS: empty quick statistics are safe
+PASS: compiled Razor renders the chosen title
+PASS: rendered matrix contains all pair columns and calendar dates
+PASS: rendered missing-day cells show explicit placeholder
+PASS: special-prize highlight preserves total hit count and accessible label
+PASS: censored gap shown as lower bound
+PASS: new entry appears in desktop, mobile and sidebar menus
+PASS: dialog receives correctly bounded cycle data
+PASS: empty dataset has usable empty state and noindex
+PASS: homepage renders quick statistics with correct cutoff heading
+PASS: all requested quick-statistics sections and ten sum/touch bars render
+PASS: quick numbers link to working number rhythm route
+PASS: quick statistics placed after regional results and before Vietlott
+PASS: homepage handles empty quick statistics
+Completed 45 NumberRhythm regression checks.

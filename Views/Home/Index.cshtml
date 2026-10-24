@@ -52,7 +52,7 @@
         {
             var result = Model.MienBac.Results.First();
             <p class="draw-history-link"><a href="@(XoSoWeb.Services.LotteryUrls.RegionPath("MB") + "/" + result.DrawDate.ToString("dd-MM-yyyy"))">Xem kỳ ngày @result.DrawDate.ToString("dd/MM/yyyy")</a></p>
-            <div class="home-summary-meta">@result.ProvinceName · @result.DrawDate.ToString("dd/MM/yyyy")</div>
+            <div class="home-summary-meta">@result.ProvinceName · @result.DrawDate.ToString("dd/MM/yyyy") · @(result.DrawDate.Date == XoSoWeb.Services.LotteryUrls.Today ? "Kết quả hôm nay" : "Kỳ gần nhất có dữ liệu")</div>
             <table class="home-summary-table">
                 <tbody>
                     @foreach (var prize in XoSoPrize.NorthernDisplayPrizes(result.Prizes))
@@ -250,7 +250,7 @@
                     }
                     <div class="news-list-copy">
                         <h3><a href="/tin-tuc/bai-viet/@article.Slug">@article.Title</a></h3>
-                        <p class="news-list-meta"><time datetime="@article.PublishedAt.ToString("O")">@XoSoWeb.Services.NewsDateTime.FormatDate(article.PublishedAt)</time></p>
+                        <p class="news-list-meta"><time datetime="@XoSoWeb.Services.NewsDateTime.IsoUtc(article.PublishedAt)">@XoSoWeb.Services.NewsDateTime.FormatDate(article.PublishedAt)</time></p>
                         @if (!string.IsNullOrWhiteSpace(article.Summary)) { <p class="news-summary">@article.Summary</p> }
                     </div>
                 </article>

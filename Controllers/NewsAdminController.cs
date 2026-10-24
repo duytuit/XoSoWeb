@@ -202,6 +202,7 @@ namespace XoSoWeb.Controllers
             await db.SaveChangesAsync(HttpContext.RequestAborted);
             await AddRevision(article, "created");
             await transaction.CommitAsync(HttpContext.RequestAborted);
+            PublicContentVersion.Invalidate();
             return RedirectToAction(nameof(Index));
         }
 
@@ -226,6 +227,9 @@ namespace XoSoWeb.Controllers
             updated.NormalizedSourceUrl = NormalizeSourceUrl(input.SourceUrl);
             updated.NormalizedSourceUrlHash = HashSourceUrl(updated.NormalizedSourceUrl);
             if (!await ValidateUniqueSourceUrl(updated.NormalizedSourceUrlHash, article.Id)) return View("~/Views/NewsAdmin/Edit.cshtml", input);
+            var before = System.Text.Json.JsonSerializer.Serialize(Map(article));
+            var after = System.Text.Json.JsonSerializer.Serialize(input);
+            if (before == after) return RedirectToAction(nameof(Index));
             await using var transaction = await db.Database.BeginTransactionAsync(HttpContext.RequestAborted);
             CopyEditable(updated, article);
             article.UpdatedAt = DateTime.UtcNow;
@@ -246,6 +250,7 @@ namespace XoSoWeb.Controllers
             await db.SaveChangesAsync(HttpContext.RequestAborted);
             await AddRevision(article, "edited");
             await transaction.CommitAsync(HttpContext.RequestAborted);
+            PublicContentVersion.Invalidate();
             return RedirectToAction(nameof(Index));
         }
 
@@ -300,6 +305,7 @@ namespace XoSoWeb.Controllers
             if (article == null) return NotFound();
             db.NewsArticles.Remove(article);
             await db.SaveChangesAsync(HttpContext.RequestAborted);
+            PublicContentVersion.Invalidate();
             TempData["CollectionStatus"] = $"Đã xóa bài viết “{article.Title}”.";
             return RedirectToAction(nameof(Index));
         }
@@ -316,6 +322,12 @@ namespace XoSoWeb.Controllers
             var article = await db.NewsArticles.FirstOrDefaultAsync(item => item.Id == id, HttpContext.RequestAborted);
             if (article == null) return NotFound();
             if (article.Status != NewsArticleStatuses.PendingReview) return Conflict("Chỉ bài chờ duyệt mới được xuất bản.");
+            if (string.IsNullOrWhiteSpace(article.Author)) return Conflict("Cần bổ sung tác giả hoặc người biên tập thật trước khi xuất bản.");
+            if ((article.Category == NewsArticleCategories.Winners || article.Category == NewsArticleCategories.Vietlott)
+                && (string.IsNullOrWhiteSpace(article.SourceName) || string.IsNullOrWhiteSpace(article.SourceUrl)))
+                return Conflict("Tin Vietlott cần có tên nguồn và đường dẫn nguồn trước khi xuất bản.");
+            if (!string.IsNullOrWhiteSpace(article.FeaturedImageUrl) && string.IsNullOrWhiteSpace(article.FeaturedImageAlt))
+                return Conflict("Cần mô tả ảnh đại diện trước khi xuất bản.");
             article.Status = NewsArticleStatuses.Published;
             article.PublishedAt ??= DateTime.UtcNow;
             article.ApprovedAt = DateTime.UtcNow;
@@ -325,6 +337,7 @@ namespace XoSoWeb.Controllers
             await db.SaveChangesAsync(HttpContext.RequestAborted);
             await AddRevision(article, "approved-and-published");
             await transaction.CommitAsync(HttpContext.RequestAborted);
+            PublicContentVersion.Invalidate();
             return RedirectToAction(nameof(Index));
         }
 
@@ -341,6 +354,7 @@ namespace XoSoWeb.Controllers
             await db.SaveChangesAsync(HttpContext.RequestAborted);
             await AddRevision(article, status == NewsArticleStatuses.Withdrawn ? "withdrawn" : "submitted-for-review");
             await transaction.CommitAsync(HttpContext.RequestAborted);
+            PublicContentVersion.Invalidate();
             return RedirectToAction(nameof(Index));
         }
 

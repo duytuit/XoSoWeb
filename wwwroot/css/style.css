@@ -18,6 +18,14 @@
     --inverse-surface: #293137;
     --inverse-on-surface: #eaf2f9;
 
+    --font-size-body: .9375rem;
+    --font-size-label: .875rem;
+    --font-size-meta: .8125rem;
+    --result-number-size: 1.75rem;
+    --result-special-size: 2.125rem;
+    --result-loto-size: 1.25rem;
+    --province-number-size: 1.625rem;
+    --province-special-size: 2rem;
     --font-body: 'Arial', sans-serif;
     --font-headline: 'Arial', sans-serif;
     --font-label: 'Arial', sans-serif;
@@ -27,10 +35,16 @@ body {
     background-color: var(--background);
     color: var(--on-surface);
     font-family: var(--font-body);
+    line-height: 1.5;
     min-height: 100dvh;
     overflow-x: hidden;
-    font-size: 15px;
+    font-size: var(--font-size-body);
 }
+
+.brand-logo { display: block; width: 10.5rem; height: 3.5rem; object-fit: contain; }
+.footer-brand { display: inline-block; padding: .375rem .625rem; background: var(--surface); }
+.footer-brand-logo { display: block; width: 12rem; max-width: 100%; height: 4rem; object-fit: contain; }
+@media (max-width: 575.98px) { .brand-logo { width: 8.25rem; height: 2.75rem; } }
 
 .topbar {
     transition: transform 220ms ease, box-shadow 220ms ease;
@@ -125,7 +139,7 @@ body {
 
 .page-content {
     min-width: 0;
-    font-size: 15px;
+    font-size: var(--font-size-body);
 }
 
 h1, h2, h3, h4, h5, h6, .font-headline-md, .font-headline-lg, .font-display-lg, .font-number-display {
@@ -2453,10 +2467,9 @@ body.mobile-menu-open {
 }
 
 /* Result sizes are defined together to avoid conflicting overrides. */
-:root {
-    --result-number-size: 34px;
-    --result-special-size: 42px;
-    --result-loto-size: 22px;
+.home-summary-section {
+    --result-number-size: 1.625rem;
+    --result-special-size: 2rem;
 }
 .home-prize-numbers > span,
 .home-province-prize .home-prize-numbers > b,
@@ -2490,21 +2503,27 @@ body.mobile-menu-open {
 }
 .home-vietlott-numbers span,
 .home-vietlott-special-numbers .special-ball {
-    width: 38px;
-    height: 38px;
-    font-size: 24px;
+    width: 2.125rem;
+    height: 2.125rem;
+    font-size: 1.125rem;
 }
 .vietlott-page .vietlott-balls span {
-    font-size: 28px;
+    font-size: 1.375rem;
 }
 .vietlott-page .vietlott-prize-row > span {
-    font-size: 24px;
+    font-size: 1.25rem;
 }
 @media (max-width: 575.98px) {
     :root {
-        --result-number-size: 28px;
-        --result-special-size: 38px;
-        --result-loto-size: 20px;
+        --result-number-size: clamp(1.25rem, 5.8vw, 1.5rem);
+        --result-special-size: clamp(1.75rem, 7.5vw, 2rem);
+        --result-loto-size: 1.0625rem;
+        --province-number-size: 1.25rem;
+        --province-special-size: 1.5rem;
+    }
+    .home-summary-section {
+        --result-number-size: clamp(1.25rem, 5.8vw, 1.5rem);
+        --result-special-size: clamp(1.75rem, 7.5vw, 2rem);
     }
     .draw-day-card .mb-results-table tbody td {
         font-size: var(--result-number-size) !important;
@@ -2879,11 +2898,11 @@ body.mobile-menu-open {
         width: 38px;
     }
     .draw-day-card .regional-results-table:not(.mb-results-table) tbody td {
-        font-size: 23px !important;
+        font-size: var(--province-number-size) !important;
         padding: .3rem .15rem;
     }
     .draw-day-card .regional-results-table:not(.mb-results-table) .special-row td {
-        font-size: 26px !important;
+        font-size: var(--province-special-size) !important;
     }
     .draw-day-card .regional-results-table:not(.mb-results-table) thead th {
         font-size: .8rem;
@@ -2896,7 +2915,7 @@ body.mobile-menu-open {
         width: 38px;
     }
     .draw-day-card .regional-loto-table tbody td {
-        font-size: 18px !important;
+        font-size: var(--result-loto-size) !important;
     }
 }
 
@@ -2946,7 +2965,7 @@ body.mobile-menu-open {
 .page-content .draw-day-meta { margin-top: .15rem; }
 .page-content .draw-day-card .regional-loto-section { padding: .4rem .5rem; }
 .page-content .loto-section-heading { margin-bottom: .35rem; }
-.page-content .draw-day-card .regional-results-table tbody td { padding: .2rem .25rem; }
+.page-content .draw-day-card .regional-results-table tbody td { padding: .4rem .25rem; }
 .page-content .draw-day-card .regional-results-table thead th { padding: .35rem .25rem; }
 .page-content .sidebar-region-heading { padding: .5rem .65rem; }
 .page-content .sidebar-region-nav { padding: .25rem; gap: .1rem; }
@@ -2966,5 +2985,54 @@ body.mobile-menu-open {
     .page-content .draw-day-card .region-detail-header,
     .page-content .results-section-header,
     .page-content .vietlott-card-header { padding: .4rem .5rem; }
-    .page-content .draw-day-card .regional-results-table tbody td { padding: .15rem; }
+    .page-content .draw-day-card .regional-results-table tbody td { padding: .35rem .2rem; }
+}
+
+/* Shared reading scale for headings, labels and result tables. */
+.page-content h1.detail-page-heading,
+.results-home-intro h1 { font-size: clamp(1.5rem, 2.4vw, 1.875rem) !important; line-height: 1.3; }
+.page-content .results-section-header h2,
+.page-content .region-detail-header h2 { font-size: clamp(1rem, 1.5vw, 1.125rem); line-height: 1.4; }
+.page-content .detail-page-description { font-size: var(--font-size-body); line-height: 1.6; }
+.home-summary-meta,
+.home-province-summary small,
+.home-vietlott-item small,
+.draw-day-meta,
+.page-content .results-section-header p,
+.region-detail-links,
+.regional-loto-links { font-size: var(--font-size-meta); line-height: 1.6; }
+.home-summary-table th,
+.home-province-prize > span,
+.regional-results-table tbody th,
+.draw-day-card .regional-results-table tbody th,
+.regional-results-table thead th,
+.draw-day-card .regional-results-table thead th,
+.regional-loto-table thead th { font-size: var(--font-size-label); line-height: 1.4; font-weight: 600; }
+.home-summary-table th,
+.home-summary-table td { padding-block: .4rem; }
+.home-prize-numbers > span,
+.home-province-prize .home-prize-numbers > b,
+.regional-results-table tbody td { line-height: 1.35; letter-spacing: .015em; }
+.home-province-prize .home-prize-numbers > b { font-size: var(--province-number-size) !important; }
+.home-province-prize.emphasis-prize .home-prize-numbers > b { font-size: var(--province-special-size) !important; }
+.home-province-prize { padding-block: .4rem; }
+.page-content .regional-loto-table tbody td,
+.page-content .loto-statistics-table tbody td { line-height: 1.5; }
+.page-content .sidebar-region-link { font-size: var(--font-size-label); line-height: 1.45; }
+@media (max-width: 575.98px) {
+    .home-summary-table th { width: 2.5rem; }
+    .home-summary-table th,
+    .home-summary-table td { padding: .35rem .2rem; }
+    .home-summary-table .mb-two-row-numbers,
+    .draw-day-card .mb-results-table .mb-prize-numbers.number-count-6 { gap: .25rem .15rem; }
+    .home-province-summary-grid { padding: .5rem; }
+    .home-province-prize { grid-template-columns: 2.25rem minmax(0, 1fr); padding-block: .4rem; }
+    .home-vietlott-numbers span,
+    .home-vietlott-special-numbers .special-ball { width: 1.875rem; height: 1.875rem; font-size: 1rem; }
+    .page-content .regional-results-table thead th,
+    .page-content .regional-results-table tbody th { font-size: var(--font-size-meta); }
+    .page-content .form-control,
+    .page-content .form-select { font-size: 1rem; min-height: 2.75rem; }
+    .results-more,
+    .draw-history-link a { display: inline-flex; align-items: center; min-height: 2.75rem; }
 }

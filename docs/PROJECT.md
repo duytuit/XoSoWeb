@@ -6,7 +6,7 @@
 
 ## web socket
 
-wss://logapp.io.vn/ws
+wss://xemnhanh.vn/ws
 
 form kết quả quay trực tiếp được trả về có dạng:
 0|2!0|23|VL|Vĩnh Long@|||||||||!0|24|BD|Bình Dương@|||||||||!0|25|TV|Trà Vinh@|||||||||

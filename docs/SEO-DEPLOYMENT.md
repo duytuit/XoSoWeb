@@ -1,3 +1,5 @@
+> Cập nhật Xem Nhanh ngày 24/10/2026: xem [báo cáo và checklist mới](SEO-XEM-NHANH-2026-10-24.md). Các kết quả đo/giới hạn bên dưới là lịch sử của đợt cũ. SiteUrl hiện bắt buộc khai báo ở mọi môi trường; không còn fallback theo Host. Không có ảnh chia sẻ thương hiệu mặc định khi chưa cung cấp file.
+
 # Triển khai SEO và chuẩn bị đổi tên miền
 
 ## Kiến trúc đã kiểm tra

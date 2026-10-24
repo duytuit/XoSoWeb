@@ -1,0 +1,49 @@
+.vietlott-compact-title { padding-bottom: 5px; }
+.vietlott-compact-title .detail-page-heading { font-size: 20px; margin-bottom: 2px; }
+.vietlott-compact-title .detail-page-description { font-size: 12px; margin: 0; }
+.vietlott-compact { min-width: 0; }
+.vietlott-game-links { display: flex; flex-wrap: wrap; gap: 2px 10px; margin: 6px 0 3px; font-size: 11px; line-height: 1.5; }
+.vietlott-page.vietlott-compact .vietlott-feature-card { margin: 0 0 6px; box-shadow: none; }
+.vietlott-page.vietlott-compact .vietlott-card-header { padding: 5px 7px; gap: 4px 8px; flex-wrap: wrap; }
+.vietlott-page.vietlott-compact .vietlott-card-title { min-width: 0; }
+.vietlott-page.vietlott-compact .vietlott-card-header h2 { font-size: 15px; }
+.vietlott-page.vietlott-compact .vietlott-card-header p { font-size: 11px; }
+.vietlott-page.vietlott-compact .vietlott-period-controls { gap: 4px; margin: 0; }
+.vietlott-page.vietlott-compact .vietlott-period-button { min-height: 28px; padding: 3px 5px; font-size: 11px; }
+.vietlott-page.vietlott-compact .vietlott-card-body { padding: 6px; }
+.vietlott-page.vietlott-compact .vietlott-jackpot-row { gap: 4px; margin-bottom: 5px; }
+.vietlott-page.vietlott-compact .vietlott-jackpot-card { min-width: 0; padding: 4px 6px; box-shadow: none; }
+.vietlott-page.vietlott-compact .vietlott-jackpot-card span { font-size: 10px; }
+.vietlott-page.vietlott-compact .vietlott-jackpot-card strong { margin-top: 1px; font-size: clamp(12px, 2vw, 16px); overflow-wrap: anywhere; }
+.vietlott-page.vietlott-compact .vietlott-number-panel { padding: 4px; box-shadow: none; }
+.vietlott-page.vietlott-compact .vietlott-number-label { font-size: 10px; }
+.vietlott-page.vietlott-compact .vietlott-balls { gap: 4px; padding: 5px 0; }
+.vietlott-page.vietlott-compact .vietlott-balls span { width: 32px; height: 32px; font-size: 15px; box-shadow: none; }
+.vietlott-page.vietlott-compact .vietlott-special-note { font-size: 10px; }
+.vietlott-page.vietlott-compact .vietlott-stats { gap: 3px; margin: 5px 0; }
+.vietlott-page.vietlott-compact .vietlott-stats span { padding: 2px 5px; font-size: 11px; }
+.vietlott-page.vietlott-compact .vietlott-prize-list { margin-top: 5px; }
+.vietlott-page.vietlott-compact .vietlott-prize-heading,
+.vietlott-page.vietlott-compact .vietlott-prize-row { gap: 4px; padding: 4px 5px; }
+.vietlott-page.vietlott-compact .vietlott-prize-row { font-size: 12px; }
+.vietlott-page.vietlott-compact .vietlott-prize-row b { font-size: 12px; overflow-wrap: anywhere; }
+.vietlott-page.vietlott-compact .vietlott-match-description { margin: 0 0 3px; font-size: 11px; }
+.vietlott-page.vietlott-compact .vietlott-max3d-digit { flex: 0 0 28px; width: 28px; height: 28px; min-width: 28px; font-size: 16px; }
+.vietlott-page.vietlott-compact .vietlott-max3d-plus-number-groups { gap: 3px; }
+.vietlott-page.vietlott-compact .vietlott-recent-grid { gap: 5px; padding: 5px; }
+.vietlott-page.vietlott-compact .vietlott-recent-card { padding: 5px; }
+.vietlott-page.vietlott-compact .vietlott-recent-card-header { font-size: 11px; margin-bottom: 4px; }
+.vietlott-page.vietlott-compact .vietlott-recent-stats { gap: 4px; margin-top: 4px; font-size: 11px; }
+.vietlott-page.vietlott-compact .vietlott-bingo-table th,
+.vietlott-page.vietlott-compact .vietlott-bingo-table td,
+.vietlott-page.vietlott-compact .vietlott-keno-table th,
+.vietlott-page.vietlott-compact .vietlott-keno-table td { padding: 4px; font-size: 11px; }
+.vietlott-page.vietlott-compact .vietlott-keno-table { min-width: 540px; }
+.vietlott-page.vietlott-compact .vietlott-keno-balls { grid-template-columns: repeat(10, 28px); gap: 3px; }
+.vietlott-page.vietlott-compact .vietlott-bingo-draw-no { font-size: 10px; }
+@media (max-width: 575.98px) {
+    .vietlott-page.vietlott-compact .vietlott-period-button { min-height: 32px; }
+    .vietlott-page.vietlott-compact .vietlott-card-header h2 { font-size: 14px; }
+    .vietlott-page.vietlott-compact .vietlott-prize-row { padding: 4px; gap: 3px; }
+    .vietlott-page.vietlott-compact .vietlott-balls span { width: 30px; height: 30px; font-size: 14px; }
+}

@@ -1,0 +1,152 @@
+{
+  "mode": "READ ONLY; newest 10000 regional source rows; no writes or collection requests",
+  "sourceRows": 257,
+  "aliasedSourceRows": 20,
+  "structurallyIncompleteSourceRows": 10,
+  "mergedDraws": 257,
+  "structurallyIncompleteMergedDraws": 10,
+  "firstDate": "2026-09-13T00:00:00",
+  "lastDate": "2026-10-23T00:00:00",
+  "incompleteExamples": [
+    {
+      "region": "MB",
+      "date": "2026-10-15",
+      "path": "/xo-so-mien-bac/15-10-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 5,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-10-14",
+      "path": "/xo-so-mien-bac/14-10-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 4,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-10-11",
+      "path": "/xo-so-mien-bac/11-10-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 5,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-10-08",
+      "path": "/xo-so-mien-bac/08-10-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 5,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-10-05",
+      "path": "/xo-so-mien-bac/05-10-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 5,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-10-02",
+      "path": "/xo-so-mien-bac/02-10-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 3,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-09-29",
+      "path": "/xo-so-mien-bac/29-09-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 4,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-09-27",
+      "path": "/xo-so-mien-bac/27-09-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 5,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-09-26",
+      "path": "/xo-so-mien-bac/26-09-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 5,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "region": "MB",
+      "date": "2026-09-25",
+      "path": "/xo-so-mien-bac/25-09-2026",
+      "invalidPrizeGroups": [
+        {
+          "name": "3",
+          "count": 4,
+          "widths": [
+            5
+          ]
+        }
+      ]
+    }
+  ]
+}

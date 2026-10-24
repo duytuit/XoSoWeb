@@ -3,7 +3,7 @@
 @using System.Linq
 @{
     ViewData["Title"] = "Thống kê tần suất lô tô trong tuần";
-    var headers = new[] { "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật" };
+    var headers = new[] { "T2", "T3", "T4", "T5", "T6", "T7", "CN" };
     var regionName = Model.Region == "MB" ? "Miền Bắc" : Model.Region == "MT" ? "Miền Trung" : "Miền Nam";
     ViewData["Title"] = "Tần suất lô tô " + regionName + " · tuần " + Model.WeekStart.ToString("dd/MM/yyyy");
     ViewData["Description"] = "Tần suất hai số cuối các giải " + regionName + " trong tuần từ " + Model.WeekStart.ToString("dd/MM/yyyy") + " đến " + Model.WeekStart.AddDays(6).ToString("dd/MM/yyyy") + ". Mỗi lần xuất hiện được tính riêng.";
@@ -11,6 +11,7 @@
 }
 @section Styles {
     <link rel="stylesheet" href="~/css/statistics.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/loto-frequency.css" asp-append-version="true" />
 }
 <div class="regional-page-title">
     <div>
@@ -18,7 +19,8 @@
         <p class="detail-page-description">Đếm số lần xuất hiện của hai số cuối tất cả các giải. Một số xuất hiện nhiều lần trong ngày được tính đủ số lần.</p>
     </div>
 </div>
-<div class="special-statistics-page">
+<div class="special-statistics-page loto-frequency-page">
+    <div class="frequency-meta"><details><summary>@Model.DrawCount bảng đầy đủ · @Model.ExcludedDrawCount bảng loại · Chú thích</summary><p>Dấu — là ngày chưa có bảng giải đầy đủ; số 0 là có dữ liệu nhưng cặp số không xuất hiện. Miền Trung và miền Nam cộng tất cả các tỉnh trong ngày. Thống kê để tham khảo, không dự đoán kết quả tương lai.</p></details><a href="@XoSoWeb.Services.LotteryUrls.RegionPath(Model.Region)">Kết quả nguồn</a></div>
     <form method="get" class="statistics-toolbar">
         <div class="statistics-date-field">
             <label for="frequency-region" class="form-label">Khu vực</label>
@@ -29,10 +31,10 @@
             </select>
         </div>
         <div class="statistics-date-field">
-            <label for="frequency-week" class="form-label">Chọn ngày trong tuần cần xem</label>
+            <label for="frequency-week" class="form-label">Ngày trong tuần</label>
             <input id="frequency-week" type="date" name="week" class="form-control" value="@Model.WeekStart.ToString("yyyy-MM-dd")" min="1753-01-08" max="@DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).ToString("yyyy-MM-dd")" required />
         </div>
-        <button class="btn btn-primary align-self-end" type="submit">Xem thống kê</button>
+        <button class="btn btn-primary align-self-end" type="submit">Xem</button>
     </form>
     <section class="special-statistics-region">
         <header class="special-statistics-header">
@@ -79,7 +81,7 @@
                             <tr id="frequency-number-@number"><th scope="row">@number.ToString("D2")</th>
                                 @for (var day = 0; day < 7; day++)
                                 {
-                                    <td class="@(day >= 5 ? "frequency-weekend" : "") @(Model.Counts[number, day] > 0 ? "frequency-hit" : "text-muted")">@(Model.Counts[number, day] > 0 ? Model.Counts[number, day].ToString() : "—")</td>
+                                    <td class="@(day >= 5 ? "frequency-weekend" : "") @(Model.Counts[number, day] > 0 ? "frequency-hit" : "text-muted")">@(Model.DrawsPerDay[day] > 0 ? Model.Counts[number, day].ToString() : "—")</td>
                                 }
                                 <td class="fw-bold">@Model.Total(number)</td>
                             </tr>
@@ -92,7 +94,6 @@
             </div>
         }
     </section>
-    <p class="special-statistics-disclaimer">Miền Trung và miền Nam cộng số lần xuất hiện của tất cả các tỉnh trong ngày. Dấu — nghĩa là chưa ghi nhận lần xuất hiện trong dữ liệu hiện có. Thống kê để tham khảo, không dự đoán kết quả tương lai.</p>
 </div>
 
 @section Scripts {

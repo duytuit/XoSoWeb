@@ -12,6 +12,7 @@ namespace XoSoWeb.Services
 
         public static string FormatDate(DateTime utc) => ToVietnam(utc).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
         public static string FormatDateTime(DateTime utc) => ToVietnam(utc).ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+        public static string IsoUtc(DateTime utc) => DateTime.SpecifyKind(utc, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture);
 
         private static TimeZoneInfo FindVietnamTimeZone()
         {

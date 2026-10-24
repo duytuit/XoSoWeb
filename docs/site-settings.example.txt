@@ -1,45 +1,50 @@
-Merge this section into deployment configuration, or use environment variables Site__Property.
-Do not copy production secrets into the repository. Empty SiteUrl automatically uses the current request scheme, host, port and application path. A configured SiteUrl overrides automatic detection.
+Cấu hình môi trường cho Xem Nhanh. Không lưu secret trong Git.
+Không suy ra SiteUrl từ Host header. Thiếu SiteUrl sẽ dừng khởi động ở mọi môi trường.
 
-{
-  "Site": {
-    "SiteUrl": "",
-    "SiteName": "Xổ Số Trực Tiếp",
-    "OrganizationName": "",
-    "ContactEmail": "",
-    "ContactPhone": "",
-    "ContactAddress": "",
-    "DataSourceDescription": "",
-    "VerificationProcess": "",
-    "SearchConsoleVerification": "",
-    "AnalyticsId": "",
-    "ShareImagePath": "/images/share.png",
-    "LiveSocketUrl": "",
-    "AllowIndexing": true,
-    "StagingUsername": "",
-    "StagingPassword": ""
-  }
-}
-
-Development only:
-ASPNETCORE_ENVIRONMENT=Development
-Site__SiteUrl=http://localhost:5099
-ASPNETCORE_URLS=http://localhost:5099
-
-Production:
+Production hiện tại — chỉ là hướng dẫn, chưa áp dụng lên máy chủ:
 ASPNETCORE_ENVIRONMENT=Production
-Site__SiteUrl=<actual public HTTPS origin without a path>
-AllowedHosts=<actual public hostname>
+Site__SiteName=Xem Nhanh
+Site__Slogan=Kết quả rõ ràng — tra cứu dễ dàng
+Site__SiteUrl=https://xemnhanh.vn
+AllowedHosts=xemnhanh.vn
 
-Existing live endpoint (configure only if still operated/authorized by the owner):
-Site__LiveSocketUrl=wss://logapp.io.vn/ws
+Sau khi xác nhận quyền sở hữu, DNS, HTTPS, dữ liệu và đường dẫn ở tên miền mới:
+Site__SiteUrl=https://xemnhanh.vn
+AllowedHosts=xemnhanh.vn
+CHƯA bật chuyển domain. Không cấu hình origin mới trên production cũ lúc này.
 
-Staging:
+Tài sản thương hiệu đã cung cấp và kiểm tra trong wwwroot:
+Site__LogoUrl=/images/logo.png
+Site__FaviconUrl=/images/favicon.ico
+Site__DefaultShareImage=/images/Biểu tượng mắt xanh lưới cam.png
+ShareImagePath vẫn là alias tương thích của DefaultShareImage; không cấu hình hai giá trị khác nhau.
+Ảnh logo.png: 2172×724; icon chia sẻ được cung cấp: 1536×1024; favicon.ico có 6 kích thước. Không chỉnh sửa/tạo ảnh thay thế.
+Ảnh /images/share.png cũ vẫn giữ nguyên nhưng không được chọn mặc định. Nếu cấu hình cũ ShareImagePath trỏ ảnh này, bỏ giá trị cũ hoặc đặt lại DefaultShareImage như trên.
+Tệp asset đã khai báo phải tồn tại, nếu thiếu ứng dụng từ chối khởi động để tránh URL ảnh lỗi.
+
+Thông tin thật do chủ website xác nhận; không điền mẫu giả:
+Site__OrganizationName=
+Site__ContactEmail=
+Site__ContactPhone=
+Site__ContactAddress=
+Site__DataSourceDescription=
+Site__VerificationProcess=
+Site__SearchConsoleVerification=
+Site__AnalyticsId=
+Site__LiveSocketUrl=
+
+Development riêng (không ghi vào production):
+ASPNETCORE_ENVIRONMENT=Development
+Site__SiteUrl=http://localhost:5000
+AllowedHosts=localhost;127.0.0.1
+ASPNETCORE_URLS=http://localhost:5000
+
+Staging riêng:
 ASPNETCORE_ENVIRONMENT=Staging
-Site__SiteUrl=<actual staging HTTPS origin>
-Site__StagingUsername=<private username>
-Site__StagingPassword=<strong secret from deployment secret store>
-
-Nonproduction environments always emit noindex. Staging additionally requires Basic authentication.
-SiteUrl is optional. Production validates an explicitly configured SiteUrl at startup; otherwise URLs use the current request origin. Configure AllowedHosts for the hostnames served by IIS.
-AnalyticsId accepts only a real GA4 G- identifier. Empty means no tracking script.
+Site__SiteUrl=<origin HTTPS staging đã xác minh>
+AllowedHosts=<hostname staging>
+Site__StagingUsername=<secret>
+Site__StagingPassword=<secret>
+Mọi môi trường ngoài Production luôn noindex. Staging cần Basic authentication.
+Mã analytics chỉ nhận mã GA4 thật dạng G-. Nếu để trống sẽ không tải analytics.
+Giữ Site__LiveSocketUrl WSS thực tế đang dùng khi triển khai. Không đổi endpoint hoặc thêm token vào HTML.

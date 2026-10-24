@@ -78,30 +78,31 @@ namespace XoSoWeb.Controllers
             controller.ViewData["NoIndex"] = preview;
             controller.ViewData["OgType"] = "article";
             controller.ViewData["OgImage"] = article.FeaturedImageUrl;
-            controller.ViewData["ArticlePublishedAt"] = article.PublishedAt?.ToString("O");
-            controller.ViewData["ArticleModifiedAt"] = article.UpdatedAt.ToString("O");
+            controller.ViewData["OgImageAlt"] = article.FeaturedImageAlt;
+            controller.ViewData["ArticlePublishedAt"] = article.PublishedAt.HasValue ? NewsDateTime.IsoUtc(article.PublishedAt.Value) : null;
+            controller.ViewData["ArticleModifiedAt"] = article.UpdatedAt == default ? null : NewsDateTime.IsoUtc(article.UpdatedAt);
             controller.ViewData["ArticleAuthor"] = article.Author;
             var schema = new System.Collections.Generic.Dictionary<string, object>
             {
                 ["@context"] = "https://schema.org",
-                ["@type"] = "NewsArticle",
+                ["@type"] = article.Category == NewsArticleCategories.Guides ? "Article" : "NewsArticle",
                 ["headline"] = article.Title,
                 ["description"] = string.IsNullOrWhiteSpace(article.MetaDescription) ? article.Summary : article.MetaDescription,
-                ["dateModified"] = article.UpdatedAt.ToString("O"),
                 ["mainEntityOfPage"] = new System.Collections.Generic.Dictionary<string, string>
                 {
                     ["@type"] = "WebPage",
                     ["@id"] = site.Absolute(canonicalPath)
                 }
             };
-            if (!preview && article.PublishedAt.HasValue) schema["datePublished"] = article.PublishedAt.Value.ToString("O");
+            if (article.UpdatedAt != default) schema["dateModified"] = NewsDateTime.IsoUtc(article.UpdatedAt);
+            if (!preview && article.PublishedAt.HasValue) schema["datePublished"] = NewsDateTime.IsoUtc(article.PublishedAt.Value);
             if (!string.IsNullOrWhiteSpace(article.Author))
                 schema["author"] = new System.Collections.Generic.Dictionary<string, string>
                 {
                     ["@type"] = "Person",
                     ["name"] = article.Author
                 };
-            if (!string.IsNullOrWhiteSpace(article.FeaturedImageUrl)) schema["image"] = site.Absolute(article.FeaturedImageUrl);
+            if (!string.IsNullOrWhiteSpace(article.FeaturedImageUrl)) schema["image"] = site.ImageUrl(article.FeaturedImageUrl);
             if (!string.IsNullOrWhiteSpace(site.OrganizationName))
                 schema["publisher"] = new System.Collections.Generic.Dictionary<string, string>
                 {

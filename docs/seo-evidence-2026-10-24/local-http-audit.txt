@@ -1,0 +1,81 @@
+PASS HTTP 200: /; 982ms; 78444 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-mien-bac; 70ms; 76210 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-mien-trung; 49ms; 97298 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-mien-nam; 57ms; 105592 bytes (local lab, real database)
+PASS HTTP 200: /thong-ke; 67ms; 149495 bytes (local lab, real database)
+PASS HTTP 200: /thong-ke/soi-cau; 91ms; 244755 bytes (local lab, real database)
+PASS HTTP 200: /thong-ke/nhip-so-mien-bac; 119ms; 357427 bytes (local lab, real database)
+PASS HTTP 200: /thong-ke-tan-suat-loto; 56ms; 134339 bytes (local lab, real database)
+PASS HTTP 200: /tin-tuc; 41ms; 19644 bytes (local lab, real database)
+PASS HTTP 200: /gioi-thieu; 8ms; 19712 bytes (local lab, real database)
+PASS HTTP 200: /nguon-du-lieu; 3ms; 20602 bytes (local lab, real database)
+PASS HTTP 200: /lich-quay; 22ms; 23270 bytes (local lab, real database)
+PASS HTTP 200: /co-cau-giai-thuong; 3ms; 21681 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-tien-giang/13-09-2026; 80ms; 26687 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-dak-lak/13-09-2026; 27ms; 27078 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-mien-bac/13-09-2026; 30ms; 31285 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-tien-giang; 49ms; 57670 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-kien-giang; 26ms; 57617 bytes (local lab, real database)
+PASS HTTP 200: /xo-so-dak-lak; 38ms; 64362 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/lotto535; 42ms; 23235 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/lotto535/ky/00829; 32ms; 23779 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/power655; 27ms; 23256 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/power655/ky/01385; 26ms; 23800 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/mega645; 30ms; 23137 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/mega645/ky/01550; 32ms; 23673 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/bingo18; 88ms; 24834 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/bingo18/ky/0182052; 32ms; 23996 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/keno; 60ms; 25671 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/keno/ky/0292395; 21ms; 24066 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/max3d; 27ms; 23504 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/max3d/ky/01120; 28ms; 24020 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/max3d-plus; 29ms; 24584 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/max3d-plus/ky/01120; 30ms; 25144 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/max3d-pro; 31ms; 24562 bytes (local lab, real database)
+PASS HTTP 200: /vietlott/max3d-pro/ky/00766; 32ms; 24888 bytes (local lab, real database)
+PASS HTTP 200: /thong-ke/vietlott; 36ms; 29723 bytes (local lab, real database)
+PASS sitemap sample: /
+PASS sitemap sample: /gioi-thieu
+PASS sitemap sample: /lien-he-quang-cao
+PASS sitemap sample: /nguon-du-lieu
+PASS sitemap sample: /privacy
+PASS sitemap sample: /support
+PASS sitemap sample: /terms
+PASS sitemap sample: /thong-ke
+PASS sitemap sample: /thong-ke-tan-suat-loto
+PASS sitemap sample: /thong-ke/nhip-so-mien-bac
+PASS sitemap sample: /thong-ke/soi-cau
+PASS sitemap sample: /thong-ke/vietlott
+PASS sitemap sample: /thong-ke/vietlott/bingo18
+PASS sitemap sample: /thong-ke/vietlott/bingo18/bo-ket-qua
+PASS sitemap sample: /thong-ke/vietlott/bingo18/chan-le
+PASS sitemap sample: /thong-ke/vietlott/bingo18/theo-ky
+PASS sitemap sample: /thong-ke/vietlott/bingo18/tong
+PASS sitemap sample: /thong-ke/vietlott/keno
+PASS sitemap sample: /thong-ke/vietlott/keno/cap-so
+PASS sitemap sample: /thong-ke/vietlott/keno/chan-le
+PASS sitemap sample: /thong-ke/vietlott/keno/chua-xuat-hien
+PASS sitemap sample: /thong-ke/vietlott/keno/lon-nho
+PASS sitemap sample: /thong-ke/vietlott/keno/tan-suat
+PASS sitemap sample: /thong-ke/vietlott/keno/theo-ky
+PASS sitemap sample: /thong-ke/vietlott/keno/trung-ky-truoc
+PASS sitemap sample: /thong-ke/vietlott/lotto535
+PASS sitemap sample: /thong-ke/vietlott/lotto535/cap-so
+PASS sitemap sample: /thong-ke/vietlott/lotto535/chan-le
+PASS sitemap sample: /thong-ke/vietlott/lotto535/chua-xuat-hien
+PASS sitemap sample: /thong-ke/vietlott/lotto535/so-dac-biet
+PASS sitemap sample: /thong-ke/vietlott/lotto535/tan-suat
+PASS sitemap sample: /thong-ke/vietlott/lotto535/theo-ky
+PASS sitemap sample: /thong-ke/vietlott/lotto535/tong-bo-so
+PASS sitemap sample: /thong-ke/vietlott/max3d
+PASS sitemap sample: /thong-ke/vietlott/max3d-plus
+PASS sitemap sample: /thong-ke/vietlott/max3d-plus/chu-so-theo-vi-tri
+PASS sitemap sample: /thong-ke/vietlott/max3d-plus/chua-xuat-hien
+PASS sitemap sample: /thong-ke/vietlott/max3d-plus/hai-so-cuoi
+PASS sitemap sample: /thong-ke/vietlott/max3d-plus/tan-suat-bo-ba
+PASS sitemap sample: /thong-ke/vietlott/max3d-plus/theo-giai
+PASS invalid URL 404: /page-does-not-exist
+PASS invalid URL 404: /xo-so-mien-bac/31-02-2026
+PASS invalid URL 404: /xo-so-mien-bac/01-01-2099
+PASS invalid URL 404: /vietlott/mega645/ky/not-a-draw
+READ-ONLY local HTTP audit: 80 checks, 0 failures. No production deployment, writes, analytics, chat/hub, collectors or notifications started.

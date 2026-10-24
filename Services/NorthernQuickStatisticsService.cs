@@ -18,7 +18,7 @@ namespace XoSoWeb.Services
         public NorthernQuickStatisticsService(XoSoDBContext db, IMemoryCache cache) { this.db = db; this.cache = cache; }
 
         public Task<NorthernQuickStatisticsViewModel> GetAsync(DateTime forDate, CancellationToken cancellation) =>
-            cache.GetOrCreateAsync("northern-quick-statistics-v1-" + forDate.ToString("yyyyMMdd"), async entry =>
+            cache.GetOrCreateAsync("northern-quick-statistics-v1-" + PublicContentVersion.Value + "-" + forDate.ToString("yyyyMMdd"), async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
                 var draws = new List<NumberRhythmDay>();

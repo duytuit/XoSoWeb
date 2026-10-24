@@ -52,15 +52,19 @@
             </button>
             <div class="d-flex align-items-center gap-2">
                 <a class="d-flex align-items-center gap-2 text-decoration-none" asp-controller="Home" asp-action="Index" aria-label="Về trang chủ">
-                    <i class="fa-solid fa-ticket text-primary fs-4" aria-hidden="true"></i>
-                    <span class="h5 mb-0 fw-bold text-primary font-headline-md">@Site.SiteName</span>
+                    @if (!string.IsNullOrWhiteSpace(Site.LogoUrl)) { <img src="@Site.LogoUrl" alt="@Site.SiteName" width="168" height="56" class="brand-logo" asp-append-version="true" /> }
+                    else { <span class="h5 mb-0 fw-bold text-primary font-headline-md">@Site.SiteName</span> }
                 </a>
             </div>
             <nav class="top-navigation d-none d-lg-flex gap-4" aria-label="Điều hướng chính">
-                <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index">Trang Chủ</a>
-                <a class="@(IsActive("Home", "XoSoMienBac") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac">XS Miền Bắc</a>
-                <a class="@(IsActive("Home", "XoSoMienTrung") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienTrung">XS Miền Trung</a>
-                <a class="@(IsActive("Home", "XoSoMienNam") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienNam">XS Miền Nam</a>
+                <div class="top-navigation-dropdown">
+                    <a class="top-navigation-dropdown-trigger @(IsActive("Home", "Index") || IsActive("Home", "XoSoMienBac") || IsActive("Home", "XoSoMienTrung") || IsActive("Home", "XoSoMienNam") || IsActive("Home", "LotteryArchive") ? "is-active" : "")" href="/">
+                        <span>Kết quả</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </a>
+                    <div class="top-navigation-submenu">
+                        <a href="/">Tổng hợp kết quả</a><a href="/xo-so-mien-bac">Xổ số miền Bắc</a><a href="/xo-so-mien-trung">Xổ số miền Trung</a><a href="/xo-so-mien-nam">Xổ số miền Nam</a>
+                    </div>
+                </div>
                 <a class="@(IsActive("Home", "Vietlott") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott">Vietlott</a>
                 <div class="top-navigation-dropdown">
                     <a class="top-navigation-dropdown-trigger @(isStatisticsPage ? "is-active" : "")" href="/thong-ke">
@@ -76,7 +80,7 @@
                 </div>
                 <div class="top-navigation-dropdown">
                     <a class="top-navigation-dropdown-trigger @(isReferencePage ? "is-active" : "")" href="/lich-quay">
-                        <span>Thông tin</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                        <span>Lịch quay</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
                     </a>
                     <div class="top-navigation-submenu">
                         <a class="@(Context.Request.Path.StartsWithSegments("/lich-quay") ? "is-active" : "")" href="/lich-quay">Lịch quay</a>
@@ -162,11 +166,11 @@
         </aside>
     </div>
 
-    <div class="container-xl mt-2">
+    <!-- <div class="container-xl mt-2">
         <div class="w-100 bg-surface-container-highest rounded ad-banner" style="height: 96px;">
             Google AdSense - Top Banner
         </div>
-    </div>
+    </div> -->
 
     <main class="container-xl d-flex flex-column flex-lg-row page-content">
 
@@ -242,17 +246,20 @@
     </main>
 
     <!-- Footer Ad -->
-    <div class="container-xl mb-3 mt-2">
+    <!-- <div class="container-xl mb-3 mt-2">
         <div class="w-100 bg-surface-container-highest rounded-4 ad-banner" style="height: 256px;">
             Google AdSense - Large Rectangular Ad
         </div>
-    </div>
+    </div> -->
 
     <!-- Footer -->
     <footer class="bg-inverse-surface text-secondary-container-opacity border-top border-secondary-container-opacity pt-5 pb-3">
         <div class="container-xl d-flex flex-column flex-md-row justify-content-between align-items-start gap-4 pb-4 border-bottom border-light border-opacity-10">
             <div class="mb-4 mb-md-0" style="max-width: 350px;">
-                <h2 class="h5 fw-bold mb-3"><a class="text-white text-decoration-none" asp-controller="Home" asp-action="Index">@Site.SiteName</a></h2>
+                <h2 class="h5 fw-bold mb-3"><a class="text-white text-decoration-none @(string.IsNullOrWhiteSpace(Site.LogoUrl) ? "" : "footer-brand")" asp-controller="Home" asp-action="Index">
+                    @if (!string.IsNullOrWhiteSpace(Site.LogoUrl)) { <img src="@Site.LogoUrl" alt="@Site.SiteName" width="192" height="64" class="footer-brand-logo" loading="lazy" asp-append-version="true" /> }
+                    else { @Site.SiteName }
+                </a></h2>
                 <p class="text-white-50 mb-3 fs-7">Tra cứu kết quả xổ số ba miền và Vietlott trên giao diện rõ ràng, dễ sử dụng. Chúng tôi liên tục cải thiện tốc độ cập nhật và độ ổn định để bạn thuận tiện theo dõi kết quả mới nhất và tìm lại các kỳ quay trước.</p>
                 @if (!string.IsNullOrWhiteSpace(Site.OrganizationName)) { <p>Đơn vị vận hành: @Site.OrganizationName</p> }
             </div>
@@ -276,7 +283,8 @@
             </div>
         </div>
         <div class="container-xl pt-3 text-center">
-            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @DateTime.Now.Year @Site.SiteName · Cập nhật kết quả xổ số nhanh chóng — dễ xem, dễ tra cứu mỗi ngày.</p>
+            <p class="font-label-sm text-white-50 mb-2">@Site.Slogan</p>
+            <p class="font-label-sm text-white-50 mb-0 opacity-75">© @XoSoWeb.Services.LotteryUrls.Today.Year @Site.SiteName · Cập nhật kết quả xổ số nhanh chóng — dễ xem, dễ tra cứu mỗi ngày.</p>
         </div>
     </footer>
 
@@ -302,7 +310,7 @@
 
 
     <!-- Site JS -->
-    <script src="~/js/main.js" asp-append-version="true"></script>
+    <script src="~/js/main.js" asp-append-version="true" defer></script>
 
     @RenderSection("Scripts", required: false)
 </body>

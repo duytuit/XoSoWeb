@@ -5,7 +5,7 @@
 }
 <section class="quick-statistics" aria-labelledby="quick-statistics-title">
     <header class="quick-statistics-header">
-        <div><span>Miền Bắc</span><h2 id="quick-statistics-title">Thống kê nhanh cho ngày @Model.ForDate.ToString("dd/MM/yyyy")</h2></div>
+        <div><span>Miền Bắc</span><h2 id="quick-statistics-title">Thống kê nhanh · @Model.ForDate.ToString("dd/MM/yyyy")</h2></div>
         <a href="@Url.Action("NumberRhythm", "Home", new { endDate = Model.EndDate.ToString("yyyy-MM-dd"), days = 30 })">Xem Nhịp số →</a>
     </header>
     @if (Model.DrawCount == 0)
@@ -41,7 +41,7 @@
         </div>
         @if (Model.Leaders.Count > 0)
         {
-            <div class="quick-statistics-block quick-statistics-leaders"><h3>Các cặp dẫn đầu bảng gan lô tô</h3><ul>
+            <details class="quick-statistics-block quick-statistics-leaders"><summary><h3>Cặp dẫn đầu &amp; chuỗi gan dài nhất <small>@string.Join(" · ", Model.Leaders.Select(item => item.Label + ": " + item.Display + " ngày"))</small></h3></summary><ul>
                 @foreach (var item in Model.Leaders)
                 {
                     <li>Cặp <a href="@Detail(item.Number)"><strong>@item.Label</strong></a> chưa về <strong>@item.Display ngày</strong>.
@@ -49,7 +49,7 @@
                         <a href="@Detail(item.Number)" class="quick-statistics-detail">Xem 120 ngày gần nhất</a>
                     </li>
                 }
-            </ul></div>
+            </ul></details>
         }
         <div class="quick-statistics-block">
             <h3>Cặp lô tô đảo cùng gan <small>Xếp theo số ngày cả hai cùng chưa về</small></h3>
@@ -81,12 +81,14 @@
                         var height = Math.Max(2, item.Days * 100 / max);
                         <div class="quick-bar-item" role="listitem" aria-label="@(group.Sum ? "Tổng" : "Chạm") @item.Number: @item.Display ngày chưa về"><span class="quick-bar-value">@item.Display</span><div class="quick-bar-track"><i style="--bar-height: @height%"></i></div><strong>@item.Number</strong></div>
                     }</div>
-                    <p>@(group.Sum ? "Tổng" : "Chạm") <strong>@leader.Number</strong> chưa về <strong>@leader.Display ngày</strong>, gồm @members.Length cặp số: <span class="quick-members">@string.Join(", ", members)</span>.</p>
-                    <p class="quick-statistics-note">@(group.Sum ? "Tổng là chữ số hàng đơn vị của tổng hai số cuối đặc biệt." : "Chạm là chữ số xuất hiện ở hàng chục hoặc hàng đơn vị của hai số cuối đặc biệt.")</p>
+                    <details class="quick-chart-explanation"><summary>@(group.Sum ? "Tổng" : "Chạm") <strong>@leader.Number</strong>: @leader.Display ngày chưa về · @members.Length cặp số</summary>
+                        <p class="quick-members">@string.Join(", ", members)</p>
+                        <p>@(group.Sum ? "Tổng là chữ số hàng đơn vị của tổng hai số cuối đặc biệt." : "Chạm là chữ số xuất hiện ở hàng chục hoặc hàng đơn vị của hai số cuối đặc biệt.")</p>
+                    </details>
                 </div>
             }
             </div>
         }
-        <p class="quick-statistics-note quick-statistics-footer">Dấu ≥ là cận dưới khi chưa tìm thấy lần về trước, chuỗi chưa khép kín hoặc dữ liệu bị thiếu. Chỉ tính các ngày có kết quả đầy đủ; ngày thiếu dữ liệu ngắt chuỗi gan. Bảng dùng tối đa 10 năm dữ liệu đã lưu, không phải kỷ lục toàn bộ lịch sử.</p>
+        <details class="quick-statistics-footer"><summary>Cách tính &amp; phạm vi dữ liệu</summary><p class="quick-statistics-note">Dấu ≥ là cận dưới khi chưa tìm thấy lần về trước, chuỗi chưa khép kín hoặc dữ liệu bị thiếu. Chỉ tính các ngày có kết quả đầy đủ; ngày thiếu dữ liệu ngắt chuỗi gan. Bảng dùng tối đa 10 năm dữ liệu đã lưu, không phải kỷ lục toàn bộ lịch sử.</p></details>
     }
 </section>

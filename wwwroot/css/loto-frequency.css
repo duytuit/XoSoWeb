@@ -1,0 +1,42 @@
+.loto-frequency-page { gap: 5px; min-width: 0; }
+.frequency-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 12px; font-size: 12px; color: var(--on-surface-variant); }
+.frequency-meta details { flex: 1; min-width: 180px; }
+.frequency-meta summary { cursor: pointer; }
+.frequency-meta p { margin: 3px 0; line-height: 1.45; }
+.frequency-meta > a { white-space: nowrap; }
+.loto-frequency-page .statistics-toolbar { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(140px, 1fr) auto; gap: 5px; padding: 5px; border-radius: 6px; }
+.loto-frequency-page .statistics-date-field { position: relative; min-width: 0; }
+.loto-frequency-page .form-label { position: absolute; top: 2px; left: 7px; margin: 0; font-size: 10px; line-height: 12px; pointer-events: none; }
+.loto-frequency-page .form-control,
+.loto-frequency-page .form-select { width: 100%; min-width: 0; height: 36px; min-height: 36px; padding: 14px 6px 2px; font-size: 13px; line-height: 18px; border-radius: 4px; }
+.loto-frequency-page .form-select { padding-right: 25px; }
+.loto-frequency-page .statistics-toolbar .btn { min-height: 36px; padding: 3px 10px; font-size: 12px; border-radius: 4px; }
+.loto-frequency-page .special-statistics-region { border-radius: 6px; }
+.loto-frequency-page .special-statistics-header { padding: 4px 6px; gap: 4px; }
+.loto-frequency-page .special-statistics-header > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.loto-frequency-page .special-statistics-header h2 { margin: 0; font-size: 13px; }
+.loto-frequency-page .special-statistics-header small { font-size: 11px; }
+.loto-frequency-page .statistics-result-count { padding: 2px 4px; font-size: 10px; }
+.loto-frequency-page .frequency-overview { padding: 4px; }
+.loto-frequency-page .frequency-overview-heading { gap: 2px 6px; margin-bottom: 3px; font-size: 12px; }
+.loto-frequency-page .frequency-overview-heading > span { font-size: 11px; }
+.loto-frequency-page .frequency-number-grid { gap: 2px; }
+.loto-frequency-page .frequency-number { flex-direction: row; gap: 4px; min-height: 27px; padding: 1px 2px; border-radius: 3px; }
+.loto-frequency-page .frequency-number strong { font-size: 13px; }
+.loto-frequency-page .frequency-number small { font-size: 10px; white-space: nowrap; }
+.loto-frequency-page .frequency-groups { gap: 3px; padding: 0 4px 4px; }
+.loto-frequency-page .frequency-group { border-radius: 4px; }
+.loto-frequency-page .frequency-group summary { min-height: 28px; padding: 2px 6px; font-size: 12px; gap: 4px; }
+.loto-frequency-page .loto-frequency-table { min-width: 360px; table-layout: fixed; font-size: 12px; }
+.loto-frequency-page .loto-frequency-table > :not(caption) > * > * { height: 24px; padding: 2px; }
+.loto-frequency-page .loto-frequency-table thead th { font-size: 11px; white-space: nowrap; }
+@media (max-width: 575.98px) {
+    .loto-frequency-page .statistics-toolbar { grid-template-columns: minmax(85px, 1fr) minmax(135px, 1.4fr) auto; gap: 3px; padding: 4px; }
+    .loto-frequency-page .form-control,
+    .loto-frequency-page .form-select { height: 42px; min-height: 42px; font-size: 16px; line-height: 22px; padding-top: 16px; }
+    .loto-frequency-page .statistics-toolbar .btn { min-height: 42px; padding: 3px 7px; }
+    .loto-frequency-page .frequency-number { flex-direction: column; gap: 0; min-height: 32px; }
+    .loto-frequency-page .frequency-number strong { font-size: 12px; }
+    .loto-frequency-page .frequency-number small { font-size: 9px; line-height: 12px; }
+    .loto-frequency-page .frequency-group summary { min-height: 32px; }
+}

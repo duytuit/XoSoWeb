@@ -1,144 +1,33 @@
-﻿using System;
-using System.Net;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Security.Claims;
-using System.IO;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using XoSoWeb.Shares;
-using XoSoWeb.Controllers;
-
 namespace XoSoWeb.Middlewares
 {
-    public class ExceptionMiddleware
+    public sealed class ExceptionMiddleware
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger;
-
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
-        {
-            _next = next;
-            _logger = logger;
-        }
-
+        private readonly RequestDelegate next;
+        private readonly ILogger<ExceptionMiddleware> logger;
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger) { this.next = next; this.logger = logger; }
         public async Task InvokeAsync(HttpContext context)
         {
-            try
+            try { await next(context); }
+            catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
+            catch (Exception exception)
             {
-                await _next(context);
-            }
-            catch (Exception ex)
-            {
-                await HandleExceptionAsync(context, ex);
-            }
-        }
-        private static bool IsFileUpload(HttpRequest request)
-        {
-            return request.ContentType != null &&
-                request.ContentType.StartsWith("multipart/form-data", StringComparison.OrdinalIgnoreCase);
-        }
-        private async Task<string> ReadRequestBodyAsync(HttpContext context)
-        {
-            context.Request.EnableBuffering();
-
-            using var reader = new StreamReader(
-                context.Request.Body,
-                Encoding.UTF8,
-                detectEncodingFromByteOrderMarks: false,
-                leaveOpen: true);
-
-            string body = await reader.ReadToEndAsync();
-
-            context.Request.Body.Position = 0; // reset để controller còn đọc
-
-            return body;
-        }
-        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
-        {
-            int statusCode = (int)HttpStatusCode.InternalServerError;
-
-            try
-            {
-                var request = context.Request;
-                string apiInfo = $"{request.Method} {request.Path}{request.QueryString}";
-
-                // 🔹 UserId
-                string userId = context.User?
-                    .Claims?
-                    .FirstOrDefault(c =>
-                        c.Type == ClaimTypes.NameIdentifier ||
-                        c.Type == JwtRegisteredClaimNames.Sub ||
-                        c.Type == "userId")
-                    ?.Value ?? "Anonymous";
-
-                // 🔹 POST body (BỎ upload file)
-                string requestBody = "";
-
-                bool isWriteBodyMethod =
-                    request.Method == HttpMethods.Post ||
-                    request.Method == HttpMethods.Put ||
-                    request.Method == HttpMethods.Patch;
-
-                if (isWriteBodyMethod && !IsFileUpload(request))
+                // Detailed failures stay in server logs; no request bodies, credentials or external notifications.
+                logger.LogError(exception, "Request failed: {Method} {Path}; trace {TraceId}", context.Request.Method, context.Request.Path, context.TraceIdentifier);
+                if (context.Response.HasStarted) { context.Abort(); return; }
+                context.Response.Clear();
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                context.Response.Headers["X-Robots-Tag"] = "noindex, follow";
+                context.Response.Headers["Cache-Control"] = "no-store";
+                if (context.Request.Headers["Accept"].ToString().Contains("text/html", StringComparison.OrdinalIgnoreCase))
                 {
-                    requestBody = await ReadRequestBodyAsync(context);
+                    context.Response.ContentType = "text/html; charset=utf-8";
+                    await context.Response.WriteAsync("<!doctype html><html lang=\"vi\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"robots\" content=\"noindex,follow\"><title>Tạm thời chưa thể tải trang</title></head><body><main><h1>Tạm thời chưa thể tải trang</h1><p>Vui lòng thử lại sau. Mã yêu cầu: " + System.Net.WebUtility.HtmlEncode(context.TraceIdentifier) + "</p><a href=\"/\">Về trang chủ</a></main></body></html>");
                 }
-
-                // 🔹 Exception detail
-                Exception currentEx = exception;
-                int depth = 0;
-                string fullDetail = "";
-
-                while (currentEx != null)
-                {
-                    var line = currentEx.StackTrace?
-                        .Split('\n')
-                        .LastOrDefault(l => l.Contains(":line"))?
-                        .Trim() ?? "No line info";
-
-                    fullDetail += $"\n[{depth}] {currentEx.GetType().Name}: {currentEx.Message} | {line}";
-                    currentEx = currentEx.InnerException;
-                    depth++;
-                }
-
-                string message = exception.Message;
-
-                // 🔔 Log / Telegram
-                _ = Task.Run(() =>
-                    Helper.SendTelegramMessageAsync(
-                        $"❌ API: {apiInfo}\n" +
-                        $"👤 UserId: {userId}\n" +
-                        $"📦 BODY: {requestBody}\n" +
-                        $"💥 Error: {message}\n" +
-                        $"📌 Detail:{fullDetail}"
-                    )
-                );
-
-                _logger.LogError(
-                    $"❌ API: {apiInfo}\n" +
-                    $"👤 UserId: {userId}\n" +
-                    $"📦 BODY: {requestBody}\n" +
-                    $"💥 Error: {message}\n" +
-                    $"📌 Detail:{fullDetail}"
-                );
-
-                var response = new ApiResponse<object>(false, message);
-
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = statusCode;
-
-                var json = JsonSerializer.Serialize(response);
-                await context.Response.WriteAsync(json);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"[ExceptionMiddlewareError] {ex.Message}");
-                context.Response.StatusCode = 500;
-                await context.Response.WriteAsync("{\"success\":false,\"message\":\"Middleware error\"}");
+                else await context.Response.WriteAsJsonAsync(new { success = false, message = "Tạm thời chưa thể xử lý yêu cầu.", traceId = context.TraceIdentifier });
             }
         }
     }

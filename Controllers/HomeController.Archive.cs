@@ -39,6 +39,7 @@ namespace XoSoWeb.Controllers
                 ParentLabel = date != null && entry.ProvinceCode != null ? entry.ProvinceName : "Xổ số " + regionName,
                 Regional = await GetRegionResultsAsync(entry.Region, regionName, null, date == null ? 7 : 1, date == null ? null : parsed, entry.ProvinceName) };
             if (model.Regional.Results.Count == 0) return NotFound();
+            if (!model.Regional.Results.Any(r => LotteryDataQuality.IsComplete(r.Prizes, entry.Region))) ViewData["NoIndex"] = true;
             var siblings = entries.Where(x => x.Region == entry.Region && x.ProvinceName == entry.ProvinceName && x.Date.HasValue)
                 .OrderByDescending(x => x.Date).ToList();
             model.Links = siblings.Take(30).ToList();

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Template for the OLD domain's separate IIS site. Not loaded by the application.
-     Requires IIS URL Rewrite. Replace BOTH placeholder hosts with verified real hosts.
+     Requires IIS URL Rewrite. The requested domain mapping is prepared below. Verify ownership and both TLS bindings first.
      Keep enabled=false until the new origin, TLS, paths and metadata are verified.
      Keep the old site's TLS binding/certificate active. -->
 <configuration>
@@ -10,9 +10,9 @@
         <rule name="Move old domain preserving path and query" enabled="false" stopProcessing="true">
           <match url="(.*)" />
           <conditions>
-            <add input="{HTTP_HOST}" pattern="^OLD_HOST_TO_REPLACE$" ignoreCase="true" />
+            <add input="{HTTP_HOST}" pattern="^xoso\.logapp\.io\.vn$" ignoreCase="true" />
           </conditions>
-          <action type="Redirect" url="https://NEW_HOST_TO_REPLACE/{R:1}"
+          <action type="Redirect" url="https://xemnhanh.vn/{R:1}"
                   appendQueryString="true" redirectType="Permanent" />
         </rule>
       </rules>

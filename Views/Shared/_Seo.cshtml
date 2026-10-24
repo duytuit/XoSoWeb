@@ -1,6 +1,10 @@
 @using System.Text.Json
 @inject XoSoWeb.Services.SiteSettings Site
-@{ var seo = XoSoWeb.Services.SeoMetadata.Create(Site, Context.Request, ViewData); }
+@{
+    var seo = XoSoWeb.Services.SeoMetadata.Create(Site, Context.Request, ViewData);
+    var pageImage = ViewData["OgImage"]?.ToString();
+    var shareImage = Site.ImageUrl(string.IsNullOrWhiteSpace(pageImage) ? Site.DefaultShareImage : pageImage);
+}
 <title>@seo.Title</title>
 <meta name="description" content="@seo.Description" />
 <meta name="robots" content="@(seo.NoIndex ? "noindex,follow" : "index,follow")" />
@@ -11,7 +15,16 @@
 <meta property="og:title" content="@seo.Title" />
 <meta property="og:description" content="@seo.Description" />
 <meta property="og:url" content="@seo.Canonical" />
-<meta property="og:image" content="@(string.IsNullOrWhiteSpace(ViewData["OgImage"]?.ToString()) ? Site.Absolute(Site.ShareImagePath) : Site.Absolute(ViewData["OgImage"].ToString()))" />
+@if (!string.IsNullOrWhiteSpace(shareImage)) {
+    <meta property="og:image" content="@shareImage" />
+    <meta property="og:image:alt" content="@(ViewData["OgImageAlt"]?.ToString() ?? Site.SiteName + " · " + Site.Slogan)" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="@shareImage" />
+}
+else { <meta name="twitter:card" content="summary" /> }
+<meta name="twitter:title" content="@seo.Title" />
+<meta name="twitter:description" content="@seo.Description" />
+@if (!string.IsNullOrWhiteSpace(Site.FaviconUrl)) { <link rel="icon" href="@Site.FaviconUrl" asp-append-version="true" /> }
 @if (ViewData["ArticleAuthor"] is string articleAuthor && !string.IsNullOrWhiteSpace(articleAuthor))
 {
     <meta property="article:author" content="@articleAuthor" />

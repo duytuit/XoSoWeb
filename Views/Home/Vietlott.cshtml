@@ -8,13 +8,16 @@
     if (Model.SelectedGameCode != null) ViewData["Description"] = pageTitle + ". Xem ngày quay, bộ số và bảng giải của các kỳ được chọn.";
     if (Model.Results.Count == 0) ViewData["NoIndex"] = true;
 }
-<div class="regional-page-title">
+@section Styles {
+    <link rel="stylesheet" href="~/css/vietlott-compact.css" asp-append-version="true" />
+}
+<div class="regional-page-title vietlott-compact-title">
     <div>
         <h1 class="detail-page-heading">@pageTitle</h1>
         <p class="detail-page-description">Bộ số trúng thưởng và giá trị giải theo từng kỳ quay</p>
     </div>
 </div>
-<div class="vietlott-page">
+<div class="vietlott-page vietlott-compact">
 
 @if (Model.Results.Count == 0)
 {
@@ -24,7 +27,7 @@ else
 {
     foreach (var resultGroup in Model.Results.GroupBy(result => result.GameCode))
     {
-        <nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Trò chơi và kỳ quay">
+        <nav class="vietlott-game-links" aria-label="Trò chơi và kỳ quay">
             <a href="@LotteryUrls.GamePath(resultGroup.Key)">@LotteryUrls.GameName(resultGroup.Key)</a>
             @foreach (var draw in resultGroup) { <a href="@LotteryUrls.DrawPath(draw.GameCode, draw.DrawNo)">Kỳ @draw.DrawNo · @draw.DrawDate.ToString("dd/MM/yyyy")</a> }
             <a href="/thong-ke/vietlott/@LotteryUrls.Slug(resultGroup.Key)">Thống kê @LotteryUrls.GameName(resultGroup.Key)</a>

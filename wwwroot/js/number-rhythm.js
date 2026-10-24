@@ -1,6 +1,49 @@
 (() => {
     const page = document.querySelector('.rhythm-page');
     if (!page) return;
+    const zoomOut = document.getElementById('rhythm-zoom-out');
+    const zoomIn = document.getElementById('rhythm-zoom-in');
+    const zoomReset = document.getElementById('rhythm-zoom-reset');
+    const zoomValue = document.getElementById('rhythm-zoom-value');
+    const expandButton = document.getElementById('rhythm-expand');
+    let zoom = 100;
+    function applyZoom(value) {
+        zoom = Math.max(75, Math.min(175, value));
+        page.style.setProperty('--rhythm-zoom', String(zoom / 100));
+        zoomValue.textContent = `${zoom}%`;
+        zoomOut.disabled = zoom === 75;
+        zoomIn.disabled = zoom === 175;
+    }
+    zoomOut.addEventListener('click', () => applyZoom(zoom - 25));
+    zoomIn.addEventListener('click', () => applyZoom(zoom + 25));
+    zoomReset.addEventListener('click', () => applyZoom(100));
+    function setExpanded(expanded) {
+        page.classList.toggle('rhythm-expanded', expanded);
+        document.body.classList.toggle('rhythm-expanded-active', expanded);
+        expandButton.setAttribute('aria-pressed', String(expanded));
+        expandButton.textContent = expanded ? '✕ Thu gọn bảng' : '⛶ Phóng to bảng';
+        if (expanded) {
+            page.setAttribute('role', 'dialog');
+            page.setAttribute('aria-modal', 'true');
+            page.setAttribute('aria-label', 'Nhịp số miền Bắc — xem bảng phóng to');
+        } else {
+            page.removeAttribute('role'); page.removeAttribute('aria-modal'); page.removeAttribute('aria-label');
+        }
+        expandButton.focus({ preventScroll: true });
+    }
+    expandButton.addEventListener('click', () => setExpanded(!page.classList.contains('rhythm-expanded')));
+    document.addEventListener('keydown', event => {
+        if (!page.classList.contains('rhythm-expanded') || document.getElementById('rhythm-cycle-dialog').open) return;
+        if (event.key === 'Escape') { event.preventDefault(); setExpanded(false); return; }
+        if (event.key !== 'Tab') return;
+        const focusable = [...page.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,[tabindex="0"]')]
+            .filter(element => element.getClientRects().length && !element.closest('[hidden]'));
+        const first = focusable[0], last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    });
+    applyZoom(100);
+
     const key = 'xosoweb.number-rhythm.marks.v1';
     const marks = new Set();
     const status = document.getElementById('rhythm-mark-status');

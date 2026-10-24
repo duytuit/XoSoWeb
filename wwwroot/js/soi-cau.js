@@ -1,8 +1,12 @@
 (() => {
     const specialOnly = document.querySelector('.soicau-page')?.dataset.target === 'special';
     document.querySelectorAll('.sc-pattern').forEach(pattern => pattern.addEventListener('toggle', () => {
+        if (!pattern.open) return;
+        pattern.closest('.sc-patterns')?.querySelectorAll('.sc-pattern[open]').forEach(other => {
+            if (other !== pattern) other.open = false;
+        });
         const history = pattern.querySelector('.sc-history-boards');
-        if (!pattern.open || !history || history.childElementCount) return;
+        if (!history || history.childElementCount) return;
         const dates = history.dataset.dates.split(',');
         const hits = history.dataset.hits.split(',');
         dates.forEach((date, index) => {

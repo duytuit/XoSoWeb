@@ -10,8 +10,8 @@
     @if (!string.IsNullOrWhiteSpace(article.Summary)) { <p class="news-article-summary">@article.Summary</p> }
     <div class="news-article-byline">
         @if (!string.IsNullOrWhiteSpace(article.Author)) { <span>Tác giả/biên tập: @article.Author</span> }
-        @if (article.PublishedAt.HasValue) { <span>Đăng ngày <time datetime="@article.PublishedAt.Value.ToString("O")">@XoSoWeb.Services.NewsDateTime.FormatDateTime(article.PublishedAt.Value)</time></span> }
-        @if (article.UpdatedAt != default) { <span>Cập nhật <time datetime="@article.UpdatedAt.ToString("O")">@XoSoWeb.Services.NewsDateTime.FormatDateTime(article.UpdatedAt)</time></span> }
+        @if (article.PublishedAt.HasValue) { <span>Đăng ngày <time datetime="@XoSoWeb.Services.NewsDateTime.IsoUtc(article.PublishedAt.Value)">@XoSoWeb.Services.NewsDateTime.FormatDateTime(article.PublishedAt.Value)</time></span> }
+        @if (article.UpdatedAt != default) { <span>Cập nhật <time datetime="@XoSoWeb.Services.NewsDateTime.IsoUtc(article.UpdatedAt)">@XoSoWeb.Services.NewsDateTime.FormatDateTime(article.UpdatedAt)</time></span> }
     </div>
     @if (!string.IsNullOrWhiteSpace(article.FeaturedImageUrl))
     {

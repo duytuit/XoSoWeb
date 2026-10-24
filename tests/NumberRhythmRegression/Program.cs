@@ -118,7 +118,8 @@ var document = new HtmlParser().ParseDocument(html);
 Check(document.QuerySelectorAll("h1").Length == 1 && document.QuerySelector("h1").TextContent.Contains("Nhịp số miền Bắc"), "compiled Razor renders the chosen title");
 Check(document.QuerySelectorAll(".rhythm-number-row [data-column]").Length == 100 && document.QuerySelectorAll(".rhythm-table tbody tr").Length == 7, "rendered matrix contains all pair columns and calendar dates");
 Check(document.QuerySelectorAll(".rhythm-missing-row").Length == 1 && document.QuerySelectorAll(".rhythm-missing-row td").All(td => td.TextContent == "—"), "rendered missing-day cells show explicit placeholder");
-Check(document.QuerySelector("tbody .is-special[data-column='12']")?.TextContent == "2", "special-prize highlight preserves total hit count");
+Check(document.QuerySelector("tbody .is-special[data-column='12']")?.TextContent.Trim().StartsWith("2") == true
+    && document.QuerySelector("tbody .is-special[data-column='12']").TextContent.Contains("ĐB"), "special-prize highlight preserves total hit count and accessible label");
 Check(document.QuerySelector("tfoot [data-column='00']").TextContent.Contains("≥"), "censored gap shown as lower bound");
 Check(document.QuerySelectorAll("a[href='/thong-ke/nhip-so-mien-bac']").Length == 3, "new entry appears in desktop, mobile and sidebar menus");
 using (var json = System.Text.Json.JsonDocument.Parse(document.QuerySelector("#rhythm-cycle-data").TextContent))

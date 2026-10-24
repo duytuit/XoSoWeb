@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 
 namespace XoSoWeb.Services
@@ -9,25 +10,26 @@ namespace XoSoWeb.Services
     public sealed class SiteSettings
     {
         private string configuredSiteUrl;
-        private readonly IHttpContextAccessor httpContextAccessor;
 
         public SiteSettings() { }
         public SiteSettings(IHttpContextAccessor httpContextAccessor)
         {
-            this.httpContextAccessor = httpContextAccessor;
+            // Retained for constructor compatibility. SEO origins never trust request headers.
         }
 
         public string SiteUrl
         {
             get
             {
-                if (!string.IsNullOrWhiteSpace(configuredSiteUrl)) return configuredSiteUrl;
-                var request = httpContextAccessor?.HttpContext?.Request;
-                return request == null ? null : $"{request.Scheme}://{request.Host}{request.PathBase}";
+                return configuredSiteUrl;
             }
             set => configuredSiteUrl = value;
         }
-        public string SiteName { get; set; } = "Xổ Số Trực Tiếp";
+        public string SiteName { get; set; } = "Xem Nhanh";
+        public string Slogan { get; set; } = "Kết quả rõ ràng — tra cứu dễ dàng";
+        public string LogoUrl { get; set; } = "/images/logo.png";
+        public string FaviconUrl { get; set; } = "/images/favicon.ico";
+        public string DefaultShareImage { get; set; } = "/images/Biểu tượng mắt xanh lưới cam.png";
         public string OrganizationName { get; set; }
         public string ContactEmail { get; set; }
         public string ContactPhone { get; set; }
@@ -36,7 +38,8 @@ namespace XoSoWeb.Services
         public string VerificationProcess { get; set; }
         public string SearchConsoleVerification { get; set; }
         public string AnalyticsId { get; set; }
-        public string ShareImagePath { get; set; } = "/images/share.png";
+        // Compatibility with deployments that already configure this setting.
+        public string ShareImagePath { get => DefaultShareImage; set => DefaultShareImage = value; }
         public string LiveSocketUrl { get; set; }
         public string StagingUsername { get; set; }
         public string StagingPassword { get; set; }
@@ -44,6 +47,8 @@ namespace XoSoWeb.Services
 
         public void Validate(bool development)
         {
+            if (string.IsNullOrWhiteSpace(configuredSiteUrl))
+                throw new InvalidOperationException("Site:SiteUrl is required. Configure the active origin explicitly for each environment.");
             if (!string.IsNullOrWhiteSpace(configuredSiteUrl))
             {
                 if (!Uri.TryCreate(configuredSiteUrl, UriKind.Absolute, out var uri)
@@ -59,11 +64,31 @@ namespace XoSoWeb.Services
                 throw new InvalidOperationException("Site:AnalyticsId must be a GA4 G- identifier.");
             if (!string.IsNullOrEmpty(LiveSocketUrl) && (!Uri.TryCreate(LiveSocketUrl, UriKind.Absolute, out var socket) || socket.Scheme != "wss"))
                 throw new InvalidOperationException("Site:LiveSocketUrl must use wss.");
-            if (string.IsNullOrEmpty(ShareImagePath) || !ShareImagePath.StartsWith("/") || ShareImagePath.StartsWith("//") || ShareImagePath.Contains('\\'))
-                throw new InvalidOperationException("Site:ShareImagePath must be a local absolute path.");
+            foreach (var asset in new[] { LogoUrl, FaviconUrl, DefaultShareImage })
+                if (!string.IsNullOrWhiteSpace(asset) && (!asset.StartsWith("/") || asset.StartsWith("//") || asset.Contains('\\')
+                    || asset.Contains("..") || asset.Contains('?') || asset.Contains('#') || asset.Contains('%')))
+                    throw new InvalidOperationException("Brand assets must use local absolute paths without traversal, query or fragment.");
         }
 
-        public string Absolute(string path) => SiteUrl + (path.StartsWith("/") ? path : "/" + path);
+        public void ValidateAssets(string webRoot)
+        {
+            foreach (var asset in new[] { LogoUrl, FaviconUrl, DefaultShareImage })
+                if (!string.IsNullOrWhiteSpace(asset) && !System.IO.File.Exists(System.IO.Path.Combine(webRoot, asset.TrimStart('/'))))
+                    throw new InvalidOperationException("A configured brand asset does not exist in wwwroot: " + asset);
+        }
+
+        public string Absolute(string path)
+        {
+            if (string.IsNullOrWhiteSpace(SiteUrl)) throw new InvalidOperationException("Site:SiteUrl is required to generate public URLs.");
+            return SiteUrl.TrimEnd('/') + (path.StartsWith("/") ? path : "/" + path);
+        }
+        public string ImageUrl(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return null;
+            if (path.StartsWith("/") && !path.StartsWith("//")) return Absolute(string.Join("/", path.Split('/').Select(Uri.EscapeDataString)));
+            return Uri.TryCreate(path, UriKind.Absolute, out var uri) && uri.Scheme == "https" && string.IsNullOrEmpty(uri.UserInfo)
+                ? uri.AbsoluteUri : null;
+        }
     }
 
     public static class LotteryUrls

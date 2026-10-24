@@ -1,0 +1,152 @@
+/* Floating labels keep every filter visible without a separate label row. */
+.statistics-filter-bar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 6px;
+    padding: 8px;
+    position: relative;
+    isolation: isolate;
+    z-index: 1;
+    min-width: 0;
+    border: 1px solid var(--border-neutral);
+    background: var(--surface-container-lowest);
+}
+
+/* Rhythm controls: compact sizes without changing the Soi cau filter. */
+.rhythm-filter.statistics-filter-bar { padding: 5px; gap: 4px; }
+.rhythm-filter.statistics-filter-bar > label > span { top: 2px; left: 6px; font-size: 11px; line-height: 12px; }
+.rhythm-filter.statistics-filter-bar .form-control,
+.rhythm-filter.statistics-filter-bar .form-select { height: 38px; min-height: 38px; padding: 15px 6px 2px; font-size: 14px; line-height: 18px; }
+.rhythm-filter.statistics-filter-bar .form-select { padding-right: 24px; }
+.rhythm-filter .statistics-filter-actions { gap: 3px; }
+.rhythm-filter .statistics-filter-actions > .btn,
+.rhythm-filter .statistics-filter-help > summary { min-height: 38px; }
+.rhythm-filter .statistics-filter-actions > .btn { padding: 3px 6px; font-size: 12px; }
+.rhythm-filter .statistics-filter-help { flex-basis: 26px; }
+.rhythm-page .rhythm-overview { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: center; }
+.rhythm-overview-copy { min-width: 0; }
+.rhythm-page .rhythm-overview h2 { margin: 0; font-size: 14px; line-height: 1.5; }
+.rhythm-page .rhythm-overview .rhythm-eyebrow { font-size: 11px; margin-right: 4px; letter-spacing: 0; white-space: nowrap; }
+.rhythm-page .rhythm-overview p { margin: 0; font-size: 12px; line-height: 1.5; }
+.rhythm-page .rhythm-date-nav { gap: 3px; }
+.rhythm-page .rhythm-date-nav .btn { min-width: 28px; min-height: 30px; padding: 2px 5px; font-size: 14px; }
+.rhythm-page .rhythm-mark-toolbar { gap: 4px 8px; padding: 3px 6px; margin-bottom: 5px; font-size: 12px; line-height: 1.4; }
+.rhythm-mark-toolbar strong { white-space: nowrap; }
+.rhythm-page .rhythm-mark-toolbar label { gap: 4px; min-height: 28px; margin: 0; white-space: nowrap; }
+.rhythm-mark-toolbar input { width: 14px; height: 14px; margin: 0; }
+.rhythm-mark-toolbar .btn { min-height: 28px; padding: 2px 6px; font-size: 12px; }
+#rhythm-mark-status:empty { display: none; }
+@media (max-width: 575.98px) {
+    .rhythm-filter.statistics-filter-bar .form-control,
+    .rhythm-filter.statistics-filter-bar .form-select { height: 42px; min-height: 42px; padding-top: 16px; font-size: 16px; line-height: 20px; }
+    .rhythm-filter .statistics-filter-actions > .btn,
+    .rhythm-filter .statistics-filter-help > summary { min-height: 42px; }
+    .rhythm-page .rhythm-overview h2 { font-size: 13px; }
+    .rhythm-page .rhythm-mark-toolbar { gap: 3px 6px; }
+}
+.statistics-filter-bar > label {
+    display: block;
+    position: relative;
+    min-width: 0;
+    margin: 0;
+}
+.statistics-filter-bar > label > span {
+    position: absolute;
+    z-index: 1;
+    top: 3px;
+    left: 8px;
+    max-width: calc(100% - 16px);
+    color: var(--on-surface-variant);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 14px;
+    pointer-events: none;
+}
+.statistics-filter-bar .form-control,
+.statistics-filter-bar .form-select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 44px;
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 18px 8px 4px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+}
+.statistics-filter-bar .form-select { padding-right: 26px; background-position: right 7px center; }
+.statistics-filter-actions { display: flex; align-items: stretch; gap: 4px; min-width: 0; }
+.statistics-filter-actions > .btn { flex: 1; min-width: 0; min-height: 44px; padding: 6px 10px; font-size: 13px; white-space: nowrap; }
+.statistics-filter-help { flex: 0 0 30px; }
+.statistics-filter-help > summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 44px;
+    list-style: none;
+    cursor: pointer;
+    border: 1px solid var(--border-neutral);
+    background: var(--surface-container-low);
+    color: var(--bs-primary);
+    font-size: 16px;
+    font-weight: 700;
+}
+.statistics-filter-help > summary::-webkit-details-marker { display: none; }
+.statistics-filter-help[open] > summary { background: var(--surface-container); }
+.statistics-filter-help > summary:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+.statistics-filter-help-content {
+    position: absolute;
+    z-index: 8;
+    right: 0;
+    top: calc(100% + 4px);
+    width: min(100%, 420px);
+    max-height: 50vh;
+    overflow: auto;
+    padding: 10px 12px;
+    border: 1px solid var(--border-neutral);
+    background: var(--surface-container-lowest);
+    color: var(--on-surface-variant);
+    box-shadow: 0 4px 12px #0002;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.statistics-filter-help-content p { margin: 0 0 8px; }
+.statistics-filter-help-content p:last-child { margin: 0; }
+
+/* Match the remaining panels to the compact filter spacing. */
+.rhythm-page, .soicau-page { gap: 10px; min-width: 0; }
+.rhythm-card, .sc-card { padding: 12px; min-width: 0; }
+.rhythm-overview { gap: 6px; }
+.rhythm-overview h2, .sc-card h2 { font-size: 17px; margin: 0 0 6px; }
+.rhythm-overview p, .sc-card > p { font-size: 13px; margin-bottom: 6px; }
+.rhythm-legend { gap: 6px 10px; margin: 6px 0 8px; }
+.rhythm-mark-toolbar { gap: 6px 12px; padding: 6px 8px; margin-bottom: 8px; }
+
+@media (min-width: 768px) {
+    .sc-filter.statistics-filter-bar {
+        grid-template-columns: minmax(136px, 1.2fr) minmax(80px, .8fr) minmax(110px, 1fr) minmax(95px, .9fr) minmax(75px, .7fr) minmax(116px, 1fr);
+    }
+}
+@media (min-width: 1200px) {
+    .rhythm-filter.statistics-filter-bar {
+        grid-template-columns: minmax(64px, .6fr) minmax(136px, 1.1fr) minmax(110px, 1.1fr) minmax(110px, 1fr) minmax(120px, 1.1fr) minmax(126px, 1fr);
+    }
+}
+@media (max-width: 575.98px) {
+    .statistics-filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .statistics-filter-bar > label > span { font-size: 12px; }
+    .statistics-filter-bar .form-control,
+    .statistics-filter-bar .form-select { height: 48px; min-height: 48px; font-size: 16px; padding-top: 19px; }
+    .statistics-filter-actions > .btn,
+    .statistics-filter-help > summary { min-height: 48px; }
+    .statistics-filter-actions > .btn { font-size: 13px; padding-inline: 6px; }
+    .statistics-filter-help { flex-basis: 28px; }
+    .rhythm-card, .sc-card { padding: 10px; }
+    .rhythm-legend { font-size: 12px; }
+    .rhythm-mark-toolbar { font-size: 12px; }
+    .sc-card h2 { font-size: 16px; }
+}

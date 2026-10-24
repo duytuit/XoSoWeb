@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using XoSoWeb.Services;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace XoSoWeb.Controllers
 {
@@ -14,12 +15,14 @@ namespace XoSoWeb.Controllers
         private readonly ArchiveCatalog catalog;
         private readonly VietlottStatisticsService statistics;
         private readonly INewsArticleService news;
-        public SeoController(SiteSettings site, ArchiveCatalog catalog, VietlottStatisticsService statistics = null, INewsArticleService news = null)
+        private readonly IMemoryCache cache;
+        public SeoController(SiteSettings site, ArchiveCatalog catalog, VietlottStatisticsService statistics = null, INewsArticleService news = null, IMemoryCache cache = null)
         {
             this.site = site;
             this.catalog = catalog;
             this.statistics = statistics;
             this.news = news;
+            this.cache = cache;
         }
         [HttpGet("/robots.txt")]
         public IActionResult Robots() => Content(site.AllowIndexing
@@ -33,10 +36,21 @@ namespace XoSoWeb.Controllers
             Response.Headers["Cache-Control"] = site.AllowIndexing ? "public,max-age=120" : "no-store";
             XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
             if (!site.AllowIndexing) return Content(new XDocument(new XElement(ns + "urlset")).ToString(), "application/xml; charset=utf-8");
+            var cacheKey = $"sitemap:{site.SiteUrl}:{PublicContentVersion.Value}:{LotteryUrls.Today:yyyyMMdd}:{part}";
+            if (cache != null && cache.TryGetValue(cacheKey, out string cachedXml))
+                return Content(cachedXml, "application/xml; charset=utf-8");
             var links = await catalog.GetAsync(HttpContext.RequestAborted);
+            links = links.Where(x => x.IsIndexable).ToList();
             var landingPages = links.Where(x => x.Region != null).Select(x => LotteryUrls.RegionPath(x.Region)).Distinct().ToList();
             if (links.Any(x => x.GameCode != null)) landingPages.Add("/vietlott");
             var statisticsPages = new List<string>();
+            // Only publish default statistics pages when their actual default date window has data.
+            if (links.Any(x => x.Region != null && x.Date >= LotteryUrls.Today.AddDays(-29))) statisticsPages.Add("/thong-ke");
+            var weekStart = LotteryUrls.Today.AddDays(-(((int)LotteryUrls.Today.DayOfWeek + 6) % 7));
+            if (links.Any(x => x.Region == "MB" && x.Date >= weekStart)) statisticsPages.Add("/thong-ke-tan-suat-loto");
+            if (links.Any(x => x.Region == "MB" && x.Date >= LotteryUrls.Today.AddDays(-29))) statisticsPages.Add("/thong-ke/nhip-so-mien-bac");
+            if (links.Any(x => x.Region == "MB" && x.Date == LotteryUrls.Today.AddDays(-1))
+                && links.Any(x => x.Region == "MB" && x.Date == LotteryUrls.Today.AddDays(-2))) statisticsPages.Add("/thong-ke/soi-cau");
             if (statistics != null)
             {
                 var statisticsIndex = await statistics.GetIndexAsync(HttpContext.RequestAborted);
@@ -75,7 +89,9 @@ namespace XoSoWeb.Controllers
                 root = new XElement(ns + "urlset", urls.Skip(((part ?? 1) - 1) * pageSize).Take(pageSize).Select(x =>
                     new XElement(ns + "url", new XElement(ns + "loc", site.Absolute(x.Path)),
                         x.Modified.HasValue ? new XElement(ns + "lastmod", x.Modified.Value.ToString("yyyy-MM-dd")) : null)));
-            return Content(new XDocument(root).ToString(), "application/xml; charset=utf-8");
+            var xml = new XDocument(root).ToString();
+            cache?.Set(cacheKey, xml, TimeSpan.FromMinutes(2));
+            return Content(xml, "application/xml; charset=utf-8");
         }
     }
 }

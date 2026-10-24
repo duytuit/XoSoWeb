@@ -1,0 +1,12 @@
+PASS: two historical transitions, prediction day excluded
+PASS: ordered positions preserve direct orientation
+PASS: direct mode considers both position orders
+PASS: direct mode rejects reverse hit
+PASS: reverse mode records actual hit
+PASS: special mode does not count other prizes
+PASS: missing day breaks chain
+PASS: missing immediately preceding draw prevents stale prediction
+PASS: stable prize order and leading zeroes
+PASS: incomplete draw rejected
+PASS: filter query passes public middleware
+All SoiCau regression checks passed.

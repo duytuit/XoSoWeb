@@ -83,7 +83,7 @@ namespace XoSoWeb.Services
 
         public async Task<VietlottStatisticsIndexViewModel> GetIndexAsync(CancellationToken cancellation)
         {
-            return await cache.GetOrCreateAsync("vietlott-statistics-index", async entry =>
+            return await cache.GetOrCreateAsync("vietlott-statistics-index-" + PublicContentVersion.Value, async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
                 return await BuildIndexAsync(cancellation);
@@ -140,7 +140,7 @@ namespace XoSoWeb.Services
                 || (prizeName != null && prizeName.Length > 100)
                 || (endDraw != null && !LotteryUrls.ValidDrawNo(endDraw))) return null;
 
-            var cacheKey = "vietlott-stat-" + game + "-" + toolSlug + "-" + periods + "-" + (endDraw ?? "latest")
+            var cacheKey = "vietlott-stat-" + PublicContentVersion.Value + "-" + game + "-" + toolSlug + "-" + periods + "-" + (endDraw ?? "latest")
                 + "-" + (prizeName ?? "all");
             var cached = await cache.GetOrCreateAsync(cacheKey, async entry =>
             {

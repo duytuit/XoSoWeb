@@ -33,6 +33,8 @@ namespace XoSoWeb.Services
         // SQL Server before JSON support: identity is resolved without SQL JSON functions.
         public static string IdentitySql => "CASE " + string.Join(" ", Stations.Select(s =>
             "WHEN ProvinceCode IN (" + SqlAliases(s) + ") OR ProvinceName IN (" + SqlAliases(s) + ") THEN '" + s.Id + "'")) + " ELSE ProvinceCode END";
+        public static string RegionSql => "CASE " + string.Join(" ", Stations.Select(s =>
+            "WHEN ProvinceCode IN (" + SqlAliases(s) + ") OR ProvinceName IN (" + SqlAliases(s) + ") THEN '" + s.Region + "'")) + " ELSE Region END";
         private static string SqlAliases(LotteryStation station) => string.Join(",", station.Aliases.SelectMany(a => new[] { a, "Xổ số " + a }).Distinct().Select(a => "N'" + a.Replace("'", "''") + "'"));
         public static void Normalize(XoSoResult result)
         {
@@ -46,15 +48,19 @@ namespace XoSoWeb.Services
         {
             var rows = results.ToList();
             foreach (var row in rows) Normalize(row);
-            return rows.GroupBy(r => new { Region = LotteryUrls.RegionCode(r.Region), r.ProvinceCode, Date = r.DrawDate.Date })
+            return rows.GroupBy(r => new { Region = LotteryUrls.RegionCode(r.Region),
+                    Identity = Resolve(r.ProvinceCode, r.ProvinceName)?.Id ?? (string.IsNullOrWhiteSpace(r.ProvinceName) ? r.ProvinceCode : LotteryUrls.Slug(r.ProvinceName)), Date = r.DrawDate.Date })
                 .Select(g => {
-                    var ordered = g.OrderByDescending(r => r.SourcePriority)
+                    var ordered = g.OrderByDescending(r => LotteryDataQuality.IsComplete(r.Prizes, g.Key.Region))
+                        .ThenByDescending(r => r.SourcePriority)
                         .ThenByDescending(r => r.Prizes.Sum(p => p.Numbers?.Count(n => !string.IsNullOrWhiteSpace(n)) ?? 0))
                         .ThenByDescending(r => r.UpdatedAt).ThenByDescending(r => r.Id).ToList();
                     var winner = ordered.First();
                     winner.Prizes = ordered.SelectMany(r => r.Prizes)
                         .GroupBy(p => XoSoPrize.NormalizeName(p.PrizeName))
-                        .Select(prizes => prizes.FirstOrDefault(p => p.Numbers != null && p.Numbers.Any(n => !string.IsNullOrWhiteSpace(n))) ?? prizes.First()).ToList();
+                        .Select(prizes => prizes.FirstOrDefault(p => LotteryDataQuality.IsCompletePrize(p, g.Key.Region))
+                            ?? prizes.Where(p => p.Numbers != null).OrderByDescending(p => p.Numbers.Count(n => !string.IsNullOrWhiteSpace(n))).FirstOrDefault()
+                            ?? prizes.First()).ToList();
                     return winner;
                 })
                 .OrderByDescending(r => r.DrawDate).ThenBy(r => r.ProvinceName).ToList();

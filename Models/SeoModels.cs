@@ -14,6 +14,7 @@ namespace XoSoWeb.Models
         public string DrawNo { get; set; }
         public DateTime? Date { get; set; }
         public DateTime? Modified { get; set; }
+        public bool IsIndexable { get; set; } = true;
     }
     public sealed class ArchivePage
     {

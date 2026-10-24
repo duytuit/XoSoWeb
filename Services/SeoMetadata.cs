@@ -23,9 +23,13 @@ namespace XoSoWeb.Services
         {
 
     var path = request.Path.Value ?? "/";
-    var title = (viewData["Title"]?.ToString() ?? Site.SiteName) + " | " + Site.SiteName;
+    var pageTitle = viewData["Title"]?.ToString();
+    var title = path == "/" ? Site.SiteName + " - Kết quả xổ số hôm nay, XSMB, XSMT, XSMN, Vietlott"
+        : string.IsNullOrWhiteSpace(pageTitle) ? Site.SiteName
+        : pageTitle.Equals(Site.SiteName, StringComparison.OrdinalIgnoreCase) || pageTitle.EndsWith(" | " + Site.SiteName, StringComparison.OrdinalIgnoreCase)
+            ? pageTitle : pageTitle + " | " + Site.SiteName;
     var descriptions = new Dictionary<string, string> {
-        ["/"] = "Tra cứu kết quả xổ số Miền Bắc, Miền Trung, Miền Nam và Vietlott theo ngày quay, cùng thống kê từ dữ liệu đã lưu.",
+        ["/"] = "Xem kết quả xổ số Bắc, Trung, Nam và Vietlott mới nhất. Tra cứu theo ngày, theo đài, xem thống kê và lịch quay trên giao diện gọn, dễ đọc.",
         ["/xo-so-mien-bac"] = "Kết quả xổ số Miền Bắc theo ngày quay, bảng giải và thống kê lô tô đầu đuôi.",
         ["/xo-so-mien-trung"] = "Kết quả xổ số Miền Trung theo tỉnh và ngày quay, bảng giải và lịch sử có dữ liệu.",
         ["/xo-so-mien-nam"] = "Kết quả xổ số Miền Nam theo tỉnh và ngày quay, bảng giải và lịch sử có dữ liệu.",
@@ -41,13 +45,15 @@ namespace XoSoWeb.Services
     var filters = request.Query.Where(x => filterKeys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)).OrderBy(x => x.Key, StringComparer.Ordinal).ToList();
     var canonicalPath = path + (filters.Count == 0 ? "" : "?" + string.Join("&", filters.Select(x => Uri.EscapeDataString(filterKeys.First(k => k.Equals(x.Key, StringComparison.OrdinalIgnoreCase))) + "=" + Uri.EscapeDataString(x.Value.ToString()))));
     var canonical = Site.Absolute(canonicalPath);
-    var noindex = !Site.AllowIndexing || filters.Count > 0 || (bool?)viewData["NoIndex"] == true;
+    var editorialPagination = path.StartsWith("/tin-tuc", StringComparison.Ordinal) && filters.All(f => f.Key.Equals("page", StringComparison.OrdinalIgnoreCase));
+    var noindex = !Site.AllowIndexing || (filters.Count > 0 && !editorialPagination) || (bool?)viewData["NoIndex"] == true;
     var graph = new List<object> { new Dictionary<string, object> { ["@type"] = "WebSite", ["@id"] = Site.Absolute("/#website"), ["url"] = Site.Absolute("/"), ["name"] = Site.SiteName, ["inLanguage"] = "vi" } };
     if (!string.IsNullOrWhiteSpace(Site.OrganizationName))
     {
         var organization = new Dictionary<string, object> { ["@type"] = "Organization", ["@id"] = Site.Absolute("/#organization"), ["name"] = Site.OrganizationName, ["url"] = Site.Absolute("/") };
         if (!string.IsNullOrWhiteSpace(Site.ContactEmail)) organization["email"] = Site.ContactEmail;
         if (!string.IsNullOrWhiteSpace(Site.ContactPhone)) organization["telephone"] = Site.ContactPhone;
+        if (!string.IsNullOrWhiteSpace(Site.LogoUrl)) organization["logo"] = Site.Absolute(Site.LogoUrl);
         graph.Add(organization);
     }
     var crumbs = new List<object> { new Dictionary<string, object> { ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Trang chủ", ["item"] = Site.Absolute("/") } };

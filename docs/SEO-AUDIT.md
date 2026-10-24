@@ -1,3 +1,5 @@
+> Current audit: [Xem Nhanh, 24/10/2026](SEO-XEM-NHANH-2026-10-24.md). The results below describe earlier implementation stages and do not supersede the current report.
+
 # SEO audit: metadata, history and crawling
 
 Validated locally with `dotnet run --project tests/SeoRegression --no-restore`: 445 checks. Tests use an isolated database fixture and real MVC routing/Razor rendering. No production crawl, live database changes, Search Console submission or external schema-validator submission was performed.

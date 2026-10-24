@@ -5,13 +5,14 @@
     ViewData["Title"] = "Thống kê giải đặc biệt ba miền · " + Model.StartDate.ToString("dd/MM/yyyy") + " – " + Model.EndDate.ToString("dd/MM/yyyy");
     ViewData["Description"] = "Bảng giải đặc biệt ba miền từ " + Model.StartDate.ToString("dd/MM/yyyy") + " đến " + Model.EndDate.ToString("dd/MM/yyyy") + ", trình bày theo tuần để tra cứu và đối chiếu.";
     if (Model.Regions.All(r => r.Entries.Count == 0)) ViewData["NoIndex"] = true;
-    var dayHeaders = new[] { "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật" };
+    var dayHeaders = new[] { "T2", "T3", "T4", "T5", "T6", "T7", "CN" };
     var calendarStart = Model.StartDate.AddDays(-(((int)Model.StartDate.DayOfWeek + 6) % 7));
     var calendarEnd = Model.EndDate.AddDays(6 - (((int)Model.EndDate.DayOfWeek + 6) % 7));
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/statistics.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/special-statistics-compact.css" asp-append-version="true" />
 }
 
 <div class="regional-page-title">
@@ -21,18 +22,19 @@
     </div>
 </div>
 
-<div class="special-statistics-page">
+<nav class="statistics-tool-links" aria-label="Công cụ thống kê"><a href="/thong-ke/nhip-so-mien-bac">Nhịp số miền Bắc</a><a href="/thong-ke/soi-cau">Soi cầu miền Bắc</a><a href="/thong-ke-tan-suat-loto">Tần suất lô tô</a><a href="/thong-ke/vietlott">Thống kê Vietlott</a></nav>
+<div class="special-statistics-page special-statistics-compact">
     <div class="statistics-toolbar">
         <div class="statistics-period">
-            <span class="statistics-eyebrow">Khoảng thống kê · 30 ngày</span>
+            <span class="statistics-eyebrow">30 ngày</span>
             <strong>@Model.StartDate.ToString("dd/MM/yyyy") <span>—</span> @Model.EndDate.ToString("dd/MM/yyyy")</strong>
         </div>
     <form method="get" asp-controller="Home" asp-action="Statistics" class="statistics-filter">
         <div class="statistics-date-field">
-            <label for="statistics-end-date" class="form-label">Thống kê 30 ngày đến ngày</label>
+            <label for="statistics-end-date" class="form-label">Đến ngày</label>
             <input id="statistics-end-date" name="endDate" type="date" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-dd")" max="@DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).ToString("yyyy-MM-dd")" min="1753-01-30" required />
         </div>
-        <button class="btn btn-primary" type="submit">Xem kết quả</button>
+        <button class="btn btn-primary" type="submit">Xem</button>
     </form>
     </div>
     <div class="statistics-legend"><span><i aria-hidden="true"></i> Thứ bảy &amp; chủ nhật</span><span class="statistics-scroll-hint">Vuốt ngang để xem đủ 7 ngày →</span></div>
@@ -40,7 +42,7 @@
     {
         <section id="region-@region.RegionCode" class="special-statistics-region" aria-labelledby="statistics-@region.RegionCode">
             <header class="special-statistics-header">
-                <div><span class="statistics-eyebrow">Giải đặc biệt</span><h2 id="statistics-@region.RegionCode">Xổ số @region.RegionName</h2></div>
+                <div><h2 id="statistics-@region.RegionCode"><a href="@XoSoWeb.Services.LotteryUrls.RegionPath(region.RegionCode)">Xổ số @region.RegionName</a></h2></div>
                 <span class="statistics-result-count">@region.Entries.Count kết quả</span>
             </header>
             @if (region.Entries.Count == 0)
@@ -93,7 +95,7 @@
                                                 {
                                                     <span class="special-statistics-no-result">Chưa cập nhật</span>
                                                 }
-                                                <time class="special-statistics-date" datetime="@date.ToString("yyyy-MM-dd")">@date.ToString("dd/MM/yyyy")</time>
+                                                <time class="special-statistics-date" datetime="@date.ToString("yyyy-MM-dd")" title="@date.ToString("dd/MM/yyyy")">@date.ToString("dd/MM")</time>
                                             }
                                         </td>
                                     }

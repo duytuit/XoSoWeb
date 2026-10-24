@@ -26,11 +26,11 @@
                             var position = offset++;
                             if (Model.Interactive)
                             {
-                                <button type="button" class="sc-board-digit @(Model.Positions.Contains(position) ? "has-pattern" : "")" data-position="@position" data-digit-position="@position" title="@Model.Draw.Labels[position] · vị trí @(position + 1)" aria-label="@Model.Draw.Labels[position]: @Model.Draw.Digits[position]" aria-pressed="false" disabled="@(!Model.Positions.Contains(position))">@Model.Draw.Digits[position]</button>
+                                <button type="button" class="sc-board-digit @(Model.Positions.Contains(position) ? "has-pattern" : "")" data-position="@position" data-digit-position="@position" aria-label="@Model.Draw.Labels[position]: @Model.Draw.Digits[position]" aria-pressed="false" disabled="@(!Model.Positions.Contains(position))">@Model.Draw.Digits[position]</button>
                             }
                             else
                             {
-                                <span class="sc-board-digit" data-digit-position="@position" title="@Model.Draw.Labels[position] · vị trí @(position + 1)">@Model.Draw.Digits[position]</span>
+                                <span class="sc-board-digit" data-digit-position="@position">@Model.Draw.Digits[position]</span>
                             }
                         }
                     </td>

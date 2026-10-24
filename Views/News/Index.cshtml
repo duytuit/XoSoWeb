@@ -1,13 +1,13 @@
 @model XoSoWeb.Models.NewsArticleListViewModel
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.Title + (Model.Page > 1 ? " · Trang " + Model.Page : "");
     var basePath = Model.Category == XoSoWeb.Models.NewsArticleCategories.Winners ? "/tin-tuc/trung-thuong-vietlott"
         : Model.Category == XoSoWeb.Models.NewsArticleCategories.Guides ? "/tin-tuc/huong-dan"
         : Model.Category == XoSoWeb.Models.NewsArticleCategories.Vietlott ? "/tin-tuc/vietlott" : "/tin-tuc";
 }
 @section Styles { <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" /> }
 <section class="news-page" aria-labelledby="news-title">
-    <h1 id="news-title">@Model.Title</h1>
+    <h1 id="news-title">@ViewData["Title"]</h1>
     <nav class="news-categories" aria-label="Danh mục tin">
         <a href="/tin-tuc" class="@(Model.Category == null ? "is-active" : "")">Tất cả</a>
         <a href="/tin-tuc/vietlott" class="@(Model.Category == XoSoWeb.Models.NewsArticleCategories.Vietlott ? "is-active" : "")">Vietlott</a>
@@ -33,7 +33,7 @@
                     <div class="news-list-copy">
                         <h2><a href="/tin-tuc/bai-viet/@article.Slug">@article.Title</a></h2>
                         <p class="news-list-meta">
-                            <time datetime="@article.PublishedAt.ToString("O")">@XoSoWeb.Services.NewsDateTime.FormatDate(article.PublishedAt)</time>
+                            <time datetime="@XoSoWeb.Services.NewsDateTime.IsoUtc(article.PublishedAt)">@XoSoWeb.Services.NewsDateTime.FormatDate(article.PublishedAt)</time>
                             @if (!string.IsNullOrWhiteSpace(article.Author)) { <span> · @article.Author</span> }
                         </p>
                         @if (!string.IsNullOrWhiteSpace(article.Summary)) { <p class="news-summary">@article.Summary</p> }
