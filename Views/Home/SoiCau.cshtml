@@ -1,6 +1,7 @@
 @model XoSoWeb.Models.SoiCauViewModel
 @using System.Linq
 @using XoSoWeb.Services
+@using Microsoft.AspNetCore.WebUtilities
 @{
     ViewData["Title"] = "Soi cầu miền Bắc";
     ViewData["Description"] = "Tra cứu cầu theo vị trí chữ số, độ dài và lịch sử đối chiếu kết quả miền Bắc.";
@@ -12,6 +13,13 @@
     if (latest != null && Model.Patterns.Count > 0) historyDates.Add(latest.Date);
     var positions = Model.Patterns.SelectMany(p => new[] { p.First, p.Second }).ToHashSet();
     var groups = Model.Patterns.GroupBy(p => Model.Reverse && string.CompareOrdinal(p.Number, new string(p.Number.Reverse().ToArray())) > 0 ? new string(p.Number.Reverse().ToArray()) : p.Number).OrderByDescending(g => g.Count()).ThenBy(g => g.Key).ToList();
+    var longerCount = Model.Patterns.Count(p => p.Steps.Count > Model.Length);
+    var longerGroups = groups.Count(g => g.Any(p => p.Steps.Count > Model.Length));
+    string FilterUrl(int length, string q) => QueryHelpers.AddQueryString("/thong-ke/soi-cau", new System.Collections.Generic.Dictionary<string, string> {
+        ["date"] = Model.Date.ToString("yyyy-MM-dd"), ["length"] = length.ToString(),
+        ["target"] = Model.Target, ["reverse"] = Model.Reverse ? "true" : "false", ["q"] = q
+    });
+
 }
 @section Styles {
     <link rel="stylesheet" href="~/css/soi-cau.css" asp-append-version="true" />
@@ -20,12 +28,16 @@
 <div class="regional-page-title"><div><h1 class="detail-page-heading">Soi cầu miền Bắc</h1><p class="detail-page-description">Phân tích các cặp vị trí chữ số từ kết quả đã lưu.</p></div></div>
 <nav class="d-flex flex-wrap gap-2 mb-2" aria-label="Dữ liệu kết quả nguồn"><a href="/xo-so-mien-bac">Kết quả miền Bắc</a><a href="/thong-ke">Giải đặc biệt</a></nav>
 <div class="soicau-page" data-target="@Model.Target">
+<nav class="sc-mode-tabs" aria-label="Cách tìm cầu">
+    <a href="@FilterUrl(Model.Length, "")" class="@(Model.Q.Length == 0 ? "is-active" : "")" aria-current="@(Model.Q.Length == 0 ? "page" : null)">Soi cầu toàn diện</a>
+    <button type="button" id="sc-pair-search" class="@(Model.Q.Length > 0 ? "is-active" : "")">Tìm cầu cho cặp số</button>
+</nav>
 <form method="get" action="/thong-ke/soi-cau" class="sc-filter statistics-filter-bar">
     <label><span>Ngày soi cầu</span><input class="form-control" type="date" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" min="1753-02-01" max="@LotteryUrls.Today.ToString("yyyy-MM-dd")" required /></label>
     <label><span>Độ dài cầu</span><select class="form-select" name="length">@for (var i = 1; i <= 10; i++) { <option value="@i" selected="@(Model.Length == i)">@i ngày</option> }</select></label>
     <label><span>Loại cầu</span><select class="form-select" name="target"><option value="loto" selected="@(Model.Target == "loto")">Lô tô</option><option value="special" selected="@(Model.Target == "special")">ĐB (2 số cuối)</option></select></label>
     <label><span>Số đảo</span><select class="form-select" name="reverse"><option value="true" selected="@Model.Reverse">Có đảo</option><option value="false" selected="@(!Model.Reverse)">Không đảo</option></select></label>
-    <label><span>Cặp số</span><input class="form-control" type="text" name="q" value="@Model.Q" inputmode="numeric" pattern="[0-9]{2}" maxlength="2" placeholder="00–99" /></label>
+    <label><span>Cặp số</span><input class="form-control" type="text" id="sc-pair-filter" name="q" value="@Model.Q" inputmode="numeric" pattern="[0-9]{2}" maxlength="2" placeholder="00–99" /></label>
     <div class="statistics-filter-actions">
         <button class="btn btn-primary" type="submit">Soi cầu</button>
         <details class="statistics-filter-help"><summary aria-label="Hướng dẫn bộ lọc và cách tính cầu" title="Hướng dẫn">?</summary>
@@ -34,23 +46,51 @@
         </details>
     </div>
 </form>
+<nav class="sc-length-nav" aria-label="Số ngày cầu chạy"><span>Số ngày cầu chạy:</span>
+@for (var length = 1; length <= 10; length++) {
+    <a href="@FilterUrl(length, Model.Q)" class="@(Model.Length == length ? "is-active" : "")" aria-current="@(Model.Length == length ? "page" : null)">@length</a>
+}
+</nav>
 @if (latest == null) {
     <div class="sc-card"><p>Chưa có bảng kết quả miền Bắc đầy đủ ngày @Model.Date.AddDays(-1).ToString("dd/MM/yyyy") để soi cầu. Vui lòng chọn ngày khác.</p></div>
 } else {
-    <section class="sc-card"><h2>Bảng vị trí ngày @latest.Date.ToString("dd/MM/yyyy")</h2><p>Chọn chữ số được tô đậm để lọc các cầu có vị trí đó. Chọn lại để bỏ lọc.</p>
-    <div class="sc-matrix">@for (var i = 0; i < latest.Digits.Length; i++) {
-        <button type="button" class="sc-digit @(positions.Contains(i) ? "has-pattern" : "")" data-position="@i" title="@latest.Labels[i]" aria-label="@latest.Labels[i]: @latest.Digits[i]" aria-pressed="false" disabled="@(!positions.Contains(i))">@latest.Digits[i]<small>@(i + 1)</small></button>
-    }</div><p id="sc-position-status" aria-live="polite"></p></section>
-    <section class="sc-card"><h2>Cầu lặp theo cặp số</h2><p><strong>@Model.Patterns.Count cầu</strong> đạt từ @Model.Length ngày, thuộc @groups.Count cặp số.</p>
+    <section class="sc-card sc-position-card" aria-label="Bảng kết quả và vị trí tạo cầu">
+        <div class="sc-board-wrap"><partial name="~/Views/Home/_SoiCauBoard.cshtml" model="@(new XoSoWeb.Models.SoiCauBoardViewModel { Draw = latest, Interactive = true, Positions = positions })" /></div>
+        <ul class="sc-position-help"><li>Chữ số đậm là vị trí đang có cầu. Chọn một vị trí để xem các vị trí ghép cùng.</li><li>Vị trí ghép cùng được tô đỏ; bấm vào đó để mở lịch sử cầu tương ứng.</li></ul>
+        <p id="sc-position-status" role="status"></p>
+        <details class="sc-position-map"><summary>Bảng vị trí cầu · 107 chữ số</summary>
+            <div class="sc-matrix">@for (var i = 0; i < latest.Digits.Length; i++) {
+                <button type="button" class="sc-digit @(positions.Contains(i) ? "has-pattern" : "")" data-position="@i" title="@latest.Labels[i]" aria-label="@latest.Labels[i]: @latest.Digits[i]" aria-pressed="false" disabled="@(!positions.Contains(i))">@latest.Digits[i]<small>@(i + 1)</small></button>
+            }</div>
+        </details>
+    </section>
+    <section class="sc-card sc-summary"><h2>Kết quả soi cầu ngày @Model.Date.ToString("dd/MM/yyyy")</h2>
+        <p>Tìm được <strong>@Model.Patterns.Count cầu</strong> chạy ít nhất @Model.Length ngày; <strong>@longerCount cầu</strong> chạy dài hơn @Model.Length ngày.</p>
+        <div class="sc-number-list" aria-label="Các cầu tìm được">@for (var i = 0; i < Model.Patterns.Count; i++) {
+            var pattern = Model.Patterns[i];
+            <a href="#sc-pattern-@i" data-pattern-index="@i" class="sc-number-link @(pattern.Steps.Count > Model.Length ? "is-long" : "")" title="@pattern.Steps.Count ngày · vị trí @(pattern.First + 1) + @(pattern.Second + 1)">@pattern.Number</a>
+        }</div>
+        <p>Có <strong>@groups.Count cặp số</strong> khác nhau; @longerGroups cặp có cầu dài hơn @Model.Length ngày. Số in đậm là cầu dài hơn mức đang chọn.</p>
+        @if (groups.Count > 0) {
+            var highest = groups[0].Count();
+            var leaders = groups.Where(g => g.Count() == highest).Select(g => {
+                var reverse = new string(g.Key.Reverse().ToArray());
+                return Model.Reverse && reverse != g.Key ? g.Key + "/" + reverse : g.Key;
+            });
+            <p>Nhiều cầu nhất: <strong>@string.Join(", ", leaders)</strong> · @highest vị trí cầu cho mỗi cặp.</p>
+        }
+    </section>
+    <section class="sc-card"><h2>Thống kê cầu lặp</h2><p><strong>@Model.Patterns.Count cầu</strong> đạt từ @Model.Length ngày, thuộc @groups.Count cặp số.</p>
     <div class="sc-groups">@foreach (var group in groups) {
         var reversed = new string(group.Key.Reverse().ToArray());
         <a href="#sc-results" class="sc-group" data-number="@group.Key"><strong>@group.Key@(Model.Reverse && reversed != group.Key ? "/" + reversed : "")</strong><span>@group.Count() cầu</span></a>
     }</div></section>
-    <section class="sc-card" id="sc-results"><h2>Kết quả soi cầu ngày @Model.Date.ToString("dd/MM/yyyy")</h2>
+    <section class="sc-card" id="sc-results"><h2>Chi tiết và lịch sử đối chiếu</h2>
     <button type="button" id="sc-reset" class="btn btn-outline-secondary btn-sm">Hiện tất cả cầu</button>
     @if (Model.Patterns.Count == 0) { <p>Không tìm thấy cầu đạt điều kiện. Có thể giảm độ dài hoặc chọn ngày khác. Cần ít nhất @(Model.Length + 1) bảng kết quả đầy đủ, liên tiếp.</p> }
-    <div class="sc-patterns">@foreach (var pattern in Model.Patterns) {
-        <details class="sc-pattern" name="soicau-patterns" data-first="@pattern.First" data-second="@pattern.Second" data-value="@pattern.Number" data-reversed="@(new string(pattern.Number.Reverse().ToArray()))">
+    <div class="sc-patterns">@for (var patternIndex = 0; patternIndex < Model.Patterns.Count; patternIndex++) {
+        var pattern = Model.Patterns[patternIndex];
+        <details id="sc-pattern-@patternIndex" class="sc-pattern" name="soicau-patterns" data-first="@pattern.First" data-second="@pattern.Second" data-value="@pattern.Number" data-reversed="@(new string(pattern.Number.Reverse().ToArray()))">
             <summary><strong>@pattern.Number</strong><span>@pattern.Steps.Count ngày</span><span>Vị trí @(pattern.First + 1) + @(pattern.Second + 1)</span></summary>
             <p>@latest.Labels[pattern.First] + @latest.Labels[pattern.Second]</p>
             <p>Ghép ngày @latest.Date.ToString("dd/MM/yyyy"): <strong>@pattern.Number</strong> → ngày @Model.Date.ToString("dd/MM/yyyy") (chưa đối chiếu).</p>
@@ -61,7 +101,7 @@
     }</div><p id="sc-empty" hidden>Không có cầu phù hợp với bộ lọc đang chọn.</p></section>
 }
 @foreach (var draw in Model.Draws.Where(draw => historyDates.Contains(draw.Date))) {
-    <template id="sc-draw-@draw.Date.ToString("yyyy-MM-dd")"><partial name="_SoiCauBoard" model="@(new XoSoWeb.Models.SoiCauBoardViewModel { Draw = draw })" /></template>
+    <template id="sc-draw-@draw.Date.ToString("yyyy-MM-dd")"><partial name="~/Views/Home/_SoiCauBoard.cshtml" model="@(new XoSoWeb.Models.SoiCauBoardViewModel { Draw = draw })" /></template>
 }
 </div>
 @section Scripts { <script src="~/js/soi-cau.js" asp-append-version="true"></script> }

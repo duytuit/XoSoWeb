@@ -124,6 +124,13 @@ Check(document.QuerySelector("tfoot [data-column='00']").TextContent.Contains("â
 Check(document.QuerySelectorAll("a[href='/thong-ke/nhip-so-mien-bac']").Length == 3, "new entry appears in desktop, mobile and sidebar menus");
 using (var json = System.Text.Json.JsonDocument.Parse(document.QuerySelector("#rhythm-cycle-data").TextContent))
     Check(json.RootElement.GetArrayLength() == 100 && json.RootElement.EnumerateArray().Single(c => c.GetProperty("number").GetString() == "12").GetProperty("cycles").GetArrayLength() == 1, "dialog receives correctly bounded cycle data");
+var expandedHtml = await client.GetStringAsync("/__rhythm-fixture?expanded=true");
+var expandedDocument = new HtmlParser().ParseDocument(expandedHtml);
+Check(expandedDocument.QuerySelector(".rhythm-expanded") != null && expandedDocument.QuerySelector("#topbar") == null, "expanded view uses its own layout without site navigation");
+Check(expandedDocument.QuerySelector("form.rhythm-filter").GetAttribute("action") == "/thong-ke/nhip-so-mien-bac/phong-to"
+    && expandedDocument.QuerySelector("#rhythm-expand").GetAttribute("href").StartsWith("/thong-ke/nhip-so-mien-bac?"), "expanded filters remain on separate view and return link preserves filter values");
+Check(expandedDocument.QuerySelector("meta[name='robots']").GetAttribute("content").Contains("noindex")
+    && expandedDocument.QuerySelectorAll(".rhythm-number-row [data-column]").Length == 100, "expanded page keeps full matrix and is noindex");
 var emptyHtml = await client.GetStringAsync("/__rhythm-fixture?empty=true");
 var emptyDocument = new HtmlParser().ParseDocument(emptyHtml);
 Check(emptyDocument.QuerySelector(".rhythm-empty[role='status']") != null && emptyDocument.QuerySelector("meta[name='robots']").GetAttribute("content").Contains("noindex"), "empty dataset has usable empty state and noindex");
@@ -145,8 +152,9 @@ public sealed class RhythmFixtureController : Controller
     private readonly NumberRhythmViewModel model;
     public RhythmFixtureController(NumberRhythmViewModel model) => this.model = model;
     [HttpGet("/__rhythm-fixture")]
-    public IActionResult Page(bool empty = false)
+    public IActionResult Page(bool empty = false, bool expanded = false)
     {
+        if (expanded) return View("~/Views/Home/NumberRhythmExpanded.cshtml", model);
         if (!empty) return View("~/Views/Home/NumberRhythm.cshtml", model);
         var blank = new NumberRhythmViewModel { EndDate = model.EndDate, Days = 7 };
         NumberRhythmCalculator.Calculate(blank, Array.Empty<NumberRhythmDay>());

@@ -24,10 +24,13 @@ function element() {
     };
 }
 const page = element(), body = element(), table = element();
+table.clientWidth = 1920;
+const numberCells = Array.from({ length: 100 }, element);
+const dateCell = { getBoundingClientRect: () => ({ width: 104 }) };
 const form = { elements: { endDate: { value: '2026-10-24' } }, requestSubmit() {} };
-page.querySelector = selector => selector === '.rhythm-filter' ? form : table;
+page.querySelector = selector => selector === '.rhythm-filter' ? form : selector === '.rhythm-number-row > th' ? dateCell : table;
 const keyboardTargets = [element(), element()];
-page.querySelectorAll = selector => selector.startsWith('a[href],button') ? keyboardTargets : [];
+page.querySelectorAll = selector => selector.startsWith('a[href],button') ? keyboardTargets : selector === '.rhythm-number-row [data-column]' ? numberCells : [];
 document = {
     body, activeElement: null,
     querySelector: () => page,
@@ -36,7 +39,7 @@ document = {
 };
 document.getElementById('rhythm-cycle-data').textContent = '[]';
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../../wwwroot/js/number-rhythm.js'), 'utf8'), {
-    document, localStorage: { getItem: () => null, setItem() {} },
+    document, URLSearchParams, FormData: class { *[Symbol.iterator]() { yield ["days", "30"]; yield ["q", "12,34"]; yield ["target", "special"]; } }, localStorage: { getItem: () => null, setItem() {} },
 });
 const get = id => document.getElementById('rhythm-' + id);
 assert.equal(get('zoom-value').textContent, '100%');
@@ -49,24 +52,29 @@ assert.equal(get('zoom-value').textContent, '75%');
 assert.equal(get('zoom-out').disabled, true);
 get('zoom-reset').dispatch('click');
 assert.equal(get('zoom-value').textContent, '100%');
+get('fit-width').dispatch('click');
+assert.equal(get('fit-width').getAttribute('aria-pressed'), 'true');
+assert.equal(page.style.values.get('--rhythm-cell-width'), '18px');
+get('zoom-in').dispatch('click');
+assert.equal(get('fit-width').getAttribute('aria-pressed'), 'false');
+assert.equal(page.style.values.get('--rhythm-cell-width'), '26px');
+get('fit-width').dispatch('click');
+assert.equal(get('zoom-value').textContent, '100%');
+table.clientWidth = 390;
+get('fit-width').dispatch('click'); get('fit-width').dispatch('click');
+assert.equal(page.style.values.get('--rhythm-cell-width'), '16px');
+get('expand').dataset = { viewPath: '/thong-ke/nhip-so-mien-bac/phong-to' };
 get('expand').dispatch('click');
-assert.equal(page.classList.contains('rhythm-expanded'), true);
-assert.equal(body.classList.contains('rhythm-expanded-active'), true);
-assert.equal(page.getAttribute('aria-modal'), 'true');
-assert.equal(document.activeElement, get('expand'));
-document.activeElement = keyboardTargets[1];
-document.keydown({ key: 'Tab', preventDefault() {} });
-assert.equal(document.activeElement, keyboardTargets[0]);
-document.keydown({ key: 'Tab', shiftKey: true, preventDefault() {} });
-assert.equal(document.activeElement, keyboardTargets[1]);
+assert.equal(get('expand').href, '/thong-ke/nhip-so-mien-bac/phong-to?days=30&q=12%2C34&target=special');
+get('expand').dataset.viewPath = '/thong-ke/nhip-so-mien-bac';
+let navigations = 0;
+get('expand').click = () => { navigations++; get('expand').dispatch('click'); };
+page.classList.toggle('rhythm-expanded', true);
 get('cycle-dialog').open = true;
 document.keydown({ key: 'Escape', preventDefault() {} });
-assert.equal(page.classList.contains('rhythm-expanded'), true);
+assert.equal(navigations, 0);
 get('cycle-dialog').open = false;
 document.keydown({ key: 'Escape', preventDefault() {} });
-assert.equal(page.classList.contains('rhythm-expanded'), false);
-assert.equal(body.classList.contains('rhythm-expanded-active'), false);
-assert.equal(page.getAttribute('aria-modal'), undefined);
-get('expand').dispatch('click'); get('expand').dispatch('click');
-assert.equal(page.classList.contains('rhythm-expanded'), false);
-console.log('PASS: zoom bounds/reset, expand/restore, Escape, nested cycle dialog and keyboard focus wrapping.');
+assert.equal(navigations, 1);
+assert.equal(get('expand').href, '/thong-ke/nhip-so-mien-bac?days=30&q=12%2C34&target=special');
+console.log('PASS: zoom bounds/reset, fit width, separate-view navigation preserves filters, Escape respects cycle dialog.');

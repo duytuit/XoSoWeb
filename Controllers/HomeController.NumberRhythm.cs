@@ -13,6 +13,7 @@ namespace XoSoWeb.Controllers
     public partial class HomeController
     {
         [HttpGet("/thong-ke/nhip-so-mien-bac")]
+        [HttpGet("/thong-ke/nhip-so-mien-bac/phong-to")]
         public async Task<IActionResult> NumberRhythm(DateTime? endDate = null, int days = 30,
             string target = "loto", string sort = "number", string q = "")
         {
@@ -58,7 +59,7 @@ namespace XoSoWeb.Controllers
             }
             finally { await _context.Database.CloseConnectionAsync(); }
             NumberRhythmCalculator.Calculate(model, draws);
-            return View(model);
+            return View(Request.Path.Value.EndsWith("/phong-to", StringComparison.Ordinal) ? "NumberRhythmExpanded" : "NumberRhythm", model);
         }
     }
 }

@@ -30,17 +30,52 @@
     let selected = null;
     const status = document.getElementById('sc-position-status');
     const empty = document.getElementById('sc-empty');
+    document.getElementById('sc-pair-search')?.addEventListener('click', () => {
+        const input = document.getElementById('sc-pair-filter');
+        input.required = true;
+        input.focus();
+        input.select();
+    });
+    function openPattern(pattern) {
+        if (!pattern) return;
+        clear(); filter(() => true);
+        patterns.forEach(other => { other.open = other === pattern; });
+        pattern.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        pattern.querySelector('summary')?.focus({ preventScroll: true });
+    }
+    document.querySelectorAll('[data-pattern-index]').forEach(link => link.addEventListener('click', event => {
+        event.preventDefault();
+        openPattern(document.getElementById(`sc-pattern-${link.dataset.patternIndex}`));
+    }));
     function filter(predicate) {
         let count = 0;
         patterns.forEach(p => { p.hidden = !predicate(p); if (!p.hidden) count++; });
         if (empty) empty.hidden = count !== 0;
         return count;
     }
-    function clear() { selected = null; digits.forEach(d => d.setAttribute('aria-pressed', 'false')); if (status) status.textContent = ''; }
+    function clear() {
+        selected = null;
+        digits.forEach(d => { d.setAttribute('aria-pressed', 'false'); d.classList.remove('sc-partner'); });
+        if (status) status.textContent = '';
+    }
     digits.forEach(d => d.addEventListener('click', () => {
         const value = d.dataset.position;
         if (selected === value) { clear(); filter(() => true); return; }
-        clear(); selected = value; d.setAttribute('aria-pressed', 'true');
+        if (selected !== null && d.classList.contains('sc-partner')) {
+            openPattern(patterns.find(p => (p.dataset.first === selected && p.dataset.second === value)
+                || (p.dataset.second === selected && p.dataset.first === value)));
+            return;
+        }
+        clear(); selected = value;
+        const partners = new Set();
+        patterns.forEach(p => {
+            if (p.dataset.first === value) partners.add(p.dataset.second);
+            if (p.dataset.second === value) partners.add(p.dataset.first);
+        });
+        digits.forEach(digit => {
+            digit.setAttribute('aria-pressed', String(digit.dataset.position === value));
+            digit.classList.toggle('sc-partner', partners.has(digit.dataset.position));
+        });
         const count = filter(p => p.dataset.first === value || p.dataset.second === value);
         if (status) status.textContent = `${count} cầu có vị trí ${Number(value) + 1}.`;
     }));

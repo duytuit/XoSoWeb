@@ -45,3 +45,37 @@
 
 .sc-group:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 1px; }
 @media (pointer: coarse) { .sc-pattern > summary { min-height: 38px; } .sc-group { min-height: 36px; } }
+
+/* Position board, quick lengths and historical summary. */
+.sc-mode-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border-neutral); }
+.sc-mode-tabs a, .sc-mode-tabs button {
+    padding: 7px 12px; border: 1px solid transparent; border-bottom: 0;
+    background: transparent; color: var(--on-surface-variant); text-decoration: none;
+    font-size: 13px; font-weight: 600;
+}
+.sc-mode-tabs .is-active { background: var(--surface-container-low); color: var(--bs-primary); border-color: var(--border-neutral); }
+.sc-mode-tabs a:focus-visible, .sc-mode-tabs button:focus-visible,
+.sc-number-link:focus-visible, .sc-length-nav a:focus-visible { outline: 2px solid var(--bs-primary); outline-offset: 2px; }
+.sc-length-nav { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 13px; }
+.sc-length-nav > span { margin-right: 4px; }
+.sc-length-nav a { display: inline-flex; justify-content: center; align-items: center; min-width: 30px; min-height: 30px; border: 1px solid var(--border-neutral); background: var(--surface-container-lowest); text-decoration: none; }
+.sc-length-nav a.is-active { background: var(--bs-primary); border-color: var(--bs-primary); color: #fff; font-weight: 700; }
+.sc-position-help { margin: 10px auto 0; max-width: 620px; padding-left: 20px; font-size: 12px; line-height: 1.6; color: var(--on-surface-variant); }
+.sc-position-card #sc-position-status { margin: 6px auto; max-width: 620px; font-size: 13px; }
+.sc-position-map { max-width: 620px; margin: 8px auto 0; font-size: 13px; }
+.sc-position-map summary { cursor: pointer; color: var(--bs-primary); }
+.sc-position-map .sc-matrix { margin-top: 8px; }
+.sc-board-digit.sc-partner, .sc-digit.sc-partner { color: #b91c1c; background: #fee2e2; font-weight: 800; }
+.sc-board-digit[aria-pressed=true], .sc-digit[aria-pressed=true] { outline: 2px solid var(--bs-primary); outline-offset: 1px; }
+.sc-summary p { margin: 6px 0; font-size: 13px; }
+.sc-number-list { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 0; }
+.sc-number-link { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; min-height: 30px; padding: 2px 4px; border: 1px solid var(--border-neutral); color: var(--bs-primary); font-size: 15px; font-variant-numeric: tabular-nums; font-weight: 400; text-decoration: none; }
+.sc-number-link.is-long { font-weight: 800; background: var(--surface-container-low); border-color: var(--bs-primary); }
+.sc-number-link:hover { background: var(--accent-gold); }
+.sc-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 4px; }
+.sc-group { justify-content: space-between; }
+.sc-pattern { scroll-margin-top: 90px; }
+@media (max-width: 575.98px) {
+    .sc-mode-tabs a, .sc-mode-tabs button { flex: 1; padding: 7px 5px; text-align: center; }
+    .sc-length-nav a, .sc-number-link { min-width: 32px; min-height: 36px; }
+}
