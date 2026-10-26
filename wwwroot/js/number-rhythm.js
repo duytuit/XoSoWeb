@@ -6,7 +6,24 @@
     const zoomReset = document.getElementById('rhythm-zoom-reset');
     const zoomValue = document.getElementById('rhythm-zoom-value');
     const expandButton = document.getElementById('rhythm-expand');
+    const fitButton = document.getElementById('rhythm-fit-width');
+    const tableWrap = page.querySelector('.rhythm-table-wrap');
+    let fitWidth = false;
     let zoom = 100;
+    function fitTable() {
+        if (!fitWidth || !tableWrap.clientWidth) return;
+        const count = [...page.querySelectorAll('.rhythm-number-row [data-column]')].filter(cell => !cell.hidden).length;
+        if (!count) return;
+        const dateWidth = page.querySelector('.rhythm-number-row > th').getBoundingClientRect().width;
+        const width = Math.max(16, Math.floor((tableWrap.clientWidth - dateWidth - 2) / count));
+        page.style.setProperty('--rhythm-cell-width', `${width}px`);
+    }
+    function setFitWidth(enabled) {
+        fitWidth = enabled;
+        fitButton.setAttribute('aria-pressed', String(enabled));
+        page.style.setProperty('--rhythm-cell-width', '26px');
+        if (enabled) { applyZoom(100); fitTable(); }
+    }
     function applyZoom(value) {
         zoom = Math.max(75, Math.min(175, value));
         page.style.setProperty('--rhythm-zoom', String(zoom / 100));
@@ -14,33 +31,21 @@
         zoomOut.disabled = zoom === 75;
         zoomIn.disabled = zoom === 175;
     }
-    zoomOut.addEventListener('click', () => applyZoom(zoom - 25));
-    zoomIn.addEventListener('click', () => applyZoom(zoom + 25));
-    zoomReset.addEventListener('click', () => applyZoom(100));
-    function setExpanded(expanded) {
-        page.classList.toggle('rhythm-expanded', expanded);
-        document.body.classList.toggle('rhythm-expanded-active', expanded);
-        expandButton.setAttribute('aria-pressed', String(expanded));
-        expandButton.textContent = expanded ? '✕ Thu gọn bảng' : '⛶ Phóng to bảng';
-        if (expanded) {
-            page.setAttribute('role', 'dialog');
-            page.setAttribute('aria-modal', 'true');
-            page.setAttribute('aria-label', 'Nhịp số miền Bắc — xem bảng phóng to');
-        } else {
-            page.removeAttribute('role'); page.removeAttribute('aria-modal'); page.removeAttribute('aria-label');
-        }
-        expandButton.focus({ preventScroll: true });
-    }
-    expandButton.addEventListener('click', () => setExpanded(!page.classList.contains('rhythm-expanded')));
+    zoomOut.addEventListener('click', () => { setFitWidth(false); applyZoom(zoom - 25); });
+    zoomIn.addEventListener('click', () => { setFitWidth(false); applyZoom(zoom + 25); });
+    zoomReset.addEventListener('click', () => { setFitWidth(false); applyZoom(100); });
+    fitButton.addEventListener('click', () => setFitWidth(!fitWidth));
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fitTable).observe(tableWrap);
+    expandButton.addEventListener('click', () => {
+        const params = new URLSearchParams(new FormData(page.querySelector('.rhythm-filter')));
+        expandButton.href = `${expandButton.dataset.viewPath}?${params}`;
+    });
     document.addEventListener('keydown', event => {
-        if (!page.classList.contains('rhythm-expanded') || document.getElementById('rhythm-cycle-dialog').open) return;
-        if (event.key === 'Escape') { event.preventDefault(); setExpanded(false); return; }
-        if (event.key !== 'Tab') return;
-        const focusable = [...page.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),summary,[tabindex="0"]')]
-            .filter(element => element.getClientRects().length && !element.closest('[hidden]'));
-        const first = focusable[0], last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        if (event.key === 'Escape' && page.classList.contains('rhythm-expanded')
+            && !document.getElementById('rhythm-cycle-dialog').open) {
+            event.preventDefault();
+            expandButton.click();
+        }
     });
     applyZoom(100);
 
@@ -64,6 +69,7 @@
         document.getElementById('rhythm-mark-count').textContent = marks.size;
         document.getElementById('rhythm-no-marks').hidden = !onlyMarked.checked || columns.some(n => marks.has(n));
         page.querySelector('.rhythm-table-wrap').hidden = onlyMarked.checked && !columns.some(n => marks.has(n));
+        fitTable();
     }
     function persist() {
         try { localStorage.setItem(key, JSON.stringify([...marks].sort())); status.textContent = ''; }
@@ -76,6 +82,7 @@
     onlyMarked.addEventListener('change', render);
     document.getElementById('rhythm-clear-marks').addEventListener('click', () => { marks.clear(); persist(); });
     render();
+    if (page.classList.contains('rhythm-expanded')) setFitWidth(true);
 
     const form = page.querySelector('.rhythm-filter');
     page.querySelectorAll('[data-shift]').forEach(button => button.addEventListener('click', () => {

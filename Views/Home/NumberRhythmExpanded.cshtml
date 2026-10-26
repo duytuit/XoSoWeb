@@ -1,0 +1,10 @@
+@model XoSoWeb.Models.NumberRhythmViewModel
+@{
+    Layout = "_NumberRhythmLayout";
+    ViewData["Title"] = "Nhịp số miền Bắc · Phóng to";
+    ViewData["Description"] = "Bảng nhịp số miền Bắc 00–99 toàn màn hình.";
+    ViewData["NoIndex"] = true;
+    ViewData["RhythmExpanded"] = true;
+}
+<h1 class="visually-hidden">Nhịp số miền Bắc · Phóng to</h1>
+<partial name="~/Views/Home/_NumberRhythmBoard.cshtml" model="Model" />
