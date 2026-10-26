@@ -3036,3 +3036,20 @@ body.mobile-menu-open {
     .results-more,
     .draw-history-link a { display: inline-flex; align-items: center; min-height: 2.75rem; }
 }
+
+/* Keep Northern live numbers in their final slots throughout the draw. */
+.live-table-wrap .mb-results-table .mb-prize-numbers {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr;
+}
+.live-table-wrap .mb-results-table .mb-prize-numbers.number-count-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.live-table-wrap .mb-results-table .mb-prize-numbers.number-count-3,
+.live-table-wrap .mb-results-table .mb-prize-numbers.number-count-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.live-table-wrap .mb-results-table .mb-prize-numbers.number-count-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}

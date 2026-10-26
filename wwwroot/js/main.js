@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
-        const renderNumberCell = (values, expectedCount, digitCount, isDrawing) => {
+        const renderNumberCell = (values, expectedCount, digitCount, isDrawing, reserveSlots = false) => {
             const numbers = values.slice(0, expectedCount);
             const missingCount = Math.max(expectedCount - numbers.length, 0);
             return numbers.map(value => `<span>${escapeHtml(value)}</span>`).join('') +
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     ? `<span class="live-number-loader" role="img" aria-label="Đang quay" title="Đang quay">${Array.from({ length: digitCount }, (_, index) =>
                         `<i aria-hidden="true"><b style="animation-delay: -${(index * .13 + Math.random()).toFixed(2)}s">${Array.from({ length: 11 }, (_, digit) => `<em>${digit % 10}</em>`).join('')}</b></i>`
                     ).join('')}</span>`
-                    : isDrawing ? '' : '<span class="live-number-waiting" role="img" aria-label="Chờ quay" title="Chờ quay"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></span>'
+                    : isDrawing ? (reserveSlots ? '<span aria-hidden="true"></span>' : '') : '<span class="live-number-waiting" role="img" aria-label="Chờ quay" title="Chờ quay"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></span>'
                 ).join('');
         };
 
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const isSpecial = label === 'ĐB';
                 const isRedPrize = isSpecial || (isNorthern ? label === 'bảy' : label === 'G8');
                 const cells = isNorthern
-                    ? `<td><div class="mb-prize-numbers number-count-${layout.counts[index]}">${renderNumberCell(group.records[0]?.values[index] || [], layout.counts[index], layout.digits[index], activePrizes[0] === index)}</div></td>`
+                    ? `<td><div class="mb-prize-numbers number-count-${layout.counts[index]}">${renderNumberCell(group.records[0]?.values[index] || [], layout.counts[index], layout.digits[index], activePrizes[0] === index, true)}</div></td>`
                     : group.records.map((record, recordIndex) =>
                         `<td>${renderNumberCell(record.values[index] || [], layout.counts[index], layout.digits[index], activePrizes[recordIndex] === index)}</td>`
                     ).join('');
