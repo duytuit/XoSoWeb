@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using XoSoWeb.Services;
@@ -25,9 +26,13 @@ namespace XoSoWeb.Controllers
             this.cache = cache;
         }
         [HttpGet("/robots.txt")]
-        public IActionResult Robots() => Content(site.AllowIndexing
-            ? "User-agent: *\nAllow: /\nSitemap: " + site.Absolute("/sitemap.xml") + "\n"
-            : "User-agent: *\nDisallow: /\n", "text/plain; charset=utf-8");
+        public IActionResult Robots()
+        {
+            Response.Headers["Cache-Control"] = site.AllowIndexing ? "public,max-age=120" : "no-store";
+            return Content(site.AllowIndexing
+                ? "User-agent: *\nAllow: /\nSitemap: " + site.Absolute("/sitemap.xml") + "\n"
+                : "User-agent: *\nDisallow: /\n", "text/plain; charset=utf-8");
+        }
 
         [HttpGet("/sitemap.xml")]
         [HttpGet("/sitemap-{part:int}.xml")]
@@ -88,7 +93,7 @@ namespace XoSoWeb.Controllers
             else
                 root = new XElement(ns + "urlset", urls.Skip(((part ?? 1) - 1) * pageSize).Take(pageSize).Select(x =>
                     new XElement(ns + "url", new XElement(ns + "loc", site.Absolute(x.Path)),
-                        x.Modified.HasValue ? new XElement(ns + "lastmod", x.Modified.Value.ToString("yyyy-MM-dd")) : null)));
+                        x.Modified.HasValue ? new XElement(ns + "lastmod", x.Modified.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)) : null)));
             var xml = new XDocument(root).ToString();
             cache?.Set(cacheKey, xml, TimeSpan.FromMinutes(2));
             return Content(xml, "application/xml; charset=utf-8");

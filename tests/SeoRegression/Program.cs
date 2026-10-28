@@ -216,6 +216,15 @@ Check(SeoMetadata.Create(site, brandRequest.Request, new ViewDataDictionary(view
 brandRequest.Request.Path = "/tin-tuc"; brandRequest.Request.QueryString = new QueryString("?page=2&utm_source=test");
 var pageTwoMetadata = SeoMetadata.Create(site, brandRequest.Request, new ViewDataDictionary(viewData) { ["Title"] = "Tin tức · Trang 2" });
 Check(!pageTwoMetadata.NoIndex && pageTwoMetadata.Canonical.EndsWith("/tin-tuc?page=2"), "editorial pagination has its own indexable canonical without tracking");
+brandRequest.Request.QueryString = new QueryString("?page=1&utm_source=test");
+var pageOneMetadata = SeoMetadata.Create(site, brandRequest.Request, viewData);
+Check(!pageOneMetadata.NoIndex && pageOneMetadata.Canonical == site.Absolute("/tin-tuc"), "first news page canonical removes redundant pagination and tracking");
+brandRequest.Request.Path = "/tin-tuc/bai-viet/test";
+brandRequest.Request.QueryString = new QueryString("?page=2");
+Check(SeoMetadata.Create(site, brandRequest.Request, viewData).NoIndex, "article page parameter is not indexable editorial pagination");
+brandRequest.Request.Path = "/tin-tuc";
+brandRequest.Request.QueryString = new QueryString("?page=invalid");
+Check(SeoMetadata.Create(site, brandRequest.Request, viewData).NoIndex, "invalid editorial pagination is not indexable");
 Check(site.ImageUrl("https://images.example.org/photo.webp") == "https://images.example.org/photo.webp", "article share image keeps valid external HTTPS origin");
 Check(NewsDateTime.IsoUtc(new DateTime(2026, 10, 24, 1, 0, 0)).EndsWith("Z"), "news machine-readable timestamps explicitly identify UTC");
 var completeNorthern = Enumerable.Range(0, 8).Select(i => new XoSoPrize { PrizeName = i == 0 ? "DB" : i.ToString(),

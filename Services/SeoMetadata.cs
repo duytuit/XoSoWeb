@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -43,9 +44,15 @@ namespace XoSoWeb.Services
     var description = viewData["Description"]?.ToString() ?? (descriptions.TryGetValue(path, out var desc) ? desc : "Tra cứu " + viewData["Title"] + " và các kết quả liên quan.");
     var filterKeys = new[] { "days", "date", "length", "target", "reverse", "day", "gameCode", "offset", "endDate", "region", "week", "periods", "endDraw", "prize", "sort", "q", "page", "station", "weekday", "game" };
     var filters = request.Query.Where(x => filterKeys.Contains(x.Key, StringComparer.OrdinalIgnoreCase)).OrderBy(x => x.Key, StringComparer.Ordinal).ToList();
+    var editorialListing = new[] { "/tin-tuc", "/tin-tuc/vietlott", "/tin-tuc/trung-thuong-vietlott", "/tin-tuc/huong-dan" }.Contains(path, StringComparer.Ordinal);
+    // The first editorial page is the listing itself.
+    if (editorialListing)
+        filters = filters.Where(x => !x.Key.Equals("page", StringComparison.OrdinalIgnoreCase)
+            || x.Value.Count != 1 || x.Value[0] != "1").ToList();
     var canonicalPath = path + (filters.Count == 0 ? "" : "?" + string.Join("&", filters.Select(x => Uri.EscapeDataString(filterKeys.First(k => k.Equals(x.Key, StringComparison.OrdinalIgnoreCase))) + "=" + Uri.EscapeDataString(x.Value.ToString()))));
     var canonical = Site.Absolute(canonicalPath);
-    var editorialPagination = path.StartsWith("/tin-tuc", StringComparison.Ordinal) && filters.All(f => f.Key.Equals("page", StringComparison.OrdinalIgnoreCase));
+    var editorialPagination = editorialListing && filters.All(f => f.Key.Equals("page", StringComparison.OrdinalIgnoreCase)
+        && f.Value.Count == 1 && int.TryParse(f.Value[0], NumberStyles.None, CultureInfo.InvariantCulture, out var page) && page > 0);
     var noindex = !Site.AllowIndexing || (filters.Count > 0 && !editorialPagination) || (bool?)viewData["NoIndex"] == true;
     var graph = new List<object> { new Dictionary<string, object> { ["@type"] = "WebSite", ["@id"] = Site.Absolute("/#website"), ["url"] = Site.Absolute("/"), ["name"] = Site.SiteName, ["inLanguage"] = "vi" } };
     if (!string.IsNullOrWhiteSpace(Site.OrganizationName))

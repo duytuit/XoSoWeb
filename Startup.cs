@@ -29,6 +29,8 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Text.RegularExpressions;
 using XoSoWeb.Controllers;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 
 namespace XoSoWeb
 {
@@ -108,7 +110,13 @@ namespace XoSoWeb
                     && origin.Scheme == Uri.UriSchemeHttps ? origin.Port : 443;
                 options.RedirectStatusCode = 308;
             });
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                                        | ForwardedHeaders.XForwardedProto;
 
+                options.KnownProxies.Add(IPAddress.Loopback);
+            });
              services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",
@@ -153,7 +161,7 @@ namespace XoSoWeb
         {
             var telegramConfig = app.ApplicationServices.GetRequiredService<IOptions<TelegramSettings>>();
             Helper.ConfigureTelegram(telegramConfig.Value);
-
+            app.UseForwardedHeaders();
             app.UseMiddleware<ExceptionMiddleware>();
             if (!env.IsDevelopment()) app.UseResponseCompression();
             app.UseMiddleware<PublicUrlMiddleware>();
