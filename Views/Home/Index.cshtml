@@ -24,8 +24,14 @@
         <h1 class="fs-2 fw-bold text-primary mb-1">Kết quả xổ số mới nhất</h1>
         <p class="text-on-surface-variant mb-0">Miền Bắc, Miền Trung, Miền Nam và Vietlott.</p>
     </div>
-    <span class="results-status">DỮ LIỆU ĐÃ LƯU</span>
+     <nav class="d-flex flex-wrap gap-2" aria-label="Các công cụ thống kê">
+        <a class="small text-primary" href="/thong-ke">Thống kê giải đặc biệt</a>
+        <a class="small text-primary" href="/thong-ke/nhip-so-mien-bac">Nhịp số miền Bắc</a>
+        <a class="small text-primary" href="/thong-ke-tan-suat-loto">Tần suất lô tô</a>
+        <a class="small text-primary" href="/thong-ke/soi-cau">Soi cầu miền Bắc</a>
+    </nav>
 </div>
+
 
 <p id="live-connection-status" class="small text-secondary" role="status">@(string.IsNullOrWhiteSpace(Site.LiveSocketUrl) ? "Kênh trực tiếp chưa được cấu hình. Dưới đây là dữ liệu đã lưu." : "Đang kết nối kênh trực tiếp…")</p>
 <section data-socket-url="@Site.LiveSocketUrl" id="live-results" class="results-section live-results-section" aria-live="polite" hidden>

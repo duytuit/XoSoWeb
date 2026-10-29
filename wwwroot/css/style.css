@@ -447,7 +447,7 @@ body.mobile-menu-open {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    gap: 1rem;
+    gap: 0.5rem;
     border-bottom: 1px solid var(--border-neutral);
 }
 
