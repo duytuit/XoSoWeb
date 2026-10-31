@@ -445,10 +445,35 @@ body.mobile-menu-open {
 /* Home results layout */
 .results-home-intro {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .2rem;
+    padding-bottom: .35rem;
     border-bottom: 1px solid var(--border-neutral);
+}
+.results-home-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .15rem .65rem;
+    min-width: 0;
+}
+.results-home-heading p {
+    font-size: .8125rem;
+    line-height: 1.4;
+}
+.results-home-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 .85rem;
+}
+.results-home-tools a {
+    display: inline-flex;
+    align-items: center;
+    padding-block: .25rem;
+    font-size: .8125rem;
+    line-height: 1.4;
 }
 
 .results-status {
@@ -817,7 +842,7 @@ body.mobile-menu-open {
 }
 
 .live-results-section {
-    margin-top: 1.25rem;
+    margin: 0;
 }
 
 .live-results-grid {
@@ -1883,7 +1908,6 @@ body.mobile-menu-open {
         grid-template-columns: 1fr;
     }
 
-    .results-home-intro,
     .results-section-header {
         align-items: flex-start;
         flex-direction: column;
@@ -2989,8 +3013,8 @@ body.mobile-menu-open {
 }
 
 /* Shared reading scale for headings, labels and result tables. */
-.page-content h1.detail-page-heading,
-.results-home-intro h1 { font-size: clamp(1.5rem, 2.4vw, 1.875rem) !important; line-height: 1.3; }
+.page-content h1.detail-page-heading { font-size: clamp(1.5rem, 2.4vw, 1.875rem) !important; line-height: 1.3; }
+.results-home-intro h1 { margin: 0; font-size: clamp(1.125rem, 1.5vw, 1.375rem); line-height: 1.3; }
 .page-content .results-section-header h2,
 .page-content .region-detail-header h2 { font-size: clamp(1rem, 1.5vw, 1.125rem); line-height: 1.4; }
 .page-content .detail-page-description { font-size: var(--font-size-body); line-height: 1.6; }
@@ -3052,4 +3076,92 @@ body.mobile-menu-open {
 }
 .live-table-wrap .mb-results-table .mb-prize-numbers.number-count-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Results on the left, quick statistics beside them, navigation on the right. */
+.results-content-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+.results-primary-column {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    min-width: 0;
+}
+.results-statistics-column { min-width: 0; }
+.results-primary-column > p { margin-bottom: .25rem; }
+.results-statistics-column .quick-statistics-charts { grid-template-columns: minmax(0, 1fr); }
+.results-statistics-column .quick-statistics-chart + .quick-statistics-chart { border-left: 0; }
+.results-statistics-column .quick-reverse-pairs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.results-statistics-column .quick-statistics-tables { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 992px) {
+    .page-sidebar { width: 190px; }
+}
+@media (min-width: 1200px) {
+    .results-content-layout { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+@media (min-width: 1400px) {
+    .topbar > .container-xl,
+    .page-content.container-xl { max-width: 1560px; }
+    .page-sidebar { width: 210px; }
+    .results-content-layout { grid-template-columns: minmax(0, 1fr) 340px; }
+}
+
+/* Keep headings compact and let metadata share a line when space allows. */
+.topbar .brand-logo { width: 9rem; height: 3rem; }
+.page-content .results-section-header,
+.page-content .draw-day-card .region-detail-header,
+.page-content .region-detail-header,
+.page-content .vietlott-card-header,
+.page-content .special-statistics-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .2rem .6rem;
+    padding: .3rem .5rem;
+}
+.page-content .results-section-header > div:first-child,
+.page-content .vietlott-card-title,
+.page-content .regional-page-title > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .1rem .6rem;
+    min-width: 0;
+}
+.page-content .region-detail-header {
+    display: flex;
+    justify-content: center;
+}
+.page-content .results-section-header h2,
+.page-content .region-detail-header h2 {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.35;
+}
+.page-content .results-section-header p,
+.page-content .region-detail-header .draw-day-meta,
+.page-content .vietlott-card-header p {
+    margin: 0;
+    font-size: .75rem;
+    line-height: 1.4;
+}
+.page-content .regional-page-title { padding-block: .15rem; }
+.page-content h1.detail-page-heading {
+    margin: 0;
+    font-size: clamp(1.125rem, 1.6vw, 1.375rem) !important;
+    line-height: 1.35;
+}
+.page-content .regional-page-title .detail-page-description {
+    margin: 0;
+    font-size: .8125rem;
+    line-height: 1.4;
+}
+.page-content .sidebar-region-heading { padding: .3rem .5rem; }
+.page-content .home-province-summary-heading { padding-block: .3rem; gap: .15rem .4rem; }
+@media (max-width: 575.98px) {
+    .topbar .brand-logo { width: 8.25rem; height: 2.75rem; }
 }

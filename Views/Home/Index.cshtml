@@ -11,24 +11,21 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" media="print" onload="this.onload=null;this.media='all'" />
-    <link rel="stylesheet" href="~/css/quick-statistics.css" asp-append-version="true" media="print" onload="this.onload=null;this.media='all'" />
     <noscript>
         <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" />
-        <link rel="stylesheet" href="~/css/quick-statistics.css" asp-append-version="true" />
     </noscript>
 }
 
 <div class="results-home-intro">
-    <div>
-        <span class="font-label-sm text-secondary text-uppercase">Tổng hợp kết quả</span>
-        <h1 class="fs-2 fw-bold text-primary mb-1">Kết quả xổ số mới nhất</h1>
+    <div class="results-home-heading">
+        <h1 class="fw-bold text-primary">Kết quả xổ số mới nhất</h1>
         <p class="text-on-surface-variant mb-0">Miền Bắc, Miền Trung, Miền Nam và Vietlott.</p>
     </div>
-     <nav class="d-flex flex-wrap gap-2" aria-label="Các công cụ thống kê">
-        <a class="small text-primary" href="/thong-ke">Thống kê giải đặc biệt</a>
-        <a class="small text-primary" href="/thong-ke/nhip-so-mien-bac">Nhịp số miền Bắc</a>
-        <a class="small text-primary" href="/thong-ke-tan-suat-loto">Tần suất lô tô</a>
-        <a class="small text-primary" href="/thong-ke/soi-cau">Soi cầu miền Bắc</a>
+    <nav class="results-home-tools" aria-label="Các công cụ thống kê">
+        <a class="text-primary" href="/thong-ke">Thống kê giải đặc biệt</a>
+        <a class="text-primary" href="/thong-ke/nhip-so-mien-bac">Nhịp số miền Bắc</a>
+        <a class="text-primary" href="/thong-ke-tan-suat-loto">Tần suất lô tô</a>
+        <a class="text-primary" href="/thong-ke/soi-cau">Soi cầu miền Bắc</a>
     </nav>
 </div>
 
@@ -175,8 +172,6 @@
         }
     </section>
 </div>
-
-<partial name="~/Views/Home/_NorthernQuickStatistics.cshtml" model="Model.NorthernQuickStatistics" />
 
 <section class="results-section home-vietlott-summary">
     <header class="results-section-header">

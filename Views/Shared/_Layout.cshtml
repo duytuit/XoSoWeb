@@ -1,15 +1,16 @@
+@inject XoSoWeb.Services.NorthernQuickStatisticsService QuickStatistics
 @inject XoSoWeb.Services.SiteSettings Site
 @inject Microsoft.AspNetCore.Mvc.ViewFeatures.IFileVersionProvider AssetVersions
 @{
     Layout = null;
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var hasResultsColumns = ViewData.Model is XoSoWeb.Models.HomePageViewModel
+        || ViewData.Model is XoSoWeb.Models.XoSoRegionViewModel
+        || ViewData.Model is XoSoWeb.Models.VietlottPageViewModel;
     var responsiveLogo = Site.LogoUrl == "/images/logo.webp";
-    var isVietlottStatisticsPage = Context.Request.Path.StartsWithSegments("/thong-ke/vietlott");
     var isReferencePage = Context.Request.Path.StartsWithSegments("/lich-quay")
         || Context.Request.Path.StartsWithSegments("/co-cau-giai-thuong");
-    var isStatisticsPage = isVietlottStatisticsPage
-        || IsStatisticsRoute(Context.Request.Path.Value);
 
     bool IsActive(string controller, string action = null)
     {
@@ -20,11 +21,6 @@
         }
 
         return isControllerMatch && string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase);
-    }
-
-    bool IsStatisticsRoute(string path)
-    {
-        return path == "/thong-ke/nhip-so-mien-bac" || path == "/thong-ke/soi-cau" || path == "/thong-ke" || path == "/thong-ke-tan-suat-loto";
     }
 }
 <!DOCTYPE html>
@@ -51,12 +47,16 @@
     <!-- Site CSS -->
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
 
+    @if (hasResultsColumns)
+    {
+        <link rel="stylesheet" href="~/css/quick-statistics.css" asp-append-version="true" />
+    }
     @RenderSection("Styles", required: false)
 </head>
 <body>
 
     <!-- TopAppBar -->
-    <header id="topbar" class="topbar sticky-top z-3 bg-surface border-bottom border-neutral py-2 w-100">
+    <header id="topbar" class="topbar sticky-top z-3 bg-surface border-bottom border-neutral py-1 w-100">
         <div class="container-xl d-flex justify-content-between align-items-center h-100">
             <button class="mobile-menu-toggle d-lg-none" id="mobile-menu-toggle" type="button"
                     aria-label="Mở menu điều hướng" aria-controls="mobile-navigation" aria-expanded="false">
@@ -69,27 +69,11 @@
                 </a>
             </div>
             <nav class="top-navigation d-none d-lg-flex gap-4" aria-label="Điều hướng chính">
-                <div class="top-navigation-dropdown">
-                    <a class="top-navigation-dropdown-trigger @(IsActive("Home", "Index") || IsActive("Home", "XoSoMienBac") || IsActive("Home", "XoSoMienTrung") || IsActive("Home", "XoSoMienNam") || IsActive("Home", "LotteryArchive") ? "is-active" : "")" href="/">
-                        <span>Kết quả</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-                    </a>
-                    <div class="top-navigation-submenu">
-                        <a href="/">Tổng hợp kết quả</a><a href="/xo-so-mien-bac">Xổ số miền Bắc</a><a href="/xo-so-mien-trung">Xổ số miền Trung</a><a href="/xo-so-mien-nam">Xổ số miền Nam</a>
-                    </div>
-                </div>
+                <a class="@(IsActive("Home", "Index") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Index" aria-label="Trang chủ" title="Trang chủ"><i class="fa-solid fa-house" aria-hidden="true"></i></a>
+                <a class="@(IsActive("Home", "XoSoMienBac") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienBac">XS Miền Bắc</a>
+                <a class="@(IsActive("Home", "XoSoMienTrung") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienTrung">XS Miền Trung</a>
+                <a class="@(IsActive("Home", "XoSoMienNam") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="XoSoMienNam">XS Miền Nam</a>
                 <a class="@(IsActive("Home", "Vietlott") ? "text-primary border-bottom border-2 border-primary fw-bold" : "text-on-surface-variant fw-medium") text-decoration-none hover-text-primary py-1" asp-controller="Home" asp-action="Vietlott">Vietlott</a>
-                <div class="top-navigation-dropdown">
-                    <a class="top-navigation-dropdown-trigger @(isStatisticsPage ? "is-active" : "")" href="/thong-ke">
-                        <span>Thống kê</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-                    </a>
-                    <div class="top-navigation-submenu">
-                        <a class="@(IsActive("Home", "Statistics") ? "is-active" : "")" asp-controller="Home" asp-action="Statistics">Giải đặc biệt ba miền</a>
-                        <a class="@(IsActive("Home", "NumberRhythm") ? "is-active" : "")" href="/thong-ke/nhip-so-mien-bac">Nhịp số miền Bắc</a>
-                        <a class="@(IsActive("Home", "SoiCau") ? "is-active" : "")" href="/thong-ke/soi-cau">Soi cầu miền Bắc</a>
-                        <a class="@(IsActive("Home", "LotoFrequency") ? "is-active" : "")" asp-controller="Home" asp-action="LotoFrequency">Tần suất lô tô trong tuần</a>
-                        <a class="@(isVietlottStatisticsPage ? "is-active" : "")" href="/thong-ke/vietlott">Thống kê Vietlott</a>
-                    </div>
-                </div>
                 <div class="top-navigation-dropdown">
                     <a class="top-navigation-dropdown-trigger @(isReferencePage ? "is-active" : "")" href="/lich-quay">
                         <span>Lịch quay</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
@@ -186,7 +170,49 @@
 
     <main class="container-xl d-flex flex-column flex-lg-row page-content">
 
-        <!-- Sidebar Navigation Drawer (Desktop Only) -->
+        <!-- Main Content Area (render theo từng trang con) -->
+        <section class="page-main-column flex-grow-1 d-flex flex-column">
+            @if (Context.Request.Path != "/")
+            {
+                <nav aria-label="Breadcrumb" class="results-breadcrumb">
+                    <a href="/">Trang chủ</a>
+                    @if (ViewData["BreadcrumbAncestors"] is IEnumerable<XoSoWeb.Services.BreadcrumbLink> breadcrumbAncestors)
+                    {
+                        foreach (var ancestor in breadcrumbAncestors)
+                        {
+                            <span aria-hidden="true"> / </span><a href="@ancestor.Path">@ancestor.Label</a>
+                        }
+                    }
+                    else if (ViewData["ParentPath"] is string parentPath
+                        && parentPath != "/"
+                        && !string.Equals(parentPath, Context.Request.Path.Value, StringComparison.OrdinalIgnoreCase))
+                    {
+                        <span aria-hidden="true"> / </span><a href="@parentPath">@ViewData["ParentLabel"]</a>
+                    }
+                    <span aria-hidden="true"> / </span><span aria-current="page">@(ViewData["BreadcrumbCurrentLabel"] ?? ViewData["Title"])</span>
+                </nav>
+            }
+            @if (hasResultsColumns)
+            {
+                var statistics = ViewData.Model is XoSoWeb.Models.HomePageViewModel home
+                    ? home.NorthernQuickStatistics
+                    : await QuickStatistics.GetAsync(XoSoWeb.Services.LotteryUrls.Today, Context.RequestAborted);
+                <div class="results-content-layout">
+                    <div class="results-primary-column">
+                        @RenderBody()
+                    </div>
+                    <aside class="results-statistics-column" aria-label="Thống kê xổ số miền Bắc">
+                        <partial name="~/Views/Home/_NorthernQuickStatistics.cshtml" model="statistics" />
+                    </aside>
+                </div>
+            }
+            else
+            {
+                @RenderBody()
+            }
+        </section>
+
+        <!-- Right Sidebar Navigation (Desktop Only) -->
         <aside class="page-sidebar d-none d-lg-flex flex-column flex-shrink-0 sticky-top" style="top: 80px; height: max-content;">
             <div class="sidebar-region-panel">
                 <div class="sidebar-region-heading">
@@ -229,31 +255,6 @@
                 </nav>
             </div>
         </aside>
-
-        <!-- Main Content Area (render theo từng trang con) -->
-        <section class="page-main-column flex-grow-1 d-flex flex-column">
-            @if (Context.Request.Path != "/")
-            {
-                <nav aria-label="Breadcrumb" class="results-breadcrumb">
-                    <a href="/">Trang chủ</a>
-                    @if (ViewData["BreadcrumbAncestors"] is IEnumerable<XoSoWeb.Services.BreadcrumbLink> breadcrumbAncestors)
-                    {
-                        foreach (var ancestor in breadcrumbAncestors)
-                        {
-                            <span aria-hidden="true"> / </span><a href="@ancestor.Path">@ancestor.Label</a>
-                        }
-                    }
-                    else if (ViewData["ParentPath"] is string parentPath
-                        && parentPath != "/"
-                        && !string.Equals(parentPath, Context.Request.Path.Value, StringComparison.OrdinalIgnoreCase))
-                    {
-                        <span aria-hidden="true"> / </span><a href="@parentPath">@ViewData["ParentLabel"]</a>
-                    }
-                    <span aria-hidden="true"> / </span><span aria-current="page">@(ViewData["BreadcrumbCurrentLabel"] ?? ViewData["Title"])</span>
-                </nav>
-            }
-            @RenderBody()
-        </section>
 
     </main>
 
